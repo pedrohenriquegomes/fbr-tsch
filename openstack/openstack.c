@@ -73,7 +73,7 @@ void openstack_init(void) {
    icmpv6echo_init();
    icmpv6rpl_init();
    //-- 04-TRAN
-   opentcp_init();
+//   opentcp_init();
    openudp_init();
    
    //===== applications
