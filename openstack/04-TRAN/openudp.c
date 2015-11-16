@@ -5,10 +5,7 @@
 #include "forwarding.h"
 #include "openqueue.h"
 // applications
-#include "opencoap.h"
-#include "uecho.h"
-#include "uinject.h"
-#include "rrt.h"
+#include "udp_light.h"
 
 //=========================== variables =======================================
 

@@ -409,15 +409,7 @@
           <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rrt</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udp_light\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2448,90 +2440,12 @@
   <group>
     <name>openapps</name>
     <group>
-      <name>c6t</name>
+      <name>udp_light</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\c6t\c6t.c</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\udp_light\udp_light.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\c6t\c6t.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cinfo</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cleds</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cstorm</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cwellknown</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.h</name>
-      </file>
-    </group>
-    <group>
-      <name>rrt</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.h</name>
-      </file>
-    </group>
-    <group>
-      <name>techo</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\techo\techo.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\techo\techo.h</name>
-      </file>
-    </group>
-    <group>
-      <name>tohlone</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone_webpages.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone_webpages.h</name>
-      </file>
-    </group>
-    <group>
-      <name>uecho</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.h</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\udp_light\udp_light.h</name>
       </file>
     </group>
     <file>

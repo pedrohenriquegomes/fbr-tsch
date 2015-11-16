@@ -8,7 +8,6 @@
 #include "scheduler.h"
 #include "opentimers.h"
 // applications
-#include "techo.h"
 
 //=========================== variables =======================================
 
