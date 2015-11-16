@@ -7,7 +7,6 @@
 
 #define UDP_LIGHT_PERIOD_MS     1000
 #define UDP_LIGHT_ON            0xAA
-#define SENSOR_ADD              0x81
 
 //=========================== typedef =========================================
 

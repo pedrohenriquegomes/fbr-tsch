@@ -70,7 +70,7 @@ void udp_light_task_cb() {
    if (ieee154e_isSynch() == FALSE) return;
    
    // only run on sensor node
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] != SENSOR_ADD) {
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] != SENSOR_ADDR) {
       opentimers_stop(udp_light_vars.timerId);
       return;
    }

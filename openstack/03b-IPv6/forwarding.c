@@ -9,7 +9,6 @@
 #include "icmpv6.h"
 #include "icmpv6rpl.h"
 #include "openudp.h"
-#include "opentcp.h"
 #include "debugpins.h"
 #include "scheduler.h"
 

@@ -18,37 +18,43 @@ void idmanager_init() {
    
    // reset local variables
    memset(&idmanager_vars, 0, sizeof(idmanager_vars_t));
-   
-   // isDAGroot
-#ifdef DAGROOT
-   idmanager_vars.isDAGroot            = TRUE;
-#else
-   idmanager_vars.isDAGroot            = FALSE;
-#endif
-   
+  
    // myPANID
    idmanager_vars.myPANID.type         = ADDR_PANID;
    idmanager_vars.myPANID.panid[0]     = 0xca;
    idmanager_vars.myPANID.panid[1]     = 0xfe;
    
-   // myPrefix
-   idmanager_vars.myPrefix.type        = ADDR_PREFIX;
-#ifdef DAGROOT
-   idmanager_vars.myPrefix.prefix[0]   = 0xbb;
-   idmanager_vars.myPrefix.prefix[1]   = 0xbb;
-   idmanager_vars.myPrefix.prefix[2]   = 0x00;
-   idmanager_vars.myPrefix.prefix[3]   = 0x00;
-   idmanager_vars.myPrefix.prefix[4]   = 0x00;
-   idmanager_vars.myPrefix.prefix[5]   = 0x00;
-   idmanager_vars.myPrefix.prefix[6]   = 0x00;
-   idmanager_vars.myPrefix.prefix[7]   = 0x00;
-#else
-   memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
-#endif
-   
    // my64bID
    idmanager_vars.my64bID.type         = ADDR_64B;
    eui64_get(idmanager_vars.my64bID.addr_64b);
+   
+   // isDAGroot
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == ROOT_ADDR)
+   {
+    idmanager_vars.isDAGroot            = TRUE;
+   }
+   else
+   {
+    idmanager_vars.isDAGroot            = FALSE;
+   }
+
+   // myPrefix
+   idmanager_vars.myPrefix.type        = ADDR_PREFIX;
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == ROOT_ADDR)
+   {
+     idmanager_vars.myPrefix.prefix[0]   = 0xbb;
+     idmanager_vars.myPrefix.prefix[1]   = 0xbb;
+     idmanager_vars.myPrefix.prefix[2]   = 0x00;
+     idmanager_vars.myPrefix.prefix[3]   = 0x00;
+     idmanager_vars.myPrefix.prefix[4]   = 0x00;
+     idmanager_vars.myPrefix.prefix[5]   = 0x00;
+     idmanager_vars.myPrefix.prefix[6]   = 0x00;
+     idmanager_vars.myPrefix.prefix[7]   = 0x00;
+   }
+   else
+   {
+     memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
+   }
    
    // my16bID
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);

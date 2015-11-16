@@ -6,7 +6,6 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "topology.h"
-#include "ieee802154_security_driver.h"
 
 //=========================== define ==========================================
 
@@ -111,9 +110,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    }
    
    //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
-   if(securityEnabled){
-      IEEE802154_SECURITY.prependAuxiliarySecurityHeader(msg);
-   }
+//   if(securityEnabled){
+//      IEEE802154_SECURITY.prependAuxiliarySecurityHeader(msg);
+//   }
 
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
@@ -329,10 +328,10 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    // pass header parsing iff: 
    // - received unsecured frame and security disabled locally
    // - received secured frame and security is enabled locally
-   if (ieee802514_header->securityEnabled && IEEE802154_SECURITY_SUPPORTED) {
-       IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
-   }
-   else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_SUPPORTED) { return; }
+//   if (ieee802514_header->securityEnabled && IEEE802154_SECURITY_SUPPORTED) {
+//       IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
+//   }
+//   else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_SUPPORTED) { return; }
 
    // remove termination IE accordingly 
    if (ieee802514_header->ieListPresent == TRUE) {

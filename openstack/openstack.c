@@ -31,9 +31,7 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
-#include "opentcp.h"
 #include "openudp.h"
-#include "opencoap.h"
 //===== applications
 #include "openapps.h"
 
@@ -59,7 +57,6 @@ void openstack_init(void) {
    //-- 02a-TSCH
    adaptive_sync_init();
    ieee154e_init();
-//   IEEE802154_SECURITY.init();
    //-- 02b-RES
    schedule_init();
    sixtop_init();
@@ -73,7 +70,6 @@ void openstack_init(void) {
    icmpv6echo_init();
    icmpv6rpl_init();
    //-- 04-TRAN
-//   opentcp_init();
    openudp_init();
    
    //===== applications

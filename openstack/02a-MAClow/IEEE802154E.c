@@ -587,20 +587,20 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
-      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         // If we are not synced, we need to parse IEs and retrieve the ASN
-         // before authenticating the beacon, because nonce is created from the ASN
-         if (!ieee154e_vars.isSync && ieee802514_header.frameType == IEEE154_TYPE_BEACON) {
-            if (!isValidJoin(ieee154e_vars.dataReceived, &ieee802514_header)) {
-               // invalidate variables
-               memset(&ieee154e_vars, 0, sizeof(ieee154e_vars_t));
-               break;
-            }
-         }
-         else if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
-            break;
-         }
-      } // checked if unsecured frame should pass during header retrieval
+//      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+//         // If we are not synced, we need to parse IEs and retrieve the ASN
+//         // before authenticating the beacon, because nonce is created from the ASN
+//         if (!ieee154e_vars.isSync && ieee802514_header.frameType == IEEE154_TYPE_BEACON) {
+//            if (!isValidJoin(ieee154e_vars.dataReceived, &ieee802514_header)) {
+//               // invalidate variables
+//               memset(&ieee154e_vars, 0, sizeof(ieee154e_vars_t));
+//               break;
+//            }
+//         }
+//         else if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
+//            break;
+//         }
+//      } // checked if unsecured frame should pass during header retrieval
 
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
       // next.
@@ -984,14 +984,14 @@ port_INLINE void activity_ti2() {
    packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
 
    // check if packet needs to be encrypted/authenticated before transmission 
-   if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
-      // encrypt in a local copy
-      if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
-         // keep the frame in the OpenQueue in order to retry later
-         endSlot(); // abort
-         return;
-      }
-   }
+//   if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
+//      // encrypt in a local copy
+//      if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
+//         // keep the frame in the OpenQueue in order to retry later
+//         endSlot(); // abort
+//         return;
+//      }
+//   }
    
    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
@@ -1282,11 +1282,11 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       memcpy(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
       // check the security level of the ACK frame and decrypt/authenticate
-      if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
-         	 break;
-          }
-      } // checked if unsecured frame should pass during header retrieval
+//      if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+//          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
+//         	 break;
+//          }
+//      } // checked if unsecured frame should pass during header retrieval
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
@@ -1486,11 +1486,11 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
       // if security is enabled, decrypt/authenticate the frame.
-      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
-        	 break;
-         }
-      } // checked if unsecured frame should pass during header retrieval
+//      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+//         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
+//        	 break;
+//         }
+//      } // checked if unsecured frame should pass during header retrieval
 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
@@ -1600,13 +1600,13 @@ port_INLINE void activity_ri6() {
                             );
    
    // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
-   if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-      if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
-     	   openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
-     	   endSlot();
-     	   return;
-      }
-   }
+//   if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+//      if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
+//     	   openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
+//     	   endSlot();
+//     	   return;
+//      }
+//   }
     // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
   
