@@ -329,14 +329,9 @@
           <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\udp_light\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\icmp_light\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\</state>
           <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
@@ -1956,30 +1951,6 @@
       <name>boards</name>
       <group>
         <name>common</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.h</name>
-        </file>
       </group>
       <group>
         <name>openmote-CC2538</name>
@@ -2209,12 +2180,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\bsp_timer.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\cc2538_crypto_engine.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\cc2538_crypto_engine.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\cc2538rf.h</name>
         </file>
         <file>
@@ -2363,6 +2328,15 @@
   </group>
   <group>
     <name>openapps</name>
+    <group>
+      <name>icmp_light</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\icmp_light\icmp_light.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\icmp_light\icmp_light.h</name>
+      </file>
+    </group>
     <group>
       <name>udp_light</name>
       <file>

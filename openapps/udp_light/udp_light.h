@@ -15,6 +15,7 @@
 typedef struct {
    opentimer_id_t       timerId;  ///< periodic timer which triggers transmission
    uint16_t             status;   ///< incrementing counter which is written into the packet
+   int16_t              counter;
 } udp_light_vars_t;
 
 //=========================== prototypes ======================================

@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-249668988
+Checksum=-1514249310
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -18,12 +18,13 @@ ShowArgs=0
 [Disassembly]
 MixedMode=1
 [JLinkDriver]
-CStepIntDis=_ 0
+CStepIntDis=_ 1
+[struct_types]
+Fmt0=ipv6_header_iht-next_header	3	0
 [Disassemble mode]
 mode=0
 [Breakpoints2]
-Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\..\..\openapps\udp_light\udp_light.c}.88.7" 0 0 1 "" 0 "" 0
-Count=1
+Count=0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""

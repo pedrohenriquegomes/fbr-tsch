@@ -12,6 +12,8 @@ while True:
     
     hisAddress     = dist_addr[0]
     hisPort        = dist_addr[1]
-    counter        = struct.unpack('<h',request)[0]
+    data 		   = struct.unpack('<hh',request)
+    lux        	   = data[0]
+    rank		   = data[1]
     
-    print 'received "{0}" from [{1}]:{2}'.format(counter,hisAddress,hisPort)
+    print 'received "{0} {3}" from [{1}]:{2}'.format(lux,hisAddress,hisPort,rank)

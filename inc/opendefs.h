@@ -74,6 +74,7 @@ enum {
    IANA_ICMPv6                         = 0x3a,
    IANA_ICMPv6_ECHO_REQUEST            =  128,
    IANA_ICMPv6_ECHO_REPLY              =  129,
+   IANA_ICMPv6_LIGHT                   =  130,
    IANA_ICMPv6_RS                      =  133,
    IANA_ICMPv6_RA                      =  134,
    IANA_ICMPv6_RA_PREFIX_INFORMATION   =    3,
@@ -171,6 +172,7 @@ enum {
    COMPONENT_RRT                       = 0x25,
    COMPONENT_SECURITY                  = 0x26,
    COMPONENT_UDP_LIGHT                 = 0x27,
+   COMPONENT_ICMP_LIGHT                = 0x28,
 };
 
 /**

@@ -5,6 +5,7 @@
 #include "forwarding.h"
 #include "openqueue.h"
 #include "openserial.h"
+#include "icmp_light.h"
 
 //=========================== variables =======================================
 
@@ -31,6 +32,9 @@ void icmpv6_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
       case IANA_ICMPv6_RPL:
          icmpv6rpl_sendDone(msg, error);
          break;
+      case IANA_ICMPv6_LIGHT:
+         icmp_light_sendDone(msg, error);
+         break;
       default:
          openserial_printCritical(COMPONENT_ICMPv6,ERR_UNSUPPORTED_ICMPV6_TYPE,
                                (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
@@ -52,6 +56,9 @@ void icmpv6_receive(OpenQueueEntry_t* msg) {
       case IANA_ICMPv6_RPL:
          icmpv6rpl_receive(msg);
          break;
+      case IANA_ICMPv6_LIGHT:
+         icmp_light_receive(msg);
+         break;         
       default:
          openserial_printError(COMPONENT_ICMPv6,ERR_UNSUPPORTED_ICMPV6_TYPE,
                                (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
