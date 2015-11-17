@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-1514249310
+Checksum=1281664372
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -21,6 +21,8 @@ MixedMode=1
 CStepIntDis=_ 1
 [struct_types]
 Fmt0=ipv6_header_iht-next_header	3	0
+Fmt1=struct <Unnamed 15>-l4_protocol	4	0
+Fmt2=struct <Unnamed 15>-l4_sourcePortORicmpv6Type	3	0
 [Disassemble mode]
 mode=0
 [Breakpoints2]

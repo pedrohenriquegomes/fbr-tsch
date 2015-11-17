@@ -63,7 +63,7 @@ void udp_light_receive(OpenQueueEntry_t* pkt) {
    }
 
    // retrieve the counter
-   uint16_t counter = pkt->payload[0] | (pkt->payload[1] << 8);
+   int16_t counter = pkt->payload[0] | (pkt->payload[1] << 8);
    
    if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == ROOT_ADDR) {
      if (counter > udp_light_vars.counter)

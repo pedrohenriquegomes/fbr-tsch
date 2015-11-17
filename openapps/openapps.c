@@ -6,6 +6,7 @@
 
 #include "opendefs.h"
 #include "udp_light.h"
+#include "icmp_light.h"
 
 //=========================== variables =======================================
 
@@ -16,6 +17,6 @@
 //=========================== private =========================================
 
 void openapps_init(void) {
-   udp_light_init();
-//   icmp_light_init();
+//   udp_light_init();
+   icmp_light_init();
 }

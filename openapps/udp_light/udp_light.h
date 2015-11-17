@@ -5,7 +5,7 @@
 
 //=========================== define ==========================================
 
-#define UDP_LIGHT_PERIOD_MS     1000
+#define UDP_LIGHT_PERIOD_MS     10000
 #define UDP_LIGHT_ON            0xAA
 
 //=========================== typedef =========================================
