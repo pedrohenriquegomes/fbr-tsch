@@ -50,6 +50,7 @@ void board_init() {
    bsp_timer_init();
    radio_init();
    radiotimer_init();
+   sensors_init();
    
    // enable interrupts
    __bis_SR_register(GIE);

@@ -23,6 +23,8 @@ enum {
    SENSOR_YACCELERATION,
    SENSOR_ZACCELERATION,
    SENSOR_ADCTEMPERATURE,
+   SENSOR_ADCSOLAR,
+   SENSOR_ADCLIGHT,
    SENSOR_DEFAULT,
    SENSOR_LAST                  // new sensor types go before this one
 };

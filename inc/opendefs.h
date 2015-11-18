@@ -171,8 +171,7 @@ enum {
    COMPONENT_UINJECT                   = 0x24,
    COMPONENT_RRT                       = 0x25,
    COMPONENT_SECURITY                  = 0x26,
-   COMPONENT_UDP_LIGHT                 = 0x27,
-   COMPONENT_ICMP_LIGHT                = 0x28,
+   COMPONENT_LIGHT                     = 0x27,
 };
 
 /**
@@ -248,6 +247,9 @@ enum {
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
    ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
    ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
+   ERR_FLOOD_SEND                      = 0x3c, // flooding packet sent, seq {0}, rank {1}
+   ERR_FLOOD_RCV                       = 0x3d, // flooding packet rcv, seq {0}, rank {1}
+   ERR_FLOOD_FW                        = 0x3e, // flooding packet fw, seq {0}, rank {1}
 };
 
 //=========================== typedef =========================================

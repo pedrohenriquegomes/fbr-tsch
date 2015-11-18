@@ -393,6 +393,7 @@
           <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\sht11\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\</state>
@@ -409,6 +410,7 @@
           <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\icmp_light\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\udp_light\</state>
         </option>
         <option>
@@ -2291,6 +2293,12 @@
       <group>
         <name>telosb</name>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
         </file>
         <file>
@@ -2310,6 +2318,9 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sensors.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\spi.c</name>
@@ -2346,6 +2357,9 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\sensors.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
       </file>
       <file>
@@ -2367,6 +2381,15 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
+        </file>
+      </group>
+      <group>
+        <name>sht11</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht11\sht11.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht11\sht11.h</name>
         </file>
       </group>
     </group>
@@ -2409,6 +2432,15 @@
   </group>
   <group>
     <name>openapps</name>
+    <group>
+      <name>icmp_light</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\icmp_light\icmp_light.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\icmp_light\icmp_light.h</name>
+      </file>
+    </group>
     <group>
       <name>udp_light</name>
       <file>

@@ -64,43 +64,40 @@ void udp_light_receive(OpenQueueEntry_t* pkt) {
 
    // retrieve the counter
    int16_t counter = pkt->payload[0] | (pkt->payload[1] << 8);
+
+   // retrieve the rank
+   uint16_t rank = pkt->payload[2] | (pkt->payload[3] << 8);
    
+   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_RCV,
+           (errorparameter_t)counter,
+           (errorparameter_t)rank);
+    
    if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == ROOT_ADDR) {
      if (counter > udp_light_vars.counter)
      {
        udp_light_vars.counter = counter;
-       openserial_printInfo(COMPONENT_UDP_LIGHT,ERR_RCVD_ECHO_REQUEST,
-                               (errorparameter_t)0,
-                               (errorparameter_t)0);
      }
      openqueue_freePacketBuffer(pkt);
      return;
    }
    
-   // retrieve the rank
-   uint16_t rank = pkt->payload[2] | (pkt->payload[3] << 8);
-   
-   openserial_printInfo(COMPONENT_UDP_LIGHT,ERR_RCVD_ECHO_REQUEST,
-                               (errorparameter_t)0,
-                               (errorparameter_t)0);
-   
    //check if rank is greater than ours
    if (rank > neighbors_getMyDAGrank())
    {
-      pkt->owner = COMPONENT_UDP_LIGHT;
+      pkt->owner = COMPONENT_LIGHT;
       
       // get a new openqueuEntry_t for the retransmission
-      fw = openqueue_getFreePacketBuffer(COMPONENT_UDP_LIGHT);
+      fw = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
       if (fw==NULL) {
-        openserial_printError(COMPONENT_UDP_LIGHT,ERR_NO_FREE_PACKET_BUFFER,
+        openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,
                               (errorparameter_t)1,
                               (errorparameter_t)0);
         openqueue_freePacketBuffer(fw);
         return;
       }
      
-      fw->owner                         = COMPONENT_UDP_LIGHT;
-      fw->creator                       = COMPONENT_UDP_LIGHT;
+      fw->owner                         = COMPONENT_LIGHT;
+      fw->creator                       = COMPONENT_LIGHT;
       fw->l4_protocol                   = IANA_UDP;
       fw->l4_destination_port           = WKP_UDP_LIGHT;
       fw->l4_sourcePortORicmpv6Type     = WKP_UDP_LIGHT;
@@ -110,6 +107,10 @@ void udp_light_receive(OpenQueueEntry_t* pkt) {
       packetfunctions_reserveHeaderSize(fw,pkt->length);
       *((uint16_t*)&fw->payload[0]) = counter;
       *((uint16_t*)&fw->payload[2]) = neighbors_getMyDAGrank();
+   
+      openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_FW,
+                       (errorparameter_t)counter,
+                       (errorparameter_t)neighbors_getMyDAGrank());
    
       if ((openudp_send(fw))==E_FAIL) {
         openqueue_freePacketBuffer(fw);
@@ -148,10 +149,10 @@ void udp_light_task_cb() {
    }
 
    // get a free packet buffer
-   pkt = openqueue_getFreePacketBuffer(COMPONENT_UDP_LIGHT);
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
    if (pkt==NULL) {
       openserial_printError(
-         COMPONENT_UINJECT,
+         COMPONENT_LIGHT,
          ERR_NO_FREE_PACKET_BUFFER,
          (errorparameter_t)0,
          (errorparameter_t)0
@@ -159,8 +160,8 @@ void udp_light_task_cb() {
       return;
    }
    
-   pkt->owner                         = COMPONENT_UDP_LIGHT;
-   pkt->creator                       = COMPONENT_UDP_LIGHT;
+   pkt->owner                         = COMPONENT_LIGHT;
+   pkt->creator                       = COMPONENT_LIGHT;
    pkt->l4_protocol                   = IANA_UDP;
    pkt->l4_destination_port           = WKP_UDP_LIGHT;
    pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_LIGHT;
@@ -171,6 +172,10 @@ void udp_light_task_cb() {
    *((uint16_t*)&pkt->payload[0]) = udp_light_vars.counter++;
    *((uint16_t*)&pkt->payload[2]) = neighbors_getMyDAGrank();
    
+   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
+                       (errorparameter_t)(udp_light_vars.counter - 1),
+                       (errorparameter_t)neighbors_getMyDAGrank());
+  
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }
