@@ -29,8 +29,8 @@ void sensors_init(void) {
    }
    
    adc_sensor_init();
-   sensors_vars.sensorsTypes[SENSOR_ADCSOLAR] = 1;
-   sensors_vars.sensorsTypes[SENSOR_ADCLIGHT] = 1;
+   sensors_vars.sensorsTypes[SENSOR_ADC_PHOTOSYNTHETIC] = 1;
+   sensors_vars.sensorsTypes[SENSOR_ADC_TOTAL_SOLAR] = 1;
    
 }
 
@@ -55,10 +55,10 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
          return &sht11_read_temperature;
       case SENSOR_HUMIDITY:
          return &sht11_read_humidity;
-      case SENSOR_ADCSOLAR:
-        return &adc_sens_read_solar;
-      case SENSOR_ADCLIGHT:
-         return &adc_sens_read_light;
+      case SENSOR_ADC_PHOTOSYNTHETIC:
+        return &adc_sens_read_photosynthetic;
+      case SENSOR_ADC_TOTAL_SOLAR:
+         return &adc_sens_read_total_solar;
       default:
          return NULL;
    }
@@ -77,10 +77,10 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
          return &sht11_convert_temperature;
       case SENSOR_HUMIDITY:
          return &sht11_convert_humidity;
-      case SENSOR_ADCSOLAR:
-         return &adc_sens_convert_solar;
-      case SENSOR_ADCLIGHT:
-         return &adc_sens_convert_light;
+      case SENSOR_ADC_PHOTOSYNTHETIC:
+         return &adc_sens_convert_photosynthetic;
+      case SENSOR_ADC_TOTAL_SOLAR:
+         return &adc_sens_convert_total_solar;
       default:
          return NULL;
    }

@@ -10,7 +10,7 @@
 
 /// define NUMSENSORS if not defined in board_info.h
 #ifndef NUMSENSORS
-#define NUMSENSORS 10
+#define NUMSENSORS 12
 #endif  // NUMSENSORS
 
 /// Sensor types
@@ -23,8 +23,8 @@ enum {
    SENSOR_YACCELERATION,
    SENSOR_ZACCELERATION,
    SENSOR_ADCTEMPERATURE,
-   SENSOR_ADCSOLAR,
-   SENSOR_ADCLIGHT,
+   SENSOR_ADC_PHOTOSYNTHETIC,
+   SENSOR_ADC_TOTAL_SOLAR,
    SENSOR_DEFAULT,
    SENSOR_LAST                  // new sensor types go before this one
 };
