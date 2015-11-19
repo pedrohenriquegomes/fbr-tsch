@@ -142,12 +142,16 @@ void udp_light_task_cb() {
    }
    
    uint16_t lux = 0;
-   if (sensors_is_present(SENSOR_LIGHT))
+   if (sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
    {
-      udp_light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
+      udp_light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
       lux = udp_light_read_cb();
    }
 
+   //detect if light is off
+//   if (lux < LUX_THRESHOLD)
+//     return;
+   
    // get a free packet buffer
    pkt = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
    if (pkt==NULL) {

@@ -6,7 +6,7 @@
 //=========================== define ==========================================
 
 #define ICMP_LIGHT_PERIOD_MS     10000
-#define ICMP_LIGHT_ON_THRESHOLD  0xAA
+#define LUX_THRESHOLD           600
 
 //=========================== typedef =========================================
 
