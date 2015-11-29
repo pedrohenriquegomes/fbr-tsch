@@ -320,10 +320,12 @@ typedef struct {
    uint8_t       l2_securityLevel;               //the security level specified for the current frame
    uint8_t       l2_keyIdMode;                   //the key Identifier mode specified for the current frame
    uint8_t       l2_keyIndex;                    //the key Index specified for the current frame
-   open_addr_t   l2_keySource;                   //the key Source specified for the current frame
-   uint8_t       l2_authenticationLength;        //the length of the authentication field
-   uint8_t       commandFrameIdentifier;         //used in case of Command Frames
-   uint8_t*      l2_FrameCounter;                //pointer to the FrameCounter in the MAC header
+//   open_addr_t   l2_keySource;                   //the key Source specified for the current frame
+//   uint8_t       l2_authenticationLength;        //the length of the authentication field
+//   uint8_t       commandFrameIdentifier;         //used in case of Command Frames
+   bool           l2_rankPresent;
+   uint16_t       l2_rank;
+//   uint8_t*      l2_FrameCounter;                //pointer to the FrameCounter in the MAC header
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet

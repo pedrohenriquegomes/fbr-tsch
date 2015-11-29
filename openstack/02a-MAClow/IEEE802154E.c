@@ -3,7 +3,6 @@
 #include "radio.h"
 #include "radiotimer.h"
 #include "IEEE802154.h"
-#include "ieee802154_security_driver.h"
 #include "openqueue.h"
 #include "idmanager.h"
 #include "openserial.h"
@@ -1485,6 +1484,10 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
+      if(ieee802514_header.rankPresent == TRUE)
+      {
+        uint16_t parentRank = ieee802514_header.rank;
+      }
       // if security is enabled, decrypt/authenticate the frame.
 //      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
 //         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
@@ -1588,9 +1591,9 @@ port_INLINE void activity_ri6() {
 
    // To send ACK, we use the same security level (including NOSEC) and keys
    // that were present in the DATA packet.
-   ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
-   ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
-   ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
+//   ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
+//   ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
+//   ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
 
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
@@ -1852,9 +1855,9 @@ bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
    packetfunctions_reserveHeaderSize(eb, parsedHeader->headerLength);
 
    // verify EB's authentication tag
-   if (IEEE802154_SECURITY.incomingFrame(eb) == E_SUCCESS) {
+//   if (IEEE802154_SECURITY.incomingFrame(eb) == E_SUCCESS) {
       return TRUE;
-   }
+//   }
 
    return FALSE;
 }

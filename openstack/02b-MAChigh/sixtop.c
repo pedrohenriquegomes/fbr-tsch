@@ -14,7 +14,6 @@
 #include "leds.h"
 #include "processIE.h"
 #include "IEEE802154.h"
-#include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
 
@@ -436,11 +435,12 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
 
-
+   msg->l2_rankPresent = FALSE;
+   
    // set l2-security attributes
-   msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
-   msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
-   msg->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+//   msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+//   msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
+//   msg->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
 
    if (msg->l2_payloadIEpresent == FALSE) {
       return sixtop_send_internal(
@@ -809,10 +809,13 @@ port_INLINE void sixtop_sendEB() {
    eb->l2_payloadIEpresent = TRUE;
 
    // set l2-security attributes
-   eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
-   eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
-   eb->l2_keyIndex        = IEEE802154_SECURITY_K1_KEY_INDEX;
+//   eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
+//   eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+//   eb->l2_keyIndex        = IEEE802154_SECURITY_K1_KEY_INDEX;
 
+   eb->l2_rankPresent     = TRUE;
+   eb->l2_rank            = neighbors_getMyDAGrank();
+     
    // put in queue for MAC to handle
    sixtop_send_internal(eb,eb->l2_payloadIEpresent);
    
@@ -875,9 +878,9 @@ port_INLINE void sixtop_sendKA() {
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
    // set l2-security attributes
-   kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
-   kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
-   kaPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+//   kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+//   kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+//   kaPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
 
    // put in queue for MAC to handle
    sixtop_send_internal(kaPkt,FALSE);

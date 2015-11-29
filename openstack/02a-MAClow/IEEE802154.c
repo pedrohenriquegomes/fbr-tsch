@@ -47,13 +47,15 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    uint8_t ielistpresent = IEEE154_IELIST_NO;
-   bool    securityEnabled;
+   bool    rankPresent;
    int16_t timeCorrection;
+   uint16_t rank;
    header_IE_ht header_desc;
    bool    headerIEPresent = FALSE;
    
-   securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
-
+   rankPresent = msg->l2_rankPresent;
+   rank = msg->l2_rank;
+   
    msg->l2_payload = msg->payload; // save the position where to start encrypting if security is enabled 
  
    // General IEs here (those that are carried in all packets)
@@ -109,10 +111,12 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        msg->payload[1] = ((header_desc.length_elementid_type) >> 8) & 0xFF;
    }
    
-   //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
-//   if(securityEnabled){
-//      IEEE802154_SECURITY.prependAuxiliarySecurityHeader(msg);
-//   }
+   //if rank present
+   if(rankPresent){
+      packetfunctions_reserveHeaderSize(msg, sizeof(uint16_t));
+      msg->payload[0] = rank & 0xFF;
+      msg->payload[1] = (rank >> 8) & 0xFF;
+   }
 
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
@@ -170,7 +174,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
    temp_8b              = 0;
    temp_8b             |= frameType                       << IEEE154_FCF_FRAME_TYPE;
-   temp_8b             |= securityEnabled                 << IEEE154_FCF_SECURITY_ENABLED;
+   temp_8b             |= rankPresent                     << IEEE154_FCF_RANK_PRESENT;
    temp_8b             |= IEEE154_PENDING_NO_FRAMEPENDING << IEEE154_FCF_FRAME_PENDING;
    if (frameType==IEEE154_TYPE_ACK || packetfunctions_isBroadcastMulticast(nextHop)) {
       temp_8b          |= IEEE154_ACK_NO_ACK_REQ          << IEEE154_FCF_ACK_REQ;
@@ -207,7 +211,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    temp_8b = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
    ieee802514_header->frameType         = (temp_8b >> IEEE154_FCF_FRAME_TYPE      ) & 0x07;//3b
-   ieee802514_header->securityEnabled   = (temp_8b >> IEEE154_FCF_SECURITY_ENABLED) & 0x01;//1b
+   ieee802514_header->rankPresent       = (temp_8b >> IEEE154_FCF_RANK_PRESENT    ) & 0x01;//1b
    ieee802514_header->framePending      = (temp_8b >> IEEE154_FCF_FRAME_PENDING   ) & 0x01;//1b
    ieee802514_header->ackRequested      = (temp_8b >> IEEE154_FCF_ACK_REQ         ) & 0x01;//1b
    ieee802514_header->panIDCompression  = (temp_8b >> IEEE154_FCF_INTRAPAN        ) & 0x01;//1b
@@ -332,7 +336,18 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
 //       IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
 //   }
 //   else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_SUPPORTED) { return; }
-
+   
+   // Reading the rank
+   if (ieee802514_header->rankPresent == TRUE)
+   {
+     temp_8b  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+     ieee802514_header->headerLength += 1;
+     temp_16b = temp_8b | (*((uint8_t*)(msg->payload)+ieee802514_header->headerLength) << 8);
+     ieee802514_header->headerLength += 1;
+     ieee802514_header->rank = temp_16b;
+     ieee802514_header->rank++;
+   }
+   
    // remove termination IE accordingly 
    if (ieee802514_header->ieListPresent == TRUE) {
        while(1) {

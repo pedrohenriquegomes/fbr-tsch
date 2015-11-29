@@ -14,7 +14,7 @@
 
 enum IEEE802154_fcf_enums {
    IEEE154_FCF_FRAME_TYPE              = 0,
-   IEEE154_FCF_SECURITY_ENABLED        = 3,
+   IEEE154_FCF_RANK_PRESENT            = 3,
    IEEE154_FCF_FRAME_PENDING           = 4,
    IEEE154_FCF_ACK_REQ                 = 5,
    IEEE154_FCF_INTRAPAN                = 6,
@@ -117,7 +117,7 @@ typedef struct {
    bool        valid;
    uint8_t     headerLength;    //including the length field
    uint8_t     frameType;
-   bool        securityEnabled;
+   bool        rankPresent;
    bool        framePending;
    bool        ackRequested;
    bool        panIDCompression;
@@ -129,6 +129,7 @@ typedef struct {
    open_addr_t dest;
    open_addr_t src;
    int16_t     timeCorrection;
+   uint16_t    rank;
 } ieee802154_header_iht; //iht for "internal header type"
 
 //=========================== variables =======================================

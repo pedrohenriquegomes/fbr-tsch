@@ -315,7 +315,7 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* sr
    dst->payload = &dst->packet[src->payload - src->packet]; // update pointers
 
    // update l2_FrameCounter pointer
-   dst->l2_FrameCounter = dst->payload + (src->l2_FrameCounter - src->payload);
+//   dst->l2_FrameCounter = dst->payload + (src->l2_FrameCounter - src->payload);
 
    // update l2_ASNpayload pointer
    dst->l2_ASNpayload = dst->payload + (src->l2_ASNpayload - src->payload);
