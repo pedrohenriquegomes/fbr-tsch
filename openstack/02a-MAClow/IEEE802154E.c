@@ -1486,7 +1486,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       if(ieee802514_header.rankPresent == TRUE)
       {
-        uint16_t parentRank = ieee802514_header.rank;
+        ieee154e_vars.dataReceived->l2_rank = ieee802514_header.rank;
       }
       // if security is enabled, decrypt/authenticate the frame.
 //      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {

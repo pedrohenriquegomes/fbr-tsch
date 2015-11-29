@@ -580,6 +580,7 @@ void task_sixtopNotifReceive() {
    // send the packet up the stack, if it qualifies
    switch (msg->l2_frameType) {
       case IEEE154_TYPE_BEACON:
+         neighbors_indicateRxEB(msg);
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
          if (msg->length>0) {

@@ -468,6 +468,37 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    neighbors_updateMyDAGrankAndNeighborPreference(); 
 }
 
+void neighbors_indicateRxEB(OpenQueueEntry_t* msg) {
+   uint8_t          i;
+  
+   // take ownership over the packet
+   msg->owner = COMPONENT_NEIGHBORS;
+   
+   // retrieve rank
+   uint16_t rank = msg->l2_rank;
+   if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
+      for (i=0;i<MAXNUMNEIGHBORS;i++) {
+         if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
+            if (
+                  rank > neighbors_vars.neighbors[i].DAGrank &&
+                  rank - neighbors_vars.neighbors[i].DAGrank >(DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
+               ) {
+                // the new DAGrank looks suspiciously high, only increment a bit
+                neighbors_vars.neighbors[i].DAGrank += (DEFAULTLINKCOST*2*MINHOPRANKINCREASE);
+                openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
+                               (errorparameter_t)rank,
+                               (errorparameter_t)neighbors_vars.neighbors[i].DAGrank);
+            } else {
+               neighbors_vars.neighbors[i].DAGrank = rank;
+            }
+            break;
+         }
+      }
+   } 
+   // update my routing information
+   neighbors_updateMyDAGrankAndNeighborPreference(); 
+}
+
 //===== write addresses
 
 /**
