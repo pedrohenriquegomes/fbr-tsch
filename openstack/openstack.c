@@ -26,11 +26,11 @@
 #include "iphc.h"
 //-- 03b-IPv6
 #include "forwarding.h"
-#include "icmpv6.h"
-#include "icmpv6echo.h"
+//#include "icmpv6.h"
+//#include "icmpv6echo.h"
 //#include "icmpv6rpl.h"
 //-- 04-TRAN
-#include "openudp.h"
+//#include "openudp.h"
 //===== applications
 #include "openapps.h"
 
@@ -65,11 +65,11 @@ void openstack_init(void) {
    iphc_init();
    //-- 03b-IPv6
    forwarding_init();
-   icmpv6_init();
-   icmpv6echo_init();
+//   icmpv6_init();
+//   icmpv6echo_init();
 //   icmpv6rpl_init();
    //-- 04-TRAN
-   openudp_init();
+//   openudp_init();
    
    //===== applications
    openapps_init();

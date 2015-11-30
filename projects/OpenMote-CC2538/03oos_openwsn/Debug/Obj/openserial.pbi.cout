@@ -34,8 +34,6 @@ C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openws
 -I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openwsn\..\..\..\openstack\03b-IPv6
 -I
-C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openwsn\..\..\..\openstack\04-TRAN
--I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openwsn\..\..\..\openstack\cross-layers
 -I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openwsn\..\..\..\openapps
@@ -85,8 +83,6 @@ C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\openstack\02b-MAChigh
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\openstack\03a-IPHC
 -I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\openstack\03b-IPv6
--I
-C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\openstack\04-TRAN
 -I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\openstack\cross-layers
 -I

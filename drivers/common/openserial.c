@@ -9,7 +9,7 @@
 #include "IEEE802154E.h"
 #include "neighbors.h"
 #include "sixtop.h"
-#include "icmpv6echo.h"
+//#include "icmpv6echo.h"
 #include "idmanager.h"
 #include "openqueue.h"
 #include "openbridge.h"

@@ -6,9 +6,9 @@
 #include "idmanager.h"
 #include "packetfunctions.h"
 #include "neighbors.h"
-#include "icmpv6.h"
+//#include "icmpv6.h"
 //#include "icmpv6rpl.h"
-#include "openudp.h"
+//#include "openudp.h"
 #include "debugpins.h"
 #include "scheduler.h"
 
@@ -164,12 +164,12 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 //         case IANA_TCP:
 //            opentcp_sendDone(msg,error);
 //            break;
-         case IANA_UDP:
-            openudp_sendDone(msg,error);
-            break;
-         case IANA_ICMPv6:
-            icmpv6_sendDone(msg,error);
-            break;
+//         case IANA_UDP:
+//            openudp_sendDone(msg,error);
+//            break;
+//         case IANA_ICMPv6:
+//            icmpv6_sendDone(msg,error);
+//            break;
          default:
             
             // log error
@@ -248,12 +248,12 @@ void forwarding_receive(
 //         case IANA_TCP:
 //            opentcp_receive(msg);
 //            break;
-         case IANA_UDP:
-            openudp_receive(msg);
-            break;
-         case IANA_ICMPv6:
-            icmpv6_receive(msg);
-            break;
+//         case IANA_UDP:
+//            openudp_receive(msg);
+//            break;
+//         case IANA_ICMPv6:
+//            icmpv6_receive(msg);
+//            break;
          default:
             
             // log error
@@ -495,12 +495,12 @@ owerror_t forwarding_send_internal_SourceRouting(
 //         case IANA_TCP:
 //            opentcp_receive(msg);
 //            break;
-         case IANA_UDP:
-            openudp_receive(msg);
-            break;
-         case IANA_ICMPv6:
-            icmpv6_receive(msg);
-            break;
+//         case IANA_UDP:
+//            openudp_receive(msg);
+//            break;
+//         case IANA_ICMPv6:
+//            icmpv6_receive(msg);
+//            break;
          default:
             openserial_printError(
                COMPONENT_FORWARDING,
@@ -510,7 +510,7 @@ owerror_t forwarding_send_internal_SourceRouting(
             );
             //not sure that this is correct as iphc will free it?
             openqueue_freePacketBuffer(msg);
-            return E_FAIL;
+//            return E_FAIL;
       }
       
       // stop executing here (successful)

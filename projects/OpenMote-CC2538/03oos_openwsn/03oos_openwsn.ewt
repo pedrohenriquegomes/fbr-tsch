@@ -2587,27 +2587,6 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.h</name>
       </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.h</name>
-      </file>
-    </group>
-    <group>
-      <name>04-TRAN</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.h</name>
-      </file>
     </group>
     <group>
       <name>cross-layers</name>
