@@ -5,7 +5,7 @@
 #include "forwarding.h"
 #include "openqueue.h"
 // applications
-#include "udp_light.h"
+//#include "udp_light.h"
 
 //=========================== variables =======================================
 
@@ -33,7 +33,7 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_OPENUDP;
    switch(msg->l4_sourcePortORicmpv6Type) {
       case WKP_UDP_LIGHT:
-         udp_light_sendDone(msg,error);
+//         udp_light_sendDone(msg,error);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
@@ -89,7 +89,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
    
    switch(msg->l4_destination_port) {
       case WKP_UDP_LIGHT:
-         udp_light_receive(msg);
+//         udp_light_receive(msg);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,

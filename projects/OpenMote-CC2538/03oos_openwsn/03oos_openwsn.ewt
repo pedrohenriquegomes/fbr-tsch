@@ -2487,30 +2487,12 @@
   <group>
     <name>openapps</name>
     <group>
-      <name>icmp_light</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\icmp_light\icmp_light.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\icmp_light\icmp_light.h</name>
-      </file>
-    </group>
-    <group>
       <name>sixtop_light</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\sixtop_light\sixtop_light.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\sixtop_light\sixtop_light.h</name>
-      </file>
-    </group>
-    <group>
-      <name>udp_light</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\udp_light\udp_light.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\udp_light\udp_light.h</name>
       </file>
     </group>
     <file>
