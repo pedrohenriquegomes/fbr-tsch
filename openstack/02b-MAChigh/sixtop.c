@@ -4,7 +4,7 @@
 #include "openqueue.h"
 #include "neighbors.h"
 #include "IEEE802154E.h"
-#include "iphc.h"
+//#include "iphc.h"
 #include "otf.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
@@ -530,7 +530,7 @@ void task_sixtopNotifSendDone() {
          
       default:
          // send the rest up the stack
-         iphc_sendDone(msg,msg->l2_sendDoneError);
+//         iphc_sendDone(msg,msg->l2_sendDoneError);
          break;
    }
 }

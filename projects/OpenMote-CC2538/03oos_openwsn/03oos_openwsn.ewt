@@ -2565,30 +2565,6 @@
       </file>
     </group>
     <group>
-      <name>03a-IPHC</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.h</name>
-      </file>
-    </group>
-    <group>
-      <name>03b-IPv6</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.h</name>
-      </file>
-    </group>
-    <group>
       <name>cross-layers</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\idmanager.c</name>

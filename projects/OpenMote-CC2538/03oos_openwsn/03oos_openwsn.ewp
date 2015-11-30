@@ -325,7 +325,6 @@
           <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\sixtop_light\</state>
@@ -2402,30 +2401,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.h</name>
-      </file>
-    </group>
-    <group>
-      <name>03a-IPHC</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.h</name>
-      </file>
-    </group>
-    <group>
-      <name>03b-IPv6</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.h</name>
       </file>
     </group>
     <group>

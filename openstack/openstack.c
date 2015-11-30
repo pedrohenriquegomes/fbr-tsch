@@ -21,16 +21,6 @@
 #include "schedule.h"
 #include "sixtop.h"
 #include "neighbors.h"
-//-- 03a-IPHC
-#include "openbridge.h"
-#include "iphc.h"
-//-- 03b-IPv6
-#include "forwarding.h"
-//#include "icmpv6.h"
-//#include "icmpv6echo.h"
-//#include "icmpv6rpl.h"
-//-- 04-TRAN
-//#include "openudp.h"
 //===== applications
 #include "openapps.h"
 
@@ -60,16 +50,6 @@ void openstack_init(void) {
    schedule_init();
    sixtop_init();
    neighbors_init();
-   //-- 03a-IPHC
-   openbridge_init();
-   iphc_init();
-   //-- 03b-IPv6
-   forwarding_init();
-//   icmpv6_init();
-//   icmpv6echo_init();
-//   icmpv6rpl_init();
-   //-- 04-TRAN
-//   openudp_init();
    
    //===== applications
    openapps_init();

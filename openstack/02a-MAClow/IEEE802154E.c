@@ -1866,7 +1866,7 @@ bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
       return TRUE;
 //   }
 
-   return FALSE;
+//   return FALSE;
 }
 
 port_INLINE void asnStoreFromEB(uint8_t* asn) {

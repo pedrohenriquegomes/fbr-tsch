@@ -12,7 +12,7 @@
 //#include "icmpv6echo.h"
 #include "idmanager.h"
 #include "openqueue.h"
-#include "openbridge.h"
+//#include "openbridge.h"
 #include "leds.h"
 #include "schedule.h"
 #include "uart.h"
@@ -421,7 +421,7 @@ void openserial_stop() {
             idmanager_triggerAboutRoot();
             break;
          case SERFRAME_PC2MOTE_DATA:
-            openbridge_triggerData();
+//            openbridge_triggerData();
             break;
          case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
             //echo function must reset input buffer after reading the data.
