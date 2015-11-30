@@ -11,6 +11,8 @@
 #include "IEEE802154E.h"
 #include "sixtop.h"
 
+#define DEBUG   TRUE
+
 //=========================== variables =======================================
 
 sixtop_light_vars_t        sixtop_light_vars;
@@ -68,18 +70,27 @@ void sixtop_light_receive(OpenQueueEntry_t* pkt) {
    // retrieve the rank
    uint16_t rank = pkt->payload[2] | (pkt->payload[3] << 8);
    
-   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_RCV,
-                 (errorparameter_t)counter,
-                 (errorparameter_t)rank);
-   
    if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == ROOT_ADDR) {
      if (counter > sixtop_light_vars.counter)
      {
        sixtop_light_vars.counter = counter;
      }
      openqueue_freePacketBuffer(pkt);
+
+#if DEBUG == TRUE
+   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_RCV,
+                 (errorparameter_t)counter,
+                 (errorparameter_t)rank);
+#endif
+   
      return;
    }
+
+#if DEBUG == TRUE
+   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_RCV,
+                 (errorparameter_t)counter,
+                 (errorparameter_t)rank);
+#endif
    
    //check if rank is greater than ours
    if (rank > neighbors_getMyDAGrank())
@@ -107,11 +118,13 @@ void sixtop_light_receive(OpenQueueEntry_t* pkt) {
        fw->l2_nextORpreviousHop.type        = ADDR_16B;
        fw->l2_nextORpreviousHop.addr_16b[0] = 0xff;
        fw->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-       
+
+#if DEBUG == TRUE
        openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_FW,
                          (errorparameter_t)counter,
                          (errorparameter_t)neighbors_getMyDAGrank());
-          
+#endif
+       
        if ((sixtop_send(fw))==E_FAIL) {
           openqueue_freePacketBuffer(fw);
        }
@@ -129,6 +142,7 @@ void sixtop_light_timer_cb(opentimer_id_t id){
 
 void sixtop_light_task_cb() {
    OpenQueueEntry_t*    pkt;
+   uint8_t i;
    
    // don't run if not synch or does not know the RANK yet
    if (ieee154e_isSynch() == FALSE || neighbors_getMyDAGrank() == DEFAULTDAGRANK) 
@@ -139,47 +153,54 @@ void sixtop_light_task_cb() {
       opentimers_stop(sixtop_light_vars.timerId);
       return;
    }
-   
+
    uint16_t lux = 0;
    if (sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
    {
       sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
       lux = sixtop_light_read_cb();
    }
-   
-   //detect if light is off
-//   if (lux < LUX_THRESHOLD)
-//     return;
+       
+       //detect if light is off
+    //   if (lux < LUX_THRESHOLD)
+    //     return;
 
-   // get a free packet buffer
-   pkt = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
-   if (pkt==NULL) {
-      openserial_printError(
-         COMPONENT_LIGHT,
-         ERR_NO_FREE_PACKET_BUFFER,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
-      return;
-   }
+   sixtop_light_vars.counter++;
    
-   pkt->owner                         = COMPONENT_LIGHT;
-   pkt->creator                       = COMPONENT_LIGHT;
+   for (i = 0; i < 3; i++)
+   {
+       // get a free packet buffer
+       pkt = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
+       if (pkt==NULL) {
+          openserial_printError(
+             COMPONENT_LIGHT,
+             ERR_NO_FREE_PACKET_BUFFER,
+             (errorparameter_t)0,
+             (errorparameter_t)0
+          );
+          return;
+       }
+       
+       pkt->owner                         = COMPONENT_LIGHT;
+       pkt->creator                       = COMPONENT_LIGHT;
 
-   // payload
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
-   *((uint16_t*)&pkt->payload[0]) = sixtop_light_vars.counter++;
-   *((uint16_t*)&pkt->payload[2]) = neighbors_getMyDAGrank();
-   
-   pkt->l2_nextORpreviousHop.type        = ADDR_16B;
-   pkt->l2_nextORpreviousHop.addr_16b[0] = 0xff;
-   pkt->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-   
-   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
-                     (errorparameter_t)(sixtop_light_vars.counter - 1),
-                     (errorparameter_t)neighbors_getMyDAGrank());
-      
-   if ((sixtop_send(pkt))==E_FAIL) {
-      openqueue_freePacketBuffer(pkt);
+       // payload
+       packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+       *((uint16_t*)&pkt->payload[0]) = sixtop_light_vars.counter;
+       *((uint16_t*)&pkt->payload[2]) = neighbors_getMyDAGrank();
+       
+       pkt->l2_nextORpreviousHop.type        = ADDR_16B;
+       pkt->l2_nextORpreviousHop.addr_16b[0] = 0xff;
+       pkt->l2_nextORpreviousHop.addr_16b[1] = 0xff;
+
+#if DEBUG == TRUE    
+       openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
+                         (errorparameter_t)(sixtop_light_vars.counter),
+                         (errorparameter_t)neighbors_getMyDAGrank());
+#endif
+       
+       if ((sixtop_send(pkt))==E_FAIL) {
+          openqueue_freePacketBuffer(pkt);
+       }
    }
 }

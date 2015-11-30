@@ -117,7 +117,8 @@ bool          sixtop_areAvailableCellsToBeScheduled(
 
 void sixtop_init() {
    
-   sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
+//   sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
+   sixtop_vars.periodMaintenance  = 500 + (int8_t)(openrandom_get16b()&0xff);
    sixtop_vars.busySendingKA      = FALSE;
    sixtop_vars.busySendingEB      = FALSE;
    sixtop_vars.dsn                = 0;

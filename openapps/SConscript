@@ -8,30 +8,15 @@ localEnv      = env.Clone()
 
 # apps which should always be built
 defaultApps   = [
-    'c6t',
-    'cinfo',
-    'cleds',
-    'cwellknown',
-    'techo',
-    'uecho',
-    'uinject',
-    'rrt',
+    'sixtop_light',
 ]
 if localEnv['board']=='python':
     defaultApps  += [
-        'cexample',
-        'cstorm',
     ]
 
 # apps which should always be present
 defaultAppsInit   = [
-    'c6t',
-    'cinfo',
-    'cleds',
-    'cwellknown',
-    'techo',
-    'uecho',
-    'rrt',
+    'sixtop_light',
 ]
 
 # additional apps the user wants to build
@@ -129,11 +114,9 @@ else:
             # inc
             os.path.join('#','inc'),
             # openstack
-            os.path.join('#','openstack','04-TRAN'),
             os.path.join('#','openstack','cross-layers'),
             os.path.join('#','openstack','02a-MAClow'),
             os.path.join('#','openstack','02b-MAChigh'),
-            os.path.join('#','openstack','03b-IPv6'),
             # openapps
             os.path.join('#','openapps'),
         ]+[os.path.join('#','openapps',a) for a in apps],

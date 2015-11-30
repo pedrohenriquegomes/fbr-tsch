@@ -45,14 +45,14 @@ void openstack_init(void) {
    opentimers_init();
    //-- 02a-TSCH
    adaptive_sync_init();
-//   ieee154e_init();
+   ieee154e_init();
    //-- 02b-RES
-//   schedule_init();
-//   sixtop_init();
-//   neighbors_init();
+   schedule_init();
+   sixtop_init();
+   neighbors_init();
    
    //===== applications
-//   openapps_init();
+   openapps_init();
    
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
