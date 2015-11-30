@@ -19,7 +19,7 @@
 #include "opentimers.h"
 #include "openhdlc.h"
 #include "schedule.h"
-#include "icmpv6rpl.h"
+//#include "icmpv6rpl.h"
 
 //=========================== variables =======================================
 
@@ -519,12 +519,12 @@ void openserial_goldenImageCommands(void){
        case COMMAND_SET_KAPERIOD: // two bytes, in slots
            sixtop_setKaPeriod(comandParam_16);
            break;
-       case COMMAND_SET_DIOPERIOD: // two bytes, in mili-seconds
-           icmpv6rpl_setDIOPeriod(comandParam_16);
-           break;
-       case COMMAND_SET_DAOPERIOD: // two bytes, in mili-seconds
-           icmpv6rpl_setDAOPeriod(comandParam_16);
-           break;
+//       case COMMAND_SET_DIOPERIOD: // two bytes, in mili-seconds
+//           icmpv6rpl_setDIOPeriod(comandParam_16);
+//           break;
+//       case COMMAND_SET_DAOPERIOD: // two bytes, in mili-seconds
+//           icmpv6rpl_setDAOPeriod(comandParam_16);
+//           break;
        case COMMAND_PING_MOTE:
            // this should not happen
            break;

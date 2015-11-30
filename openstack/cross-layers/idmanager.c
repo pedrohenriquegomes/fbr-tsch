@@ -183,7 +183,7 @@ void idmanager_triggerAboutRoot() {
    uint8_t         number_bytes_from_input_buffer;
    uint8_t         input_buffer[9];
    open_addr_t     myPrefix;
-   uint8_t         dodagid[16];
+//   uint8_t         dodagid[16];
    
    //=== get command from OpenSerial
    number_bytes_from_input_buffer = openserial_getInputBuffer(input_buffer,sizeof(input_buffer));
@@ -223,9 +223,9 @@ void idmanager_triggerAboutRoot() {
    idmanager_setMyID(&myPrefix);
    
    // indicate DODAGid to RPL
-   memcpy(&dodagid[0],idmanager_vars.myPrefix.prefix,8);  // prefix
-   memcpy(&dodagid[8],idmanager_vars.my64bID.addr_64b,8); // eui64
-   icmpv6rpl_writeDODAGid(dodagid);
+//   memcpy(&dodagid[0],idmanager_vars.myPrefix.prefix,8);  // prefix
+//   memcpy(&dodagid[8],idmanager_vars.my64bID.addr_64b,8); // eui64
+//   icmpv6rpl_writeDODAGid(dodagid);
    
    return;
 }

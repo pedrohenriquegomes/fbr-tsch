@@ -28,7 +28,7 @@
 #include "forwarding.h"
 #include "icmpv6.h"
 #include "icmpv6echo.h"
-#include "icmpv6rpl.h"
+//#include "icmpv6rpl.h"
 //-- 04-TRAN
 #include "openudp.h"
 //===== applications
@@ -67,7 +67,7 @@ void openstack_init(void) {
    forwarding_init();
    icmpv6_init();
    icmpv6echo_init();
-   icmpv6rpl_init();
+//   icmpv6rpl_init();
    //-- 04-TRAN
    openudp_init();
    

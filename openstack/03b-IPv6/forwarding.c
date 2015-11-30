@@ -7,7 +7,7 @@
 #include "packetfunctions.h"
 #include "neighbors.h"
 #include "icmpv6.h"
-#include "icmpv6rpl.h"
+//#include "icmpv6rpl.h"
 #include "openudp.h"
 #include "debugpins.h"
 #include "scheduler.h"
@@ -24,7 +24,7 @@ owerror_t forwarding_send_internal_RoutingTable(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht*     ipv6_outer_header,
    ipv6_header_iht*     ipv6_inner_header,
-   rpl_option_ht*       rpl_option,
+//   rpl_option_ht*       rpl_option,
    uint32_t*             flow_label,
    uint8_t              fw_SendOrfw_Rcv
 );
@@ -33,10 +33,10 @@ owerror_t forwarding_send_internal_SourceRouting(
    ipv6_header_iht*     ipv6_outer_header,
    ipv6_header_iht*     ipv6_inner_header
 );
-void      forwarding_createRplOption(
-   rpl_option_ht*       rpl_option,
-   uint8_t              flags
-);
+//void      forwarding_createRplOption(
+//   rpl_option_ht*       rpl_option,
+//   uint8_t              flags
+//);
 
 
 //=========================== public ==========================================
@@ -58,7 +58,7 @@ at this mote.
 owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    ipv6_header_iht      ipv6_outer_header;
    ipv6_header_iht      ipv6_inner_header;
-   rpl_option_ht        rpl_option;
+//   rpl_option_ht        rpl_option;
    open_addr_t*         myprefix;
    open_addr_t*         myadd64;
    uint32_t             flow_label = 0;
@@ -87,10 +87,10 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    
    // create the RPL hop-by-hop option
 
-   forwarding_createRplOption(
-      &rpl_option,      // rpl_option to fill in
-      0x00              // flags
-   );
+//   forwarding_createRplOption(
+//      &rpl_option,      // rpl_option to fill in
+//      0x00              // flags
+//   );
 
 
    // inner header is required only when the destination address is NOT broadcast address
@@ -134,7 +134,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
       msg,
       &ipv6_outer_header,
       &ipv6_inner_header,
-      &rpl_option,
+//      &rpl_option,
       &flow_label,
       PCKTSEND
    );
@@ -307,14 +307,14 @@ void forwarding_receive(
          }
          
 
-         forwarding_createRplOption(rpl_option, rpl_option->flags);
+//         forwarding_createRplOption(rpl_option, rpl_option->flags);
          // resend as if from upper layer
          if (
                forwarding_send_internal_RoutingTable(
                   msg,
                   ipv6_outer_header,
                   ipv6_inner_header,
-                  rpl_option,
+//                  rpl_option,
                   &(ipv6_outer_header->flow_label),
                   PCKTFORWARD 
                )==E_FAIL
@@ -381,7 +381,7 @@ owerror_t forwarding_send_internal_RoutingTable(
       OpenQueueEntry_t*      msg,
       ipv6_header_iht*       ipv6_outer_header,
       ipv6_header_iht*       ipv6_inner_header,
-      rpl_option_ht*         rpl_option,
+//      rpl_option_ht*         rpl_option,
       uint32_t*              flow_label,
       uint8_t                fw_SendOrfw_Rcv
    ) {
@@ -403,7 +403,7 @@ owerror_t forwarding_send_internal_RoutingTable(
       msg,
       ipv6_outer_header,
       ipv6_inner_header,
-      rpl_option,
+//      rpl_option,
       flow_label,
       fw_SendOrfw_Rcv
    );
@@ -642,7 +642,7 @@ owerror_t forwarding_send_internal_SourceRouting(
       msg,
       ipv6_outer_header,
       ipv6_inner_header,
-      &rpl_option,
+//      &rpl_option,
       &ipv6_outer_header->flow_label,
       PCKTFORWARD
    );
@@ -655,17 +655,17 @@ owerror_t forwarding_send_internal_SourceRouting(
 \param[out] rpl_option A pointer to the structure to fill in.
 \param[in]  flags      The flags to indicate in the RPL option.
 */
-void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
-   // set the RPL hop-by-hop header
-   rpl_option->optionType         = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
-   
-   // 8-bit field indicating the length of the option, in
-   // octets, excluding the Option Type and Opt Data Len fields.
-   // 4-bytes, flags+instanceID+senderrank - no sub-tlvs
-   rpl_option->optionLen          = 0x04; 
-   
-   rpl_option->flags              = flags;
-   rpl_option->rplInstanceID      = icmpv6rpl_getRPLIntanceID();
-   rpl_option->senderRank         = neighbors_getMyDAGrank();
-}
+//void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
+//   // set the RPL hop-by-hop header
+//   rpl_option->optionType         = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
+//   
+//   // 8-bit field indicating the length of the option, in
+//   // octets, excluding the Option Type and Opt Data Len fields.
+//   // 4-bytes, flags+instanceID+senderrank - no sub-tlvs
+//   rpl_option->optionLen          = 0x04; 
+//   
+//   rpl_option->flags              = flags;
+//   rpl_option->rplInstanceID      = icmpv6rpl_getRPLIntanceID();
+//   rpl_option->senderRank         = neighbors_getMyDAGrank();
+//}
 

@@ -421,53 +421,6 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
    }
 }
 
-/**
-\brief Indicate I just received a RPL DIO from a neighbor.
-
-This function should be called for each received a DIO is received so neighbor
-routing information in the neighbor table can be updated.
-
-The fields which are updated are:
-- DAGrank
-
-\param[in] msg The received message with msg->payload pointing to the DIO
-   header.
-*/
-void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
-   uint8_t          i;
-   uint8_t          temp_8b;
-  
-   // take ownership over the packet
-   msg->owner = COMPONENT_NEIGHBORS;
-   
-   // update rank of that neighbor in table
-   neighbors_vars.dio = (icmpv6rpl_dio_ht*)(msg->payload);
-   // retrieve rank
-   temp_8b            = *(msg->payload+2);
-   neighbors_vars.dio->rank = (temp_8b << 8) + *(msg->payload+3);
-   if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
-      for (i=0;i<MAXNUMNEIGHBORS;i++) {
-         if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
-            if (
-                  neighbors_vars.dio->rank > neighbors_vars.neighbors[i].DAGrank &&
-                  neighbors_vars.dio->rank - neighbors_vars.neighbors[i].DAGrank >(DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
-               ) {
-                // the new DAGrank looks suspiciously high, only increment a bit
-                neighbors_vars.neighbors[i].DAGrank += (DEFAULTLINKCOST*2*MINHOPRANKINCREASE);
-                openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
-                               (errorparameter_t)neighbors_vars.dio->rank,
-                               (errorparameter_t)neighbors_vars.neighbors[i].DAGrank);
-            } else {
-               neighbors_vars.neighbors[i].DAGrank = neighbors_vars.dio->rank;
-            }
-            break;
-         }
-      }
-   } 
-   // update my routing information
-   neighbors_updateMyDAGrankAndNeighborPreference(); 
-}
-
 void neighbors_indicateRxEB(OpenQueueEntry_t* msg) {
    uint8_t          i;
   

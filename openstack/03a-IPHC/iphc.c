@@ -7,7 +7,7 @@
 #include "forwarding.h"
 #include "neighbors.h"
 #include "openbridge.h"
-#include "icmpv6rpl.h"
+//#include "icmpv6rpl.h"
 
 //=========================== variables =======================================
 
@@ -55,7 +55,7 @@ owerror_t iphc_sendFromForwarding(
       OpenQueueEntry_t* msg,
       ipv6_header_iht*  ipv6_outer_header,
       ipv6_header_iht*  ipv6_inner_header,
-      rpl_option_ht*    rpl_option,
+//      rpl_option_ht*    rpl_option,
       uint32_t*         flow_label,
       uint8_t           fw_SendOrfw_Rcv
    ) {
@@ -171,13 +171,13 @@ owerror_t iphc_sendFromForwarding(
    
    //prepend Option hop by hop header except when src routing and dst is not 0xffff
    //-- this is a little trick as src routing is using an option header set to 0x00
-   if (rpl_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
-       && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
-       ){
-      iphc_prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, rpl_option);
-      //change nh to point to the newly added header
-      next_header=IANA_IPv6HOPOPT;// use 0x00 as NH to indicate option header -- see rfc 2460
-   }
+//   if (rpl_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
+//       && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
+//       ){
+//      iphc_prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, rpl_option);
+//      //change nh to point to the newly added header
+//      next_header=IANA_IPv6HOPOPT;// use 0x00 as NH to indicate option header -- see rfc 2460
+//   }
    //then regular header
 
 

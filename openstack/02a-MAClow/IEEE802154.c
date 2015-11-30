@@ -345,7 +345,6 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
      temp_16b = temp_8b | (*((uint8_t*)(msg->payload)+ieee802514_header->headerLength) << 8);
      ieee802514_header->headerLength += 1;
      ieee802514_header->rank = temp_16b;
-     ieee802514_header->rank++;
    }
    
    // remove termination IE accordingly 

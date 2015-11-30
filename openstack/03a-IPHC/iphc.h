@@ -122,6 +122,14 @@ enum IPHC_OUTER_INNER_enums {
     IPHC_INNER               = 1,
 };
 
+/**
+\brief Well-known IPv6 multicast address for "all routers".
+*/
+static const uint8_t all_routers_multicast[] = {
+   0xff, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1a
+};
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -189,7 +197,7 @@ owerror_t     iphc_sendFromForwarding(
    OpenQueueEntry_t*    msg, 
    ipv6_header_iht*     ipv6_outer_header, 
    ipv6_header_iht*     ipv6_inner_header, 
-   rpl_option_ht*       rpl_option, 
+//   rpl_option_ht*       rpl_option, 
    uint32_t*            flow_label,
    uint8_t              fw_SendOrfw_Rcv
 );

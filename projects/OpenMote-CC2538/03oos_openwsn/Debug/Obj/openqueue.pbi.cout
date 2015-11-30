@@ -44,6 +44,8 @@ C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openws
 -I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openwsn\..\..\..\openapps\icmp_light
 -I
+C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openwsn\..\..\..\openapps\sixtop_light
+-I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openwsn\..\..\..\bsp\boards\OpenMote-CC2538
 -I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\OpenMote-CC2538\03oos_openwsn\..\..\..\bsp\boards\OpenMote-CC2538\headers
@@ -97,6 +99,8 @@ C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\openapps
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\openapps\udp_light
 -I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\openapps\icmp_light
+-I
+C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\openapps\sixtop_light
 -I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\bsp\boards\OpenMote-CC2538
 -I

@@ -601,6 +601,12 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 //         }
 //      } // checked if unsecured frame should pass during header retrieval
 
+      if(ieee802514_header.rankPresent == TRUE)
+      {
+        ieee154e_vars.dataReceived->l2_rankPresent = TRUE;
+        ieee154e_vars.dataReceived->l2_rank = ieee802514_header.rank;
+      }
+      
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
       // next.
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
@@ -1486,6 +1492,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       if(ieee802514_header.rankPresent == TRUE)
       {
+        ieee154e_vars.dataReceived->l2_rankPresent = TRUE;
         ieee154e_vars.dataReceived->l2_rank = ieee802514_header.rank;
       }
       // if security is enabled, decrypt/authenticate the frame.

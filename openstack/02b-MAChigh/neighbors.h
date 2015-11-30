@@ -8,7 +8,6 @@
 \{
 */
 #include "opendefs.h"
-#include "icmpv6rpl.h"
 
 //=========================== define ==========================================
 
@@ -66,7 +65,7 @@ typedef struct {
    neighborRow_t        neighbors[MAXNUMNEIGHBORS];
    dagrank_t            myDAGrank;
    uint8_t              debugRow;
-   icmpv6rpl_dio_ht*    dio; //keep it global to be able to debug correctly.
+//   icmpv6rpl_dio_ht*    dio; //keep it global to be able to debug correctly.
 } neighbors_vars_t;
 
 //=========================== prototypes ======================================
@@ -101,7 +100,6 @@ void          neighbors_indicateTx(
    bool                 was_finally_acked,
    asn_t*               asnTimestamp
 );
-void          neighbors_indicateRxDIO(OpenQueueEntry_t* msg);
 void          neighbors_indicateRxEB(OpenQueueEntry_t* msg);
 
 // get addresses

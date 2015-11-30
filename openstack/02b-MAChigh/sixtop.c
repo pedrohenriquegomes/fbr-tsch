@@ -16,6 +16,7 @@
 #include "IEEE802154.h"
 #include "idmanager.h"
 #include "schedule.h"
+#include "sixtop_light.h"
 
 //=========================== variables =======================================
 
@@ -523,6 +524,10 @@ void task_sixtopNotifSendDone() {
          sixtop_six2six_sendDone(msg,msg->l2_sendDoneError);
          break;
       
+      case COMPONENT_LIGHT:
+         sixtop_light_sendDone(msg,msg->l2_sendDoneError);
+         break;
+         
       default:
          // send the rest up the stack
          iphc_sendDone(msg,msg->l2_sendDoneError);
@@ -580,17 +585,20 @@ void task_sixtopNotifReceive() {
    // send the packet up the stack, if it qualifies
    switch (msg->l2_frameType) {
       case IEEE154_TYPE_BEACON:
+        // update the rank
          neighbors_indicateRxEB(msg);
+         openqueue_freePacketBuffer(msg);
+         break;
       case IEEE154_TYPE_DATA:
-      case IEEE154_TYPE_CMD:
-         if (msg->length>0) {
-            // send to upper layer
-            iphc_receive(msg);
+        //we only have one type of data packet. It is from sixtop light application
+        if (msg->length>0) {
+           sixtop_light_receive(msg);
          } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
          }
-         break;
+        break;
+      case IEEE154_TYPE_CMD:
       case IEEE154_TYPE_ACK:
       default:
          // free the packet's RAM memory

@@ -1,7 +1,7 @@
 #include "opendefs.h"
 #include "icmpv6.h"
 #include "icmpv6echo.h"
-#include "icmpv6rpl.h"
+//#include "icmpv6rpl.h"
 #include "forwarding.h"
 #include "openqueue.h"
 #include "openserial.h"
@@ -29,9 +29,9 @@ void icmpv6_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
       case IANA_ICMPv6_ECHO_REPLY:
          icmpv6echo_sendDone(msg, error);
          break;
-      case IANA_ICMPv6_RPL:
-         icmpv6rpl_sendDone(msg, error);
-         break;
+//      case IANA_ICMPv6_RPL:
+//         icmpv6rpl_sendDone(msg, error);
+//         break;
       case IANA_ICMPv6_LIGHT:
          icmp_light_sendDone(msg, error);
          break;
@@ -53,9 +53,9 @@ void icmpv6_receive(OpenQueueEntry_t* msg) {
       case IANA_ICMPv6_ECHO_REPLY:
          icmpv6echo_receive(msg);
          break;
-      case IANA_ICMPv6_RPL:
-         icmpv6rpl_receive(msg);
-         break;
+//      case IANA_ICMPv6_RPL:
+//         icmpv6rpl_receive(msg);
+//         break;
       case IANA_ICMPv6_LIGHT:
          icmp_light_receive(msg);
          break;         

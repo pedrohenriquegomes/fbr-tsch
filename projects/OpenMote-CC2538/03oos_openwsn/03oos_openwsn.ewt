@@ -2496,6 +2496,15 @@
       </file>
     </group>
     <group>
+      <name>sixtop_light</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\sixtop_light\sixtop_light.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\sixtop_light\sixtop_light.h</name>
+      </file>
+    </group>
+    <group>
       <name>udp_light</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\udp_light\udp_light.c</name>
@@ -2607,12 +2616,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.h</name>
       </file>
     </group>
     <group>
