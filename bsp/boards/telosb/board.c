@@ -13,6 +13,7 @@
 #include "spi.h"
 #include "bsp_timer.h"
 #include "radio.h"
+#include "sensors.h"
 #include "radiotimer.h"
 
 //=========================== variables =======================================
