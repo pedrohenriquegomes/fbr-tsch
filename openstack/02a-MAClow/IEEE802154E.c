@@ -15,6 +15,8 @@
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "processIE.h"
+#include "sixtop_light.h"
+#include "sensors.h"
 
 //=========================== variables =======================================
 
@@ -870,6 +872,25 @@ port_INLINE void activity_ti1ORri1() {
       endSlot();
       return;
    }
+   
+    // check if light threshold has been reached
+   debugpins_slot_toggle();
+//   callbackRead_cbt             sixtop_light_read_cb;
+//   uint16_t                     lux = 0;
+//   if (!sixtop_light_is_processing() && sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
+   if ((idmanager_getMyID(ADDR_64B)->addr_64b[7] == SENSOR_ADDR) \
+        && !sixtop_light_is_processing() /*&& sensors_is_present(SENSOR_LIGHT)*/)
+   {
+//      sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
+//      sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
+//      lux = sixtop_light_read_cb();
+      
+//      if (lux >= LUX_THRESHOLD)
+//      {
+        sixtop_light_send(0);
+//      }
+   }  
+   debugpins_slot_toggle();
    
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
       // this is the next active slot

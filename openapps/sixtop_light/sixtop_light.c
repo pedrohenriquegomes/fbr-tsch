@@ -16,12 +16,13 @@
 //=========================== variables =======================================
 
 sixtop_light_vars_t        sixtop_light_vars;
-callbackRead_cbt           sixtop_light_read_cb;
 
 //=========================== prototypes ======================================
 
-void sixtop_light_timer_cb(opentimer_id_t id);
-void sixtop_light_task_cb(void);
+void sixtop_light_cancel_cb(opentimer_id_t id);
+void sixtop_light_send_cb(opentimer_id_t id);
+void sixtop_light_cancel_task_cb(void);
+void sixtop_light_send_task_cb(void);
 
 //=========================== public ==========================================
 
@@ -30,25 +31,41 @@ void sixtop_light_init() {
    // clear local variables
    memset(&sixtop_light_vars,0,sizeof(sixtop_light_vars_t));
    
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == SENSOR_ADDR) 
-   {
-      sixtop_light_vars.counter = 0;
-   }
-   else
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] != SENSOR_ADDR) 
    {
       sixtop_light_vars.counter = -1;
    }
-   
-   // start periodic timer
-   sixtop_light_vars.timerId                    = opentimers_start(
-      SIXTOP_LIGHT_PERIOD_MS,
-      TIMER_PERIODIC,TIME_MS,
-      sixtop_light_timer_cb
-   );
 }
 
 void sixtop_light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
+}
+
+bool sixtop_light_is_processing(void)
+{
+  return sixtop_light_vars.processing;
+}
+
+void sixtop_light_send(uint16_t lux)
+{
+  //we are processing the event
+  sixtop_light_vars.processing = TRUE;
+  
+  sixtop_light_vars.lux = lux;
+  
+  //timer to cancel the processing
+  sixtop_light_vars.cancelTimerId  = opentimers_start(
+    SIXTOP_LIGHT_CANCEL_MS,
+    TIMER_ONESHOT,TIME_MS,
+    sixtop_light_cancel_cb
+  );
+  
+  //timer to send the packets
+  sixtop_light_vars.sendTimerId  = opentimers_start(
+    SIXTOP_LIGHT_SEND_MS,
+    TIMER_ONESHOT,TIME_MS,
+    sixtop_light_send_cb
+  );
 }
 
 void sixtop_light_receive(OpenQueueEntry_t* pkt) {
@@ -135,12 +152,22 @@ void sixtop_light_receive(OpenQueueEntry_t* pkt) {
 
 //=========================== private =========================================
 
-void sixtop_light_timer_cb(opentimer_id_t id){
+void sixtop_light_cancel_cb(opentimer_id_t id){
    
-   scheduler_push_task(sixtop_light_task_cb, TASKPRIO_SIXTOP);
+   scheduler_push_task(sixtop_light_cancel_task_cb, TASKPRIO_SIXTOP);
 }
 
-void sixtop_light_task_cb() {
+void sixtop_light_send_cb(opentimer_id_t id){
+   
+   scheduler_push_task(sixtop_light_send_task_cb, TASKPRIO_SIXTOP);
+}
+
+void sixtop_light_cancel_task_cb() {
+  //finished the processing
+  sixtop_light_vars.processing = FALSE;
+}
+
+void sixtop_light_send_task_cb() {
    OpenQueueEntry_t*    pkt;
    uint8_t i;
    
@@ -150,20 +177,8 @@ void sixtop_light_task_cb() {
    
    // only run on sensor node
    if (idmanager_getMyID(ADDR_64B)->addr_64b[7] != SENSOR_ADDR) {
-      opentimers_stop(sixtop_light_vars.timerId);
       return;
    }
-
-   uint16_t lux = 0;
-   if (sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
-   {
-      sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
-      lux = sixtop_light_read_cb();
-   }
-       
-       //detect if light is off
-    //   if (lux < LUX_THRESHOLD)
-    //     return;
 
    sixtop_light_vars.counter++;
    
