@@ -5,7 +5,7 @@
 
 //=========================== define ==========================================
 
-#define SIXTOP_LIGHT_CANCEL_MS     10000
+#define SIXTOP_LIGHT_CANCEL_MS     1000
 #define SIXTOP_LIGHT_SEND_MS       1
 #define LUX_THRESHOLD              2000
 

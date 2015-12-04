@@ -181,7 +181,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>FORCETOPOLOGY</state>
+          <state></state>
         </option>
         <option>
           <name>CCPreprocFile</name>

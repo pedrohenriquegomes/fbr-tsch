@@ -93,7 +93,6 @@ C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\bsp\boards\OpenMote-CC2538\headers
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\bsp\boards\OpenMote-CC2538\source
 -I
 C:\Users\Pedro\Dev\openwsn-ewsn\openwsn-fw\projects\common\03oos_openwsn
--DFORCETOPOLOGY=1
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0

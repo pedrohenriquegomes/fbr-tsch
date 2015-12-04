@@ -10,6 +10,7 @@
 #include "idmanager.h"
 #include "IEEE802154E.h"
 #include "sixtop.h"
+#include "debugpins.h"
 
 #define DEBUG   TRUE
 
@@ -91,14 +92,20 @@ void sixtop_light_receive(OpenQueueEntry_t* pkt) {
      if (counter > sixtop_light_vars.counter)
      {
        sixtop_light_vars.counter = counter;
-     }
-     openqueue_freePacketBuffer(pkt);
-
 #if DEBUG == TRUE
-   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_RCV,
+        openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_RCV,
                  (errorparameter_t)counter,
                  (errorparameter_t)rank);
 #endif
+        debugpins_task_set();
+        //timer to cancel the processing
+        sixtop_light_vars.cancelTimerId  = opentimers_start(
+          SIXTOP_LIGHT_CANCEL_MS,
+          TIMER_ONESHOT,TIME_MS,
+          sixtop_light_cancel_cb
+        );
+     }
+     openqueue_freePacketBuffer(pkt);
    
      return;
    }
@@ -165,6 +172,7 @@ void sixtop_light_send_cb(opentimer_id_t id){
 void sixtop_light_cancel_task_cb() {
   //finished the processing
   sixtop_light_vars.processing = FALSE;
+  debugpins_task_clr();
 }
 
 void sixtop_light_send_task_cb() {
@@ -172,13 +180,13 @@ void sixtop_light_send_task_cb() {
    uint8_t i;
    
    // don't run if not synch or does not know the RANK yet
-   if (ieee154e_isSynch() == FALSE || neighbors_getMyDAGrank() == DEFAULTDAGRANK) 
-     return;
+//   if (ieee154e_isSynch() == FALSE || neighbors_getMyDAGrank() == DEFAULTDAGRANK) 
+//     return;
    
    // only run on sensor node
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] != SENSOR_ADDR) {
-      return;
-   }
+//   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] != SENSOR_ADDR) {
+//      return;
+//   }
 
    sixtop_light_vars.counter++;
    
@@ -202,6 +210,7 @@ void sixtop_light_send_task_cb() {
        // payload
        packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
        *((uint16_t*)&pkt->payload[0]) = sixtop_light_vars.counter;
+//       *((uint16_t*)&pkt->payload[0]) = sixtop_light_vars.lux;
        *((uint16_t*)&pkt->payload[2]) = neighbors_getMyDAGrank();
        
        pkt->l2_nextORpreviousHop.type        = ADDR_16B;
