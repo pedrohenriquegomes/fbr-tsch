@@ -15,31 +15,16 @@
 #include "opentimers_obj.h"
 #include "scheduler_obj.h"
 #include "IEEE802154E_obj.h"
-#include "IEEE802154_security_obj.h"
 #include "adaptive_sync_obj.h"
 #include "neighbors_obj.h"
 #include "processIE_obj.h"
 #include "sixtop_obj.h"
 #include "schedule_obj.h"
-#include "icmpv6echo_obj.h"
-#include "icmpv6rpl_obj.h"
-#include "opencoap_obj.h"
-#include "opentcp_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
 // applications
-#include "c6t_obj.h"
-#include "cexample_obj.h"
-#include "cinfo_obj.h"
-#include "cleds_obj.h"
-#include "cstorm_obj.h"
-#include "cwellknown_obj.h"
-#include "rrt_obj.h"
-#include "techo_obj.h"
-//#include "tohlone_obj.h"
-//#include "tohlone_obj.h"
-#include "uecho_obj.h"
+#include "sixtop_light.h"
 
 //=========================== prototypes ======================================
 
@@ -213,10 +198,6 @@ struct OpenMote {
    radiotimer_icb_t     radiotimer_icb;
    //===== openstack
    // l4
-   icmpv6echo_vars_t    icmpv6echo_vars;
-   icmpv6rpl_vars_t     icmpv6rpl_vars;
-   opencoap_vars_t      opencoap_vars;
-   tcp_vars_t           tcp_vars;
    // l3
    // l2b
    sixtop_vars_t        sixtop_vars;
@@ -224,7 +205,6 @@ struct OpenMote {
    schedule_vars_t      schedule_vars;
    // l2a
    adaptive_sync_vars_t adaptive_sync_vars;
-   ieee802154_security_vars_t ieee802154_security_vars;
    ieee154e_vars_t      ieee154e_vars;
    ieee154e_stats_t     ieee154e_stats;
    ieee154e_dbg_t       ieee154e_dbg;
@@ -239,14 +219,8 @@ struct OpenMote {
    scheduler_vars_t     scheduler_vars;
    scheduler_dbg_t      scheduler_dbg;
    //===== openapps
-   c6t_vars_t           c6t_vars;
-   cexample_vars_t      cexample_vars;
-   cinfo_vars_t         cinfo_vars;
-   cleds_vars_t         cleds_vars;
-   cstorm_vars_t        cstorm_vars;
-   cwellknown_vars_t    cwellknown_vars;
-   rrt_vars_t           rrt_vars;
-   //tohlone_vars_t       tohlone_vars;
+   sixtop_light_vars_t  sixtop_light_vars;
+
 };
 
 #endif

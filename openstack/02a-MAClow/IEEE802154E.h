@@ -278,7 +278,6 @@ bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
 void               ieee154e_setIsAckEnabled(bool isEnabled);
 void               ieee154e_setSingleChannel(uint8_t channel);
-void               ieee154e_setIsSecurityEnabled(bool isEnabled);
 
 uint16_t           ieee154e_getTimeCorrection(void);
 // events

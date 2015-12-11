@@ -20,9 +20,7 @@ sixtop_light_vars_t        sixtop_light_vars;
 
 //=========================== prototypes ======================================
 
-void sixtop_light_cancel_cb(opentimer_id_t id);
 void sixtop_light_send_cb(opentimer_id_t id);
-void sixtop_light_cancel_task_cb(void);
 void sixtop_light_send_task_cb(void);
 
 //=========================== public ==========================================
@@ -34,7 +32,7 @@ void sixtop_light_init() {
    
    if (idmanager_getMyID(ADDR_64B)->addr_64b[7] != SENSOR_ADDR) 
    {
-      sixtop_light_vars.counter = -1;
+      sixtop_light_vars.initialized = FALSE;
    }
 }
 
@@ -42,24 +40,26 @@ void sixtop_light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-bool sixtop_light_is_processing(void)
+bool sixtop_light_is_initialized(void)
 {
-  return sixtop_light_vars.processing;
+  return sixtop_light_vars.initialized;
 }
 
-void sixtop_light_send(uint16_t lux)
+void sixtop_light_initialize(bool state)
 {
-  //we are processing the event
-  sixtop_light_vars.processing = TRUE;
+  sixtop_light_vars.initialized = state;
+}
+
+bool sixtop_light_state(void)
+{
+  return sixtop_light_vars.state;
+}
+
+void sixtop_light_send(uint16_t lux, bool state)
+{
   
   sixtop_light_vars.lux = lux;
-  
-  //timer to cancel the processing
-  sixtop_light_vars.cancelTimerId  = opentimers_start(
-    SIXTOP_LIGHT_CANCEL_MS,
-    TIMER_ONESHOT,TIME_MS,
-    sixtop_light_cancel_cb
-  );
+  sixtop_light_vars.state = state;
   
   //timer to send the packets
   sixtop_light_vars.sendTimerId  = opentimers_start(
@@ -98,12 +98,6 @@ void sixtop_light_receive(OpenQueueEntry_t* pkt) {
                  (errorparameter_t)rank);
 #endif
         debugpins_task_set();
-        //timer to cancel the processing
-        sixtop_light_vars.cancelTimerId  = opentimers_start(
-          SIXTOP_LIGHT_CANCEL_MS,
-          TIMER_ONESHOT,TIME_MS,
-          sixtop_light_cancel_cb
-        );
      }
      openqueue_freePacketBuffer(pkt);
    
@@ -159,35 +153,15 @@ void sixtop_light_receive(OpenQueueEntry_t* pkt) {
 
 //=========================== private =========================================
 
-void sixtop_light_cancel_cb(opentimer_id_t id){
-   
-   scheduler_push_task(sixtop_light_cancel_task_cb, TASKPRIO_SIXTOP);
-}
-
 void sixtop_light_send_cb(opentimer_id_t id){
    
    scheduler_push_task(sixtop_light_send_task_cb, TASKPRIO_SIXTOP);
-}
-
-void sixtop_light_cancel_task_cb() {
-  //finished the processing
-  sixtop_light_vars.processing = FALSE;
-  debugpins_task_clr();
 }
 
 void sixtop_light_send_task_cb() {
    OpenQueueEntry_t*    pkt;
    uint8_t i;
    
-   // don't run if not synch or does not know the RANK yet
-//   if (ieee154e_isSynch() == FALSE || neighbors_getMyDAGrank() == DEFAULTDAGRANK) 
-//     return;
-   
-   // only run on sensor node
-//   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] != SENSOR_ADDR) {
-//      return;
-//   }
-
    sixtop_light_vars.counter++;
    
    for (i = 0; i < 3; i++)
@@ -210,7 +184,6 @@ void sixtop_light_send_task_cb() {
        // payload
        packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
        *((uint16_t*)&pkt->payload[0]) = sixtop_light_vars.counter;
-//       *((uint16_t*)&pkt->payload[0]) = sixtop_light_vars.lux;
        *((uint16_t*)&pkt->payload[2]) = neighbors_getMyDAGrank();
        
        pkt->l2_nextORpreviousHop.type        = ADDR_16B;
@@ -219,7 +192,8 @@ void sixtop_light_send_task_cb() {
 
 #if DEBUG == TRUE    
        openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
-                         (errorparameter_t)(sixtop_light_vars.counter),
+//                         (errorparameter_t)(sixtop_light_vars.counter),
+                         (errorparameter_t)(sixtop_light_vars.lux),
                          (errorparameter_t)neighbors_getMyDAGrank());
 #endif
        

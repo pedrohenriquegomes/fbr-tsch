@@ -877,16 +877,28 @@ port_INLINE void activity_ti1ORri1() {
 //   debugpins_slot_toggle();
    callbackRead_cbt             sixtop_light_read_cb;
    uint16_t                     lux = 0;
-   if ((idmanager_getMyID(ADDR_64B)->addr_64b[7] == SENSOR_ADDR) \
-        && !sixtop_light_is_processing() && sensors_is_present(SENSOR_LIGHT))
+   if ((idmanager_getMyID(ADDR_64B)->addr_64b[7] == SENSOR_ADDR) && (sensors_is_present(SENSOR_LIGHT)))
    {
 //      sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
       sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
       lux = sixtop_light_read_cb();
       
-      if (lux >= LUX_THRESHOLD)
+      //first time
+      if (!sixtop_light_is_initialized())
       {
-        sixtop_light_send(lux);
+        sixtop_light_send(lux, (lux >= LUX_THRESHOLD) ? TRUE : FALSE);
+        sixtop_light_initialize(TRUE);
+      }
+      else
+      {
+        if (!sixtop_light_state() && (lux >= LUX_THRESHOLD)) // turned on
+        {
+          sixtop_light_send(lux, TRUE);
+        }
+        else if (sixtop_light_state() && (lux < LUX_THRESHOLD)) // turned off
+        {
+          sixtop_light_send(lux, FALSE);
+        }
       }
    }  
 //   debugpins_slot_toggle();
@@ -1933,10 +1945,6 @@ void ieee154e_setSingleChannel(uint8_t channel){
     }
     ieee154e_vars.singleChannel = channel;
     ieee154e_vars.singleChannelChanged = TRUE;
-}
-
-void ieee154e_setIsSecurityEnabled(bool isEnabled){
-    ieee154e_vars.isSecurityEnabled = isEnabled;
 }
 
 // timeslot template handling

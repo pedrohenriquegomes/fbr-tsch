@@ -531,18 +531,18 @@ void openserial_goldenImageCommands(void){
        case COMMAND_SET_DAGRANK: // two bytes
            neighbors_setMyDAGrank(comandParam_16);
            break;
-       case COMMAND_SET_SECURITY_STATUS: // one byte
-           if (comandParam_8 ==1) {
-               ieee154e_setIsSecurityEnabled(TRUE);
-           } else {
-               if (comandParam_8 == 0) {
-                  ieee154e_setIsSecurityEnabled(FALSE);
-               } else {
-                   // security only can be 1 or 0 
-                   break;
-               }
-           }
-           break;
+//       case COMMAND_SET_SECURITY_STATUS: // one byte
+//           if (comandParam_8 ==1) {
+//               ieee154e_setIsSecurityEnabled(TRUE);
+//           } else {
+//               if (comandParam_8 == 0) {
+//                  ieee154e_setIsSecurityEnabled(FALSE);
+//               } else {
+//                   // security only can be 1 or 0 
+//                   break;
+//               }
+//           }
+//           break;
        case COMMAND_SET_FRAMELENGTH: // two bytes
            schedule_setFrameLength(comandParam_16);
            break;
