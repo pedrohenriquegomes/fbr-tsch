@@ -250,6 +250,7 @@ enum {
    ERR_FLOOD_SEND                      = 0x3c, // flooding packet sent, seq {0}, rank {1}
    ERR_FLOOD_RCV                       = 0x3d, // flooding packet rcv, seq {0}, rank {1}
    ERR_FLOOD_FW                        = 0x3e, // flooding packet fw, seq {0}, rank {1}
+   ERR_LIGHT_THRESHOLD                 = 0x3f, // light measurement {0}
 };
 
 //=========================== typedef =========================================

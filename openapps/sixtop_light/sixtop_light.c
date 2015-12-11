@@ -12,7 +12,8 @@
 #include "sixtop.h"
 #include "debugpins.h"
 
-#define DEBUG   TRUE
+#define DEBUG                   TRUE
+#define LED_THRESHOLD_TEST      TRUE
 
 //=========================== variables =======================================
 
@@ -34,6 +35,24 @@ void sixtop_light_init() {
    {
       sixtop_light_vars.initialized = FALSE;
    }
+   
+#if LIGHT_THRESHOLD_TEST == TRUE
+   
+   if (sensors_is_present(SENSOR_LIGHT)))
+   {
+      callbackRead_cbt             sixtop_light_read_cb;
+      uint16_t                     lux = 0;
+      
+//      sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
+      sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
+      lux = sixtop_light_read_cb();
+      
+      openserial_printInfo(COMPONENT_LIGHT,ERR_LIGHT_THRESHOLD,
+             (errorparameter_t)lux,
+             0);
+   }
+#endif
+   
 }
 
 void sixtop_light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
