@@ -247,10 +247,12 @@ enum {
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
    ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
    ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
-   ERR_FLOOD_SEND                      = 0x3c, // flooding packet sent, seq {0}, rank {1}
-   ERR_FLOOD_RCV                       = 0x3d, // flooding packet rcv, seq {0}, rank {1}
-   ERR_FLOOD_FW                        = 0x3e, // flooding packet fw, seq {0}, rank {1}
+   ERR_FLOOD_SEND                      = 0x3c, // flooding packet sent, seq {0}, state {1}
+   ERR_FLOOD_RCV                       = 0x3d, // flooding packet rcv, seq {0}, state {1}
+   ERR_FLOOD_FW                        = 0x3e, // flooding packet fw, seq {0}, state {1}
    ERR_LIGHT_THRESHOLD                 = 0x3f, // light measurement {0}
+   ERR_FLOOD_STATE                     = 0x40, // sink state {0}
+   ERR_FLOOD_DROP                      = 0X41, // flooding packet dropped, seq {0}, state {1}
 };
 
 //=========================== typedef =========================================
