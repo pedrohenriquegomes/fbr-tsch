@@ -5,7 +5,7 @@
 
 //=========================== define ==========================================
 
-#define LIGHT_SEND_MS       1
+//#define LIGHT_SEND_MS       1
 #define LIGHT_PROC_MS       1000
 #define LUX_THRESHOLD       1000
 
@@ -17,8 +17,8 @@
 //=========================== variables =======================================
 
 typedef struct {
-   opentimer_id_t       cancelTimerId;  ///< periodic timer which triggers when to cancel the processing
-   opentimer_id_t       sendTimerId;    ///< periodic timer which triggers when to transmit      
+//   opentimer_id_t       cancelTimerId;  ///< periodic timer which triggers when to cancel the processing
+//   opentimer_id_t       sendTimerId;    ///< periodic timer which triggers when to transmit      
    int16_t              counter;        ///< incrementing counter which is written into the packet
    uint16_t             lux;
    bool                 state;

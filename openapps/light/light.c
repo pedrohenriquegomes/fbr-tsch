@@ -21,7 +21,6 @@ light_vars_t        light_vars;
 
 //=========================== prototypes ======================================
 
-void light_send_cb(opentimer_id_t id);
 void light_send_task_cb(void);
 
 //=========================== public ==========================================
@@ -75,12 +74,7 @@ void light_send(uint16_t lux, bool state)
   light_vars.lux = lux;
   light_vars.state = state;
   
-  //timer to send the packets
-  light_vars.sendTimerId  = opentimers_start(
-    LIGHT_SEND_MS,
-    TIMER_ONESHOT,TIME_MS,
-    light_send_cb
-  );
+  scheduler_push_task(light_send_task_cb, TASKPRIO_MAX);
 }
 
 void light_receive(OpenQueueEntry_t* pkt) 
@@ -172,11 +166,6 @@ void light_receive(OpenQueueEntry_t* pkt)
 }
 
 //=========================== private =========================================
-
-void light_send_cb(opentimer_id_t id)
-{   
-   scheduler_push_task(light_send_task_cb, TASKPRIO_SIXTOP);
-}
 
 void light_send_task_cb() 
 {
