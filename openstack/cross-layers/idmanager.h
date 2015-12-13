@@ -16,9 +16,6 @@
 #define ACTION_NO       'N'
 #define ACTION_TOGGLE   'T'
 
-#define ROOT_ADDR       0x4f
-#define SENSOR_ADDR     0xbf
-
 //=========================== typedef =========================================
 
 BEGIN_PACK

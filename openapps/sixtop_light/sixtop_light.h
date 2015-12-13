@@ -6,6 +6,7 @@
 //=========================== define ==========================================
 
 #define SIXTOP_LIGHT_SEND_MS       1
+#define SIXTOP_LIGHT_PROC_MS       1000
 #define LUX_THRESHOLD              2000
 
 //=========================== typedef =========================================
@@ -19,6 +20,7 @@ typedef struct {
    uint16_t             lux;
    bool                 state;
    bool                 initialized;
+   bool                 processing;
 } sixtop_light_vars_t;
 
 //=========================== prototypes ======================================

@@ -5,7 +5,7 @@
 */
 
 #include "opendefs.h"
-#include "sixtop_light.h"
+#include "light.h"
 
 //=========================== variables =======================================
 
@@ -16,5 +16,5 @@
 //=========================== private =========================================
 
 void openapps_init(void) {
-  sixtop_light_init();
+  light_init();
 }

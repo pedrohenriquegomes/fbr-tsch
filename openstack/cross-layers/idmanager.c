@@ -5,6 +5,7 @@
 #include "openserial.h"
 #include "neighbors.h"
 #include "schedule.h"
+#include "light.h"
 
 //=========================== variables =======================================
 
@@ -29,7 +30,7 @@ void idmanager_init() {
    eui64_get(idmanager_vars.my64bID.addr_64b);
    
    // isDAGroot
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == ROOT_ADDR)
+   if (light_checkMyId(SINK_ID))
    {
     idmanager_vars.isDAGroot            = TRUE;
    }
@@ -40,7 +41,7 @@ void idmanager_init() {
 
    // myPrefix
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == ROOT_ADDR)
+   if (light_checkMyId(SINK_ID))
    {
      idmanager_vars.myPrefix.prefix[0]   = 0xbb;
      idmanager_vars.myPrefix.prefix[1]   = 0xbb;

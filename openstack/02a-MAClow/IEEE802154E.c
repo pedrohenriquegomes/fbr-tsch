@@ -15,7 +15,7 @@
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "processIE.h"
-#include "sixtop_light.h"
+#include "light.h"
 #include "sensors.h"
 
 //=========================== variables =======================================
@@ -874,34 +874,33 @@ port_INLINE void activity_ti1ORri1() {
    }
    
     // check if light threshold has been reached
-//   debugpins_slot_toggle();
-   callbackRead_cbt             sixtop_light_read_cb;
+   callbackRead_cbt             light_read_cb;
    uint16_t                     lux = 0;
-   if ((idmanager_getMyID(ADDR_64B)->addr_64b[7] == SENSOR_ADDR) && (sensors_is_present(SENSOR_LIGHT)))
+   
+   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
    {
 //      sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
-      sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
-      lux = sixtop_light_read_cb();
+      light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
+      lux = light_read_cb();
       
       //first time
-      if (!sixtop_light_is_initialized())
+      if (!light_is_initialized())
       {
-        sixtop_light_send(lux, (lux >= LUX_THRESHOLD) ? TRUE : FALSE);
-        sixtop_light_initialize(TRUE);
+        light_send(lux, (lux >= LUX_THRESHOLD) ? TRUE : FALSE);
+        light_initialize(TRUE);
       }
       else
       {
-        if (!sixtop_light_state() && (lux >= LUX_THRESHOLD)) // turned on
+        if (!light_state() && (lux >= LUX_THRESHOLD)) // turned on
         {
-          sixtop_light_send(lux, TRUE);
+          light_send(lux, TRUE);
         }
-        else if (sixtop_light_state() && (lux < LUX_THRESHOLD)) // turned off
+        else if (light_state() && (lux < LUX_THRESHOLD)) // turned off
         {
-          sixtop_light_send(lux, FALSE);
+          light_send(lux, FALSE);
         }
       }
-   }  
-//   debugpins_slot_toggle();
+   }
    
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
       // this is the next active slot

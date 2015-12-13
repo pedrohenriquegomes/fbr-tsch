@@ -2487,12 +2487,12 @@
   <group>
     <name>openapps</name>
     <group>
-      <name>sixtop_light</name>
+      <name>light</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\sixtop_light\sixtop_light.c</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\light\light.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\sixtop_light\sixtop_light.h</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\light\light.h</name>
       </file>
     </group>
     <file>

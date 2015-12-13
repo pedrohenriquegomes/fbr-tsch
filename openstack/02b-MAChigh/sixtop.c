@@ -16,7 +16,7 @@
 #include "IEEE802154.h"
 #include "idmanager.h"
 #include "schedule.h"
-#include "sixtop_light.h"
+#include "light.h"
 
 //=========================== variables =======================================
 
@@ -526,7 +526,7 @@ void task_sixtopNotifSendDone() {
          break;
       
       case COMPONENT_LIGHT:
-         sixtop_light_sendDone(msg,msg->l2_sendDoneError);
+         light_sendDone(msg,msg->l2_sendDoneError);
          break;
          
       default:
@@ -593,7 +593,7 @@ void task_sixtopNotifReceive() {
       case IEEE154_TYPE_DATA:
         //we only have one type of data packet. It is from sixtop light application
         if (msg->length>0) {
-           sixtop_light_receive(msg);
+           light_receive(msg);
          } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);

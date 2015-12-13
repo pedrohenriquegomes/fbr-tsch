@@ -31,7 +31,7 @@ void sixtop_light_init() {
    // clear local variables
    memset(&sixtop_light_vars,0,sizeof(sixtop_light_vars_t));
    
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7] != SENSOR_ADDR) 
+   if ((idmanager_getMyID(ADDR_64B)->addr_64b[7] != (SENSOR_ADDR &0xff)) 
    {
       sixtop_light_vars.initialized = FALSE;
    }
