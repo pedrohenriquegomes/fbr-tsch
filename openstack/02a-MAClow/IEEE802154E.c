@@ -760,7 +760,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                
                case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
                   if ((idmanager_getIsDAGroot()==FALSE) && (ieee154e_isSynch()==FALSE)) {
-                     processIE_retrieveSlotframeLinkIE(pkt,&ptr);
+//                     processIE_retrieveSlotframeLinkIE(pkt,&ptr);
                   }
                   break;
                
@@ -775,7 +775,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
                   if (idmanager_getIsDAGroot()==FALSE) {
                       // timelsot template ID
-                      channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+//                      channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
                       ptr = ptr + 1;
                   }
                   break;

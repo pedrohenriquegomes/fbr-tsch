@@ -37,9 +37,9 @@ void schedule_init() {
    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
    
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
-   if (idmanager_getIsDAGroot()==TRUE) {
+//   if (idmanager_getIsDAGroot()==TRUE) {
       schedule_startDAGroot();
-   }
+//   }
    
    // serial RX slot(s)
    start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;

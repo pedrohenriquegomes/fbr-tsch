@@ -800,8 +800,8 @@ port_INLINE void sixtop_sendEB() {
    
    // reserve space for EB-specific header
    // reserving for IEs.
-   len += processIE_prependSlotframeLinkIE(eb);
-   len += processIE_prependChannelHoppingIE(eb);
+//   len += processIE_prependSlotframeLinkIE(eb);
+//   len += processIE_prependChannelHoppingIE(eb);
    len += processIE_prependTSCHTimeslotIE(eb);
    len += processIE_prependSyncIE(eb);
    
