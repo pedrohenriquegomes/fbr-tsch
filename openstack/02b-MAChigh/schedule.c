@@ -44,6 +44,7 @@ void schedule_init() {
    // serial RX slot(s)
    start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   temp_neighbor.type             = ADDR_64B;
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
       schedule_addActiveSlot(
          running_slotOffset,                    // slot offset
@@ -52,6 +53,20 @@ void schedule_init() {
          0,                                     // channel offset
          &temp_neighbor                         // neighbor
       );
+   }
+   
+   uint8_t i;
+   // fixed schedule
+   temp_neighbor.type             = ADDR_ANYCAST;
+   for (i=0;i<N_SHARED_TIMESLOTS;i++) {
+       schedule_addActiveSlot(
+             running_slotOffset,                                                                // slot offset
+             CELLTYPE_TXRX,
+             TRUE,
+             0,
+             &temp_neighbor                                                                     // neighbor
+            );
+       running_slotOffset++;
    }
 }
 

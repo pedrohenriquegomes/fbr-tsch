@@ -5,7 +5,7 @@
 #include "neighbors.h"
 #include "IEEE802154E.h"
 //#include "iphc.h"
-#include "otf.h"
+//#include "otf.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"
@@ -117,8 +117,7 @@ bool          sixtop_areAvailableCellsToBeScheduled(
 
 void sixtop_init() {
    
-//   sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
-   sixtop_vars.periodMaintenance  = 500 + (int8_t)(openrandom_get16b()&0xff);
+   sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
    sixtop_vars.busySendingKA      = FALSE;
    sixtop_vars.busySendingEB      = FALSE;
    sixtop_vars.dsn                = 0;
@@ -724,33 +723,33 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
-   scheduleEntry_t* entry;
-   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
-   
-   switch (sixtop_vars.mgtTaskCounter) {
-      case 0:
+//   scheduleEntry_t* entry;
+//   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
+//   
+//   switch (sixtop_vars.mgtTaskCounter) {
+//      case 0:
          // called every EBPERIOD seconds
          sixtop_sendEB();
-         break;
-      case 1:
-         // called every EBPERIOD seconds
-         neighbors_removeOld();
-         break;
-      case 2:
-         // called every EBPERIOD seconds
-         entry = schedule_statistic_poorLinkQuality();
-         if (
-             entry       != NULL                        && \
-             entry->type != CELLTYPE_OFF                && \
-             entry->type != CELLTYPE_TXRX               
-         ){
-             sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
-         }
-      default:
-         // called every second, except third times every EBPERIOD seconds
-         sixtop_sendKA();
-         break;
-   }
+//         break;
+//      case 1:
+//         // called every EBPERIOD seconds
+////         neighbors_removeOld();
+//         break;
+//      case 2:
+//         // called every EBPERIOD seconds
+//         entry = schedule_statistic_poorLinkQuality();
+//         if (
+//             entry       != NULL                        && \
+//             entry->type != CELLTYPE_OFF                && \
+//             entry->type != CELLTYPE_TXRX               
+//         ){
+//             sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
+//         }
+//      default:
+//         // called every second, except third times every EBPERIOD seconds
+//         sixtop_sendKA();
+//         break;
+//   }
 }
 
 /**
@@ -1282,7 +1281,7 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    
    if (sixtop_vars.handler == SIX_HANDLER_OTF) {
      // notify OTF
-     otf_notif_removedCell();
+//     otf_notif_removedCell();
    } else {
        if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
            // if sixtop remove request handler is 
