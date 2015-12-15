@@ -138,17 +138,11 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-#ifdef GOLDEN_IMAGE_ROOT
-   TsTxOffset                =   70,                  //  2120us
-   TsLongGT                  =   36,                  //  1100us
-   TsTxAckDelay              =   33,                  //  1000us
-   TsShortGT                 =    7,                  //   500us
-#else
    TsTxOffset                =  131,                  //  4000us
    TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
+//   TsTxAckDelay              =  151,                  //  4606us
+   TsTxAckDelay              =  0,
    TsShortGT                 =   16,                  //   500us
-#endif
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
@@ -159,15 +153,11 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-#ifdef GOLDEN_IMAGE_ROOT
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =   80,                  //  2400us (measured 1000us)
-#else
-   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
-#endif
+//   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+   wdDataDuration            =   82,
+//   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+   wdAckDuration             =   0,
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

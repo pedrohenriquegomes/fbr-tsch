@@ -767,7 +767,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
                   if (idmanager_getIsDAGroot()==FALSE) {
                       // timelsot template ID
-                      timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+//                      timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
                       ptr = ptr + 1;
                   }
                   break;

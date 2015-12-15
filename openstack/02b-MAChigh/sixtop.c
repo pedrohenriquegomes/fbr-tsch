@@ -723,33 +723,7 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
-//   scheduleEntry_t* entry;
-//   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
-//   
-//   switch (sixtop_vars.mgtTaskCounter) {
-//      case 0:
-         // called every EBPERIOD seconds
-         sixtop_sendEB();
-//         break;
-//      case 1:
-//         // called every EBPERIOD seconds
-////         neighbors_removeOld();
-//         break;
-//      case 2:
-//         // called every EBPERIOD seconds
-//         entry = schedule_statistic_poorLinkQuality();
-//         if (
-//             entry       != NULL                        && \
-//             entry->type != CELLTYPE_OFF                && \
-//             entry->type != CELLTYPE_TXRX               
-//         ){
-//             sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
-//         }
-//      default:
-//         // called every second, except third times every EBPERIOD seconds
-//         sixtop_sendKA();
-//         break;
-//   }
+    sixtop_sendEB();
 }
 
 /**
@@ -800,9 +774,7 @@ port_INLINE void sixtop_sendEB() {
    
    // reserve space for EB-specific header
    // reserving for IEs.
-//   len += processIE_prependSlotframeLinkIE(eb);
-//   len += processIE_prependChannelHoppingIE(eb);
-   len += processIE_prependTSCHTimeslotIE(eb);
+//   len += processIE_prependTSCHTimeslotIE(eb);
    len += processIE_prependSyncIE(eb);
    
    //add IE header 
