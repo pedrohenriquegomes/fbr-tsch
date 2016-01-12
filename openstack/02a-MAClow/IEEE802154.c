@@ -63,9 +63,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    if (payloadIEPresent == TRUE) {
        ielistpresent = IEEE154_IELIST_YES; 
        //add header termination IE (id=0x7e)
-       packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
-       msg->payload[0] = Header_PayloadIE_TerminationIE         & 0xFF;
-       msg->payload[1] = (Header_PayloadIE_TerminationIE  >> 8) & 0xFF;
+//       packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
+//       msg->payload[0] = Header_PayloadIE_TerminationIE         & 0xFF;
+//       msg->payload[1] = (Header_PayloadIE_TerminationIE  >> 8) & 0xFF;
        
        
    } else {
@@ -349,7 +349,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    
    // remove termination IE accordingly 
    if (ieee802514_header->ieListPresent == TRUE) {
-       while(1) {
+       while(0) {
            // I have IE in frame. phase the IE in header first
            temp_8b  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
            ieee802514_header->headerLength += 1;
