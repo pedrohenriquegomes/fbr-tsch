@@ -66,7 +66,6 @@ void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
 bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
-bool     isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader); 
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 // ASN handling
@@ -589,21 +588,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
-//      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-//         // If we are not synced, we need to parse IEs and retrieve the ASN
-//         // before authenticating the beacon, because nonce is created from the ASN
-//         if (!ieee154e_vars.isSync && ieee802514_header.frameType == IEEE154_TYPE_BEACON) {
-//            if (!isValidJoin(ieee154e_vars.dataReceived, &ieee802514_header)) {
-//               // invalidate variables
-//               memset(&ieee154e_vars, 0, sizeof(ieee154e_vars_t));
-//               break;
-//            }
-//         }
-//         else if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
-//            break;
-//         }
-//      } // checked if unsecured frame should pass during header retrieval
-
       if(ieee802514_header.rankPresent == TRUE)
       {
         ieee154e_vars.dataReceived->l2_rankPresent = TRUE;
@@ -695,6 +679,9 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    temp_16b   = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr)) << 8);
    ptr++;
    
+   /* Changed for flooding - it will be always the same value */
+//   temp_16b = 34824;
+   
    *lenIE     = ptr;
    
    if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == IEEE802154E_DESC_TYPE_PAYLOAD_IE){
@@ -739,7 +726,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                sublen   = temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK;
                subid    = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
             }
-            
+
             switch(subid){
                
                case IEEE802154E_MLME_SYNC_IE_SUBID:
@@ -758,27 +745,6 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   }
                   break;
                
-               case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
-                  if ((idmanager_getIsDAGroot()==FALSE) && (ieee154e_isSynch()==FALSE)) {
-//                     processIE_retrieveSlotframeLinkIE(pkt,&ptr);
-                  }
-                  break;
-               
-               case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
-                  if (idmanager_getIsDAGroot()==FALSE) {
-                      // timelsot template ID
-//                      timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
-                      ptr = ptr + 1;
-                  }
-                  break;
-                  
-               case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
-                  if (idmanager_getIsDAGroot()==FALSE) {
-                      // timelsot template ID
-//                      channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
-                      ptr = ptr + 1;
-                  }
-                  break;
                default:
                   return FALSE;
                   break;
@@ -1527,12 +1493,6 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
         ieee154e_vars.dataReceived->l2_rankPresent = TRUE;
         ieee154e_vars.dataReceived->l2_rank = ieee802514_header.rank;
       }
-      // if security is enabled, decrypt/authenticate the frame.
-//      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-//         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
-//        	 break;
-//         }
-//      } // checked if unsecured frame should pass during header retrieval
 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
@@ -1866,40 +1826,6 @@ port_INLINE void joinPriorityStoreFromEB(uint8_t jp){
   ieee154e_vars.dataReceived->l2_joinPriorityPresent = TRUE;     
 }
 
-// This function parses IEs from an EB to get to the ASN before security
-// processing is invoked. It should be called *only* when a node has no/lost sync.
-// This way, we can authenticate EBs and reject unwanted ones.
-bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
-   uint16_t              lenIE;
-
-   // toss the header in order to get to IEs
-   packetfunctions_tossHeader(eb, parsedHeader->headerLength);
-     
-   // process IEs
-   // at this stage, this can work only if EB is authenticated but not encrypted
-   lenIE = 0;
-   if (
-         (
-            parsedHeader->valid==TRUE                                                       &&
-            parsedHeader->ieListPresent==TRUE                                               &&
-            parsedHeader->frameType==IEEE154_TYPE_BEACON                                    &&
-            packetfunctions_sameAddress(&parsedHeader->panid,idmanager_getMyID(ADDR_PANID)) &&
-            ieee154e_processIEs(eb,&lenIE)
-         )==FALSE) {
-      return FALSE;
-   }
-   
-   // put everything back in place in order to invoke security-incoming on the
-   // correct frame length and correct pointers (first byte of the frame)
-   packetfunctions_reserveHeaderSize(eb, parsedHeader->headerLength);
-
-   // verify EB's authentication tag
-//   if (IEEE802154_SECURITY.incomingFrame(eb) == E_SUCCESS) {
-      return TRUE;
-//   }
-
-//   return FALSE;
-}
 
 port_INLINE void asnStoreFromEB(uint8_t* asn) {
    
