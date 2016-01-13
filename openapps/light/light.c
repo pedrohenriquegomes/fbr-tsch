@@ -46,7 +46,6 @@ void light_init()
                           0);
    }
 #endif
-   
 }
 
 void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -66,6 +65,11 @@ void light_initialize(bool state)
 bool light_state(void)
 {
   return light_vars.state;
+}
+
+uint16_t light_counter(void)
+{
+  return light_vars.counter;
 }
 
 void light_send(uint16_t lux, bool state)
@@ -134,8 +138,7 @@ void light_receive(OpenQueueEntry_t* pkt)
      return;
    }
    
-   // I am not the sink, let forward
-   // get a new openqueuEntry_t for the retransmission
+   // I am not the sink, lets forward
    fw = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
    if (fw==NULL) {
      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);

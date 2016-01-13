@@ -10,6 +10,7 @@
 #include "schedule.h"
 #include "scheduler.h"
 #include "packetfunctions.h"
+#include "light.h"
 
 //=========================== variables =======================================
 
@@ -45,6 +46,14 @@ port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
   
    len = 0;
   
+   /* Inserting Counter and State into Beacon */
+   packetfunctions_reserveHeaderSize(pkt,3);
+   
+   *((uint16_t*)&pkt->payload[0]) = light_counter();
+   *((uint8_t*)&pkt->payload[2]) = light_state();
+       
+   len += 3;
+   
    //=== sync IE
    
    // reserve space
@@ -59,7 +68,7 @@ port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
    pkt->l2_ASNpayload               = pkt->payload; 
    
    len += sizeof(sync_IE_ht);
-  
+   
    //=== MLME IE
   
 //   // reserve space

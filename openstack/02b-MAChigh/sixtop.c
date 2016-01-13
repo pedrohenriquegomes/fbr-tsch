@@ -47,10 +47,6 @@ void          sixtop_six2six_sendDone(
    OpenQueueEntry_t*    msg,
    owerror_t            error
 );
-bool          sixtop_processIEs(
-   OpenQueueEntry_t*    pkt,
-   uint16_t*            lenIE
-);
 void          sixtop_notifyReceiveCommand(
    opcode_IE_ht*        opcode_ie, 
    bandwidth_IE_ht*     bandwidth_ie, 
@@ -703,108 +699,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    // discard reservation packets this component has created
    openqueue_freePacketBuffer(msg);
 }
-
-port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
-   uint8_t ptr;
-   uint8_t temp_8b,gr_elem_id,subid;
-   uint16_t temp_16b,len,sublen;
-   opcode_IE_ht opcode_ie;
-   bandwidth_IE_ht bandwidth_ie;
-   schedule_IE_ht schedule_ie;
- 
-   ptr=0; 
-   memset(&opcode_ie,0,sizeof(opcode_IE_ht));
-   memset(&bandwidth_ie,0,sizeof(bandwidth_IE_ht));
-   memset(&schedule_ie,0,sizeof(schedule_IE_ht));  
-  
-   //candidate IE header  if type ==0 header IE if type==1 payload IE
-   temp_8b = *((uint8_t*)(pkt->payload)+ptr);
-   ptr++;
-   temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
-   ptr++;
-   *lenIE = ptr;
-   if(
-      (temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == 
-      IEEE802154E_DESC_TYPE_PAYLOAD_IE
-   ){
-   //payload IE - last bit is 1
-      len = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
-      gr_elem_id = 
-         (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>
-         IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT;
-   }else {
-   //header IE - last bit is 0
-      len = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
-      gr_elem_id = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>
-         IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT; 
-   }
-   
-   /* Changing for flooding */
-//   len = 8;
-//   gr_elem_id = 1;
-   
-   *lenIE += len;
-   //now determine sub elements if any
-   switch(gr_elem_id){
-      //this is the only groupID that we parse. See page 82.  
-      case IEEE802154E_MLME_IE_GROUPID:
-        //IE content can be any of the sub-IEs. Parse and see which
-        do{
-           //read sub IE header
-           temp_8b = *((uint8_t*)(pkt->payload)+ptr);
-           ptr = ptr + 1;
-           temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
-           ptr = ptr + 1;
-           len = len - 2; //remove header fields len
-           if(
-              (temp_16b & IEEE802154E_DESC_TYPE_LONG) == 
-              IEEE802154E_DESC_TYPE_LONG
-              ){
-              //long sub-IE - last bit is 1
-              sublen = temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK;
-              subid= 
-                 (temp_16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>
-                 IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT; 
-           } else {
-              //short IE - last bit is 0
-              sublen = temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK;
-              subid = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>
-                 IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
-           }
-           switch(subid){
-              case MLME_IE_SUBID_OPCODE:
-              processIE_retrieveOpcodeIE(pkt,&ptr,&opcode_ie);
-              break;
-              case MLME_IE_SUBID_BANDWIDTH:
-              processIE_retrieveBandwidthIE(pkt,&ptr,&bandwidth_ie);
-              break;
-              case MLME_IE_SUBID_TRACKID:
-              break;
-              case MLME_IE_SUBID_SCHEDULE:
-              processIE_retrieveScheduleIE(pkt,&ptr,&schedule_ie);
-              break;
-          default:
-             return FALSE;
-             break;
-        }
-        len = len - sublen;
-      } while(len>0);
-      
-      break;
-    default:
-      *lenIE = 0;//no header or not recognized.
-       return FALSE;
-   }
-   if (*lenIE>127) {
-         // log the error
-     openserial_printError(COMPONENT_IEEE802154E,ERR_HEADER_TOO_LONG,
-                           (errorparameter_t)*lenIE,
-                           (errorparameter_t)1);
-   }
-  
-  return TRUE;
-}
-
 
 void sixtop_notifyReceiveLinkResponse(
    bandwidth_IE_ht* bandwidth_ie, 
