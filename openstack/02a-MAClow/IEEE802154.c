@@ -328,59 +328,6 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
      ieee802514_header->headerLength += 1;
      ieee802514_header->rank = temp_16b;
    }
-   
-   // remove termination IE accordingly 
-//   if (ieee802514_header->ieListPresent == TRUE) {
-//       while(0) {
-//           // I have IE in frame. phase the IE in header first
-//           temp_8b  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
-//           ieee802514_header->headerLength += 1;
-//           temp_16b = temp_8b | (*((uint8_t*)(msg->payload)+ieee802514_header->headerLength) << 8);
-//           ieee802514_header->headerLength += 1;
-//           // stop when I got a header termination IE
-//           if (temp_16b == Header_PayloadIE_TerminationIE) {
-//               // I have payloadIE following
-//               msg->l2_payloadIEpresent = TRUE;
-//               break;
-//           }
-//           if (temp_16b == Header_Payload_TerminationIE) {
-//               // I have payload following
-//               msg->l2_payloadIEpresent = FALSE;
-//               break;
-//           }
-//           if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) != IEEE802154E_DESC_TYPE_PAYLOAD_IE) {
-//               // only process header IE here
-//               len          = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
-//               gr_elem_id   = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT;
-//
-//               switch(gr_elem_id){
-//                   case IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID:
-//                       // timecorrection IE
-//                       byte0 = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
-//                       byte1 = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength+1);
-//
-//                       timeCorrection  = (int16_t)((uint16_t)byte1<<8 | (uint16_t)byte0);
-//                       timeCorrection  = (timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
-//                       
-//                       ieee802514_header->timeCorrection = timeCorrection;
-//                       ieee802514_header->headerLength  += len;
-//
-//                       // Record the position where we should start decrypting the ACK, if security is enabled
-//                       msg->l2_payload = &msg->payload[ieee802514_header->headerLength];
-//                       break;
-//                   default:
-//                       break;
-//               }
-//           }
-//           if (ieee802514_header->headerLength==msg->length) {
-//               // nothing left, no payloadIE, no payload, this is the end of packet!
-//
-//               ieee802514_header->valid=TRUE;
-//               return;
-//           }
-//           if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
-//       }
-//   }
 
    // Record the position where we should start decrypting if security is enabled
    msg->l2_payload = &msg->payload[ieee802514_header->headerLength];

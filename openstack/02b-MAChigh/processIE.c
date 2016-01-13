@@ -62,115 +62,24 @@ port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
   
    //=== MLME IE
   
-   // reserve space
-   packetfunctions_reserveHeaderSize(
-      pkt,
-      sizeof(mlme_IE_ht)
-   );
+//   // reserve space
+//   packetfunctions_reserveHeaderSize(
+//      pkt,
+//      sizeof(mlme_IE_ht)
+//   );
+//   
+//   // prepare header
+//   mlme_subHeader.length_subID_type = sizeof(sync_IE_ht);
+//   mlme_subHeader.length_subID_type |= 
+//      (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT)|
+//      IEEE802154E_DESC_TYPE_SHORT;
+//   
+//   // copy header
+//   pkt->payload[0]= mlme_subHeader.length_subID_type        & 0xFF;
+//   pkt->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+//   
+//   len += 2;
    
-   // prepare header
-   mlme_subHeader.length_subID_type = sizeof(sync_IE_ht);
-   mlme_subHeader.length_subID_type |= 
-      (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT)|
-      IEEE802154E_DESC_TYPE_SHORT;
-   
-   // copy header
-   pkt->payload[0]= mlme_subHeader.length_subID_type        & 0xFF;
-   pkt->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
-   
-   len += 2;
-   
-   return len;
-}
-
-port_INLINE uint8_t processIE_prependOpcodeIE(
-      OpenQueueEntry_t* pkt,
-      uint8_t           uResCommandID
-   ){
-   uint8_t    len;
-   mlme_IE_ht mlme_subHeader;
-  
-   len = 0;
-   
-   //===== command ID
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // write header
-   *((uint8_t*)(pkt->payload)) = uResCommandID;
-   
-   len += 1;  
-  
-   //===== MLME IE header
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt, sizeof(mlme_IE_ht));
-   
-   // prepare header
-   mlme_subHeader.length_subID_type  = len;
-   mlme_subHeader.length_subID_type |= 
-      MLME_IE_SUBID_OPCODE << MLME_IE_SUBID_SHIFT|
-      IEEE802154E_DESC_TYPE_SHORT;
-   
-   // copy header
-   pkt->payload[0] = mlme_subHeader.length_subID_type        & 0xFF;
-   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
-   
-   len += 2;
-  
-   return len;
-}
-
-port_INLINE uint8_t processIE_prependBandwidthIE(
-      OpenQueueEntry_t* pkt, 
-      uint8_t           numOfLinks, 
-      uint8_t           slotframeID
-   ){
-   
-   uint8_t    len;
-   mlme_IE_ht mlme_subHeader;
-   
-   len = 0;
-   
-   //===== number of cells
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // write header
-   *((uint8_t*)(pkt->payload)) = numOfLinks;
-   
-   len += 1;
-   
-   //===== number of cells
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // write header
-   *((uint8_t*)(pkt->payload)) = slotframeID;
-   
-   len += 1;
-   
-   //===== MLME IE header
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt, sizeof(mlme_IE_ht));
-   
-   // prepare header
-   mlme_subHeader.length_subID_type  = len;
-   mlme_subHeader.length_subID_type |= 
-      (MLME_IE_SUBID_BANDWIDTH << 
-         MLME_IE_SUBID_SHIFT) |
-      IEEE802154E_DESC_TYPE_SHORT;
-   
-   // copy header
-   pkt->payload[0] = mlme_subHeader.length_subID_type        & 0xFF;
-   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
-   
-   len += 2;
-  
    return len;
 }
 

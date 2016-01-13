@@ -147,15 +147,6 @@ uint8_t          processIE_prependTSCHTimeslotIE(
 uint8_t          processIE_prependChannelHoppingIE(
    OpenQueueEntry_t*    pkt
 );
-uint8_t          processIE_prependOpcodeIE(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              uResCommandID
-);
-uint8_t          processIE_prependBandwidthIE(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              numOfLinks, 
-   uint8_t              slotframeID
-);
 uint8_t          processIE_prependScheduleIE(
    OpenQueueEntry_t*    pkt,
    uint8_t              type,

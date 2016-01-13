@@ -306,17 +306,7 @@ void task_sixtopNotifReceive() {
    
    // process the header IEs
    lenIE=0;
-   if(
-         msg->l2_frameType              == IEEE154_TYPE_DATA  &&
-         msg->l2_payloadIEpresent       == TRUE               &&
-         sixtop_processIEs(msg, &lenIE) == FALSE
-      ) {
-      // free the packet's RAM memory
-      openqueue_freePacketBuffer(msg);
-      //log error
-      return;
-   }
-   
+      
    // toss the header IEs
    packetfunctions_tossHeader(msg,lenIE);
    
@@ -528,7 +518,7 @@ port_INLINE void sixtop_sendEB() {
    len += processIE_prependSyncIE(eb);
    
    //add IE header 
-   processIE_prependMLMEIE(eb,len);
+//   processIE_prependMLMEIE(eb,len);
   
    // some l2 information about this packet
    eb->l2_frameType                     = IEEE154_TYPE_BEACON;
@@ -812,143 +802,9 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
                            (errorparameter_t)1);
    }
   
-   if(*lenIE>0) {
-      sixtop_notifyReceiveCommand(&opcode_ie,
-                                  &bandwidth_ie,
-                                  &schedule_ie,
-                                  &(pkt->l2_nextORpreviousHop));
-   }
-  
   return TRUE;
 }
 
-void sixtop_notifyReceiveCommand(
-   opcode_IE_ht* opcode_ie, 
-   bandwidth_IE_ht* bandwidth_ie, 
-   schedule_IE_ht* schedule_ie,
-   open_addr_t* addr){
-   switch(opcode_ie->opcode){
-      case SIXTOP_SOFT_CELL_REQ:
-         if(sixtop_vars.six2six_state == SIX_IDLE)
-         {
-            sixtop_vars.six2six_state = SIX_ADDREQUEST_RECEIVED;
-            //received uResCommand is reserve link request
-            sixtop_notifyReceiveLinkRequest(bandwidth_ie,schedule_ie,addr);
-         }
-         break;
-      case SIXTOP_SOFT_CELL_RESPONSE:
-         if(sixtop_vars.six2six_state == SIX_WAIT_ADDRESPONSE){
-           sixtop_vars.six2six_state = SIX_ADDRESPONSE_RECEIVED;
-           //received uResCommand is reserve link response
-           sixtop_notifyReceiveLinkResponse(bandwidth_ie,schedule_ie,addr);
-         }
-         break;
-      case SIXTOP_REMOVE_SOFT_CELL_REQUEST:
-         if(sixtop_vars.six2six_state == SIX_IDLE){
-            sixtop_vars.six2six_state = SIX_REMOVEREQUEST_RECEIVED;
-          //received uResComand is remove link request
-             sixtop_notifyReceiveRemoveLinkRequest(schedule_ie,addr);
-        }
-        break;
-      default:
-         // log the error
-         break;
-      }
-}
-
-void sixtop_notifyReceiveLinkRequest(
-   bandwidth_IE_ht* bandwidth_ie, 
-   schedule_IE_ht* schedule_ie,
-   open_addr_t* addr){
-   
-   uint8_t bw,numOfcells,frameID;
-   bool scheduleCellSuccess;
-  
-   frameID = schedule_ie->frameID;
-   numOfcells = schedule_ie->numberOfcells;
-   bw = bandwidth_ie->numOfLinks;
-   
-   // need to check whether the links are available to be scheduled.
-   if(bw > numOfcells                                                 ||
-      schedule_ie->frameID != bandwidth_ie->slotframeID               ||
-      sixtop_areAvailableCellsToBeScheduled(frameID,
-                                            numOfcells,
-                                            schedule_ie->cellList, 
-                                            bw) == FALSE){
-      scheduleCellSuccess = FALSE;
-   } else {
-      scheduleCellSuccess = TRUE;
-   }
-  
-   //call link response command
-   sixtop_linkResponse(scheduleCellSuccess,
-                       addr,
-                       bandwidth_ie->numOfLinks,
-                       schedule_ie);
-}
-
-void sixtop_linkResponse(
-   bool scheduleCellSuccess, 
-   open_addr_t* tempNeighbor,
-   uint8_t bandwidth, 
-   schedule_IE_ht* schedule_ie){
-   
-   OpenQueueEntry_t* sixtopPkt;
-   uint8_t len=0;
-   uint8_t bw;
-   uint8_t type,frameID,flag;
-   cellInfo_ht* cellList;
-    
-   // get parameters for scheduleIE
-   type = schedule_ie->type;
-   frameID = schedule_ie->frameID;
-   flag = schedule_ie->flag;
-   cellList = schedule_ie->cellList;
-  
-   // get a free packet buffer
-   sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
-  
-   if(sixtopPkt==NULL) {
-      openserial_printError(COMPONENT_SIXTOP_RES,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
-      return;
-    }
-    
-   // changing state to resLinkRespone command
-   sixtop_vars.six2six_state = SIX_SENDING_ADDRESPONSE;
-    
-   // declare ownership over that packet
-   sixtopPkt->creator = COMPONENT_SIXTOP_RES;
-   sixtopPkt->owner   = COMPONENT_SIXTOP_RES;
-    
-   memcpy(&(sixtopPkt->l2_nextORpreviousHop),tempNeighbor,sizeof(open_addr_t));
-   // set SubFrameAndLinkIE
-   len += processIE_prependScheduleIE(sixtopPkt,
-                                                  type,
-                                                  frameID,
-                                                  flag,
-                                                  cellList);
-    
-   if(scheduleCellSuccess){
-      bw = bandwidth;
-   } else {
-      bw = 0;
-   }
-   //add BandwidthIE
-   len += processIE_prependBandwidthIE(sixtopPkt,bw,frameID);
-   //add opcodeIE
-   len += processIE_prependOpcodeIE(sixtopPkt,SIXTOP_SOFT_CELL_RESPONSE);
-   //add IE header 
-   processIE_prependMLMEIE(sixtopPkt,len);
-    
-   //I has an IE in my payload
-   sixtopPkt->l2_payloadIEpresent = TRUE;
-  
-   sixtop_send(sixtopPkt);
-  
-   sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE_SENDDONE;
-}
 
 void sixtop_notifyReceiveLinkResponse(
    bandwidth_IE_ht* bandwidth_ie, 
