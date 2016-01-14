@@ -71,15 +71,6 @@ bool idmanager_getIsDAGroot() {
    return res;
 }
 
-void idmanager_setIsDAGroot(bool newRole) {
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   idmanager_vars.isDAGroot = newRole;
-   neighbors_updateMyDAGrankAndNeighborPreference();
-   schedule_startDAGroot();
-   ENABLE_INTERRUPTS();
-}
-
 open_addr_t* idmanager_getMyID(uint8_t type) {
    open_addr_t* res;
    INTERRUPT_DECLARATION();
@@ -178,57 +169,6 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
         ENABLE_INTERRUPTS();
         return FALSE;
    }
-}
-
-void idmanager_triggerAboutRoot() {
-   uint8_t         number_bytes_from_input_buffer;
-   uint8_t         input_buffer[9];
-   open_addr_t     myPrefix;
-//   uint8_t         dodagid[16];
-   
-   //=== get command from OpenSerial
-   number_bytes_from_input_buffer = openserial_getInputBuffer(input_buffer,sizeof(input_buffer));
-   if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
-      openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
-            (errorparameter_t)number_bytes_from_input_buffer,
-            (errorparameter_t)0);
-      return;
-   };
-   
-   //=== handle command
-   
-   // take action (byte 0)
-   switch (input_buffer[0]) {
-     case ACTION_YES:
-        idmanager_setIsDAGroot(TRUE);
-        break;
-     case ACTION_NO:
-        idmanager_setIsDAGroot(FALSE);
-        break;
-     case ACTION_TOGGLE:
-        if (idmanager_getIsDAGroot()) {
-           idmanager_setIsDAGroot(FALSE);
-        } else {
-           idmanager_setIsDAGroot(TRUE);
-        }
-        break;
-   }
-   
-   // store prefix (bytes 1-8)
-   myPrefix.type = ADDR_PREFIX;
-   memcpy(
-      myPrefix.prefix,
-      &input_buffer[1],
-      sizeof(myPrefix.prefix)
-   );
-   idmanager_setMyID(&myPrefix);
-   
-   // indicate DODAGid to RPL
-//   memcpy(&dodagid[0],idmanager_vars.myPrefix.prefix,8);  // prefix
-//   memcpy(&dodagid[8],idmanager_vars.my64bID.addr_64b,8); // eui64
-//   icmpv6rpl_writeDODAGid(dodagid);
-   
-   return;
 }
 
 /**

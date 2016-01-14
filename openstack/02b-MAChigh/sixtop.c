@@ -38,7 +38,6 @@ void          sixtop_timeout_timer_cb(opentimer_id_t id);
 
 void          timer_sixtop_management_fired(void);
 void          sixtop_sendEB(void);
-void          sixtop_sendKA(void);
 
 //=== six2six task
 
@@ -114,11 +113,9 @@ bool          sixtop_areAvailableCellsToBeScheduled(
 void sixtop_init() {
    
    sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
-   sixtop_vars.busySendingKA      = FALSE;
    sixtop_vars.busySendingEB      = FALSE;
    sixtop_vars.dsn                = 0;
    sixtop_vars.mgtTaskCounter     = 0;
-   sixtop_vars.kaPeriod           = MAXKAPERIOD;
    sixtop_vars.ebPeriod           = EBPERIOD;
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
@@ -136,14 +133,6 @@ void sixtop_init() {
    );
 }
 
-void sixtop_setKaPeriod(uint16_t kaPeriod) {
-   if(kaPeriod > MAXKAPERIOD) {
-      sixtop_vars.kaPeriod = MAXKAPERIOD;
-   } else {
-      sixtop_vars.kaPeriod = kaPeriod;
-   } 
-}
-
 void sixtop_setEBPeriod(uint8_t ebPeriod) {
    if(ebPeriod < SIXTOP_MINIMAL_EBPERIOD) {
       sixtop_vars.ebPeriod = SIXTOP_MINIMAL_EBPERIOD;
@@ -154,24 +143,6 @@ void sixtop_setEBPeriod(uint8_t ebPeriod) {
 
 void sixtop_setHandler(six2six_handler_t handler) {
     sixtop_vars.handler = handler;
-}
-
-//======= maintaning 
-void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
-    slotinfo_element_t info;
-    cellInfo_ht linkInfo;
-    schedule_getSlotInfo(slotOffset,neighbor,&info);
-    if(info.link_type != CELLTYPE_OFF){
-        linkInfo.tsNum       = slotOffset;
-        linkInfo.choffset    = info.channelOffset;
-        linkInfo.linkoptions = info.link_type;
-        sixtop_vars.handler  = SIX_HANDLER_MAINTAIN;
-        sixtop_removeCellByInfo(neighbor, &linkInfo);
-    } else {
-        //should log this error
-        
-        return;
-    }
 }
 
 //======= from upper layer
@@ -243,11 +214,6 @@ void task_sixtopNotifSendDone() {
             
             // not busy sending EB anymore
             sixtop_vars.busySendingEB = FALSE;
-         } else {
-            // this is a KA
-            
-            // not busy sending KA anymore
-            sixtop_vars.busySendingKA = FALSE;
          }
          // discard packets
          openqueue_freePacketBuffer(msg);
@@ -271,7 +237,6 @@ void task_sixtopNotifSendDone() {
          
       default:
          // send the rest up the stack
-//         iphc_sendDone(msg,msg->l2_sendDoneError);
          break;
    }
 }
@@ -368,27 +333,6 @@ bool debugPrint_myDAGrank() {
    
    output = neighbors_getMyDAGrank();
    openserial_printStatus(STATUS_DAGRANK,(uint8_t*)&output,sizeof(uint16_t));
-   return TRUE;
-}
-
-/**
-\brief Trigger this module to print status information, over serial.
-
-debugPrint_* functions are used by the openserial module to continuously print
-status information about several modules in the OpenWSN stack.
-
-\returns TRUE if this function printed something, FALSE otherwise.
-*/
-bool debugPrint_kaPeriod() {
-   uint16_t output;
-   
-   output = sixtop_vars.kaPeriod;
-   
-   openserial_printStatus(
-       STATUS_KAPERIOD,
-       (uint8_t*)&output,
-       sizeof(output)
-   );
    return TRUE;
 }
 
@@ -523,11 +467,7 @@ port_INLINE void sixtop_sendEB() {
    //I has an IE in my payload
    eb->l2_payloadIEpresent = TRUE;
 
-   // set l2-security attributes
-//   eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
-//   eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
-//   eb->l2_keyIndex        = IEEE802154_SECURITY_K1_KEY_INDEX;
-
+   // lets embedd the Rank
    eb->l2_rankPresent     = TRUE;
    eb->l2_rank            = neighbors_getMyDAGrank();
      
@@ -536,77 +476,6 @@ port_INLINE void sixtop_sendEB() {
    
    // I'm now busy sending an EB
    sixtop_vars.busySendingEB = TRUE;
-}
-
-/**
-\brief Send an keep-alive message, if necessary.
-
-This is one of the MAC management tasks. This function inlines in the
-timers_res_fired() function, but is declared as a separate function for better
-readability of the code.
-*/
-port_INLINE void sixtop_sendKA() {
-   OpenQueueEntry_t* kaPkt;
-   open_addr_t*      kaNeighAddr;
-   
-   if (ieee154e_isSynch()==FALSE) {
-      // I'm not sync'ed
-      
-      // delete packets genereted by this module (EB and KA) from openqueue
-      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
-      
-      // I'm now busy sending a KA
-      sixtop_vars.busySendingKA = FALSE;
-      
-      // stop here
-      return;
-   }
-   
-   if (sixtop_vars.busySendingKA==TRUE) {
-      // don't proceed if I'm still sending a KA
-      return;
-   }
-   
-   kaNeighAddr = neighbors_getKANeighbor(sixtop_vars.kaPeriod);
-   if (kaNeighAddr==NULL) {
-      // don't proceed if I have no neighbor I need to send a KA to
-      return;
-   }
-   
-   // if I get here, I will send a KA
-   
-   // get a free packet buffer
-   kaPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
-   if (kaPkt==NULL) {
-      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)1,
-                            (errorparameter_t)0);
-      return;
-   }
-   
-   // declare ownership over that packet
-   kaPkt->creator = COMPONENT_SIXTOP;
-   kaPkt->owner   = COMPONENT_SIXTOP;
-   
-   // some l2 information about this packet
-   kaPkt->l2_frameType = IEEE154_TYPE_DATA;
-   memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
-   
-   // set l2-security attributes
-//   kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
-//   kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
-//   kaPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
-
-   // put in queue for MAC to handle
-   sixtop_send_internal(kaPkt,FALSE);
-   
-   // I'm now busy sending a KA
-   sixtop_vars.busySendingKA = TRUE;
-
-#ifdef OPENSIM
-   debugpins_ka_set();
-   debugpins_ka_clr();
-#endif
 }
 
 //======= six2six task

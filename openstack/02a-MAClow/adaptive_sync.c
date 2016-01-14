@@ -80,7 +80,6 @@ void adaptive_sync_indicateTimeCorrection(int16_t timeCorrection, open_addr_t ti
             adaptive_sync_vars.sumOfTC                     = 0;
             // update threshold
             adaptive_sync_vars.compensateThreshold        *= 2;
-            sixtop_setKaPeriod(adaptive_sync_vars.compensateThreshold);
             // update oldASN
             ieee154e_getAsn(array);
             adaptive_sync_vars.oldASN.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
@@ -92,7 +91,7 @@ void adaptive_sync_indicateTimeCorrection(int16_t timeCorrection, open_addr_t ti
          }
    } else {
       adaptive_sync_vars.compensateThreshold               = BASIC_COMPENSATION_THRESHOLD;
-      sixtop_setKaPeriod(adaptive_sync_vars.compensateThreshold);
+//      sixtop_setKaPeriod(adaptive_sync_vars.compensateThreshold);
       
       // when I joined the network, or changed my time parent, reset adaptive_sync relative variables
       adaptive_sync_vars.clockState                        = S_NONE;

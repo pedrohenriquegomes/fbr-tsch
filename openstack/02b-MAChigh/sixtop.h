@@ -54,13 +54,11 @@ typedef enum {
 
 typedef struct {
    uint16_t             periodMaintenance;
-   bool                 busySendingKA;           // TRUE when busy sending a keep-alive
    bool                 busySendingEB;           // TRUE when busy sending an enhanced beacon
    uint8_t              dsn;                     // current data sequence number
    uint8_t              mgtTaskCounter;          // counter to determine what management task to do
    opentimer_id_t       maintenanceTimerId;
    opentimer_id_t       timeoutTimerId;          // TimeOut timer id
-   uint16_t             kaPeriod;                // period of sending KA
    uint16_t             ebPeriod;                // period of sending EB
    six2six_state_t      six2six_state;
    uint8_t              commandID;
@@ -71,15 +69,8 @@ typedef struct {
 
 // admin
 void      sixtop_init(void);
-void      sixtop_setKaPeriod(uint16_t kaPeriod);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setHandler(six2six_handler_t handler);
-// scheduling
-//void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells);
-void      sixtop_removeCell(open_addr_t*  neighbor);
-void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
-// maintaining
-void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer

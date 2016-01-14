@@ -355,10 +355,6 @@ void openserial_startOutput() {
          if (debugPrint_neighbors()==TRUE) {
             break;
          }
-      case STATUS_KAPERIOD:
-         if (debugPrint_kaPeriod()==TRUE) {
-            break;
-         }
       default:
          DISABLE_INTERRUPTS();
          openserial_vars.debugPrintCounter=0;
@@ -417,12 +413,6 @@ void openserial_stop() {
       cmdByte = openserial_vars.inputBuf[0];
       ENABLE_INTERRUPTS();
       switch (cmdByte) {
-         case SERFRAME_PC2MOTE_SETROOT:
-            idmanager_triggerAboutRoot();
-            break;
-         case SERFRAME_PC2MOTE_DATA:
-//            openbridge_triggerData();
-            break;
          case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
             //echo function must reset input buffer after reading the data.
             openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
@@ -516,33 +506,12 @@ void openserial_goldenImageCommands(void){
                sniffer_setListeningChannel(comandParam_8); // one byte
 #endif
            break;
-       case COMMAND_SET_KAPERIOD: // two bytes, in slots
-           sixtop_setKaPeriod(comandParam_16);
-           break;
-//       case COMMAND_SET_DIOPERIOD: // two bytes, in mili-seconds
-//           icmpv6rpl_setDIOPeriod(comandParam_16);
-//           break;
-//       case COMMAND_SET_DAOPERIOD: // two bytes, in mili-seconds
-//           icmpv6rpl_setDAOPeriod(comandParam_16);
-//           break;
        case COMMAND_PING_MOTE:
            // this should not happen
            break;
        case COMMAND_SET_DAGRANK: // two bytes
            neighbors_setMyDAGrank(comandParam_16);
            break;
-//       case COMMAND_SET_SECURITY_STATUS: // one byte
-//           if (comandParam_8 ==1) {
-//               ieee154e_setIsSecurityEnabled(TRUE);
-//           } else {
-//               if (comandParam_8 == 0) {
-//                  ieee154e_setIsSecurityEnabled(FALSE);
-//               } else {
-//                   // security only can be 1 or 0 
-//                   break;
-//               }
-//           }
-//           break;
        case COMMAND_SET_FRAMELENGTH: // two bytes
            schedule_setFrameLength(comandParam_16);
            break;

@@ -44,11 +44,9 @@ typedef struct {
 
 void         idmanager_init(void);
 bool         idmanager_getIsDAGroot(void);
-void         idmanager_setIsDAGroot(bool newRole);
 open_addr_t* idmanager_getMyID(uint8_t type);
 owerror_t    idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
-void         idmanager_triggerAboutRoot(void);
 
 bool         debugPrint_id(void);
 

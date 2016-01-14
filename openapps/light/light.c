@@ -24,7 +24,7 @@ light_vars_t        light_vars;
 void light_timer_cb(opentimer_id_t id);
 void light_send_task_cb(void);
 
-//=========================== public ==========================================
+//=========================== procedures ======================================
 
 void light_init() 
 {  
@@ -33,6 +33,7 @@ void light_init()
   
 #if THRESHOLD_TEST == TRUE
    
+   // printout the current lux as a way of finding out the correct thresholds
    if (light_checkMyId(SENSOR_ID) &&
        sensors_is_present(SENSOR_LIGHT))
    {
@@ -59,9 +60,9 @@ port_INLINE bool light_is_initialized(void)
   return light_vars.initialized;
 }
 
-port_INLINE void light_initialize(bool state)
+port_INLINE void light_initialize(bool init)
 {
-  light_vars.initialized = state;
+  light_vars.initialized = init;
 }
 
 port_INLINE bool light_state(void)
@@ -74,6 +75,7 @@ port_INLINE uint16_t light_counter(void)
   return light_vars.counter;
 }
 
+// send a few packets. Uses a timer to spread the transmissions
 void light_send(uint16_t lux, bool state)
 {
   
@@ -89,6 +91,7 @@ void light_send(uint16_t lux, bool state)
    );
 }
 
+// fires the multiples transmissions
 void light_timer_cb(opentimer_id_t id){
   
   if (light_vars.n_tx < LIGHT_SEND_RETRIES)
@@ -106,6 +109,7 @@ void light_timer_cb(opentimer_id_t id){
   }
 }
 
+// receive a data packet and analyse it
 void light_receive_data(OpenQueueEntry_t* pkt) 
 {
    OpenQueueEntry_t* fw;
@@ -179,6 +183,7 @@ void light_receive_data(OpenQueueEntry_t* pkt)
 #endif
 }
 
+// receive a beacon packet and analyse it
 void light_receive_beacon(OpenQueueEntry_t* pkt) 
 {
    OpenQueueEntry_t* fw;
@@ -231,6 +236,7 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
 #endif
 }
 
+// send the packet to the lower layer (sixtop)
 port_INLINE void light_tx_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool state)
 {
    pkt->owner                         = COMPONENT_LIGHT;
@@ -250,6 +256,7 @@ port_INLINE void light_tx_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool s
    }
 }
 
+// send a new packet when a state change happens
 void light_send_task_cb() 
 {
    OpenQueueEntry_t*    pkt;
@@ -288,6 +295,7 @@ void light_send_task_cb()
    }
 }
 
+// check if my id is equal to addr
 port_INLINE bool light_checkMyId(uint16_t addr)
 {
   return ((idmanager_getMyID(ADDR_64B)->addr_64b[7] == (addr & 0xff)) &&
