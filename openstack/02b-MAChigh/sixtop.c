@@ -318,7 +318,7 @@ void task_sixtopNotifReceive() {
       case IEEE154_TYPE_BEACON:
         // update the rank
          neighbors_indicateRxEB(msg);
-         // if the beacon comes from a lower node we should check if the node is up-to-date
+         // if the beacon comes from an upper node we should check if the node is up-to-date
          if (msg->l2_rank < neighbors_getMyDAGrank())
          {
            light_receive_beacon(msg);

@@ -47,6 +47,7 @@ void light_init()
                           0);
    }
 #endif
+   
 }
 
 void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -79,30 +80,29 @@ void light_send(uint16_t lux, bool state)
   light_vars.lux = lux;
   light_vars.state = state;
   
-  // send one packet
-  scheduler_push_task(light_send_task_cb, TASKPRIO_MAX);
-  
-  light_vars.n_tx = 1;
-  
   // start timer for additional packets
   light_vars.sendTimerId = opentimers_start(
       LIGHT_SEND_PERIOD_MS,
-      TIMER_PERIODIC,TIME_MS,
+      TIMER_PERIODIC,
+      TIME_MS,
       light_timer_cb
    );
 }
 
 void light_timer_cb(opentimer_id_t id){
   
-  if (light_vars.n_tx < 3)
+  if (light_vars.n_tx < LIGHT_SEND_RETRIES)
   {
+    debugpins_slot_toggle();
     scheduler_push_task(light_send_task_cb, TASKPRIO_MAX);
     light_vars.n_tx++;
+    
   }
   else
   {
+    debugpins_slot_clr();
     opentimers_stop(id);
-    light_vars.n_tx = 1;
+    light_vars.n_tx = 0;
   }
 }
 

@@ -725,7 +725,7 @@ port_INLINE void activity_ti1ORri1() {
    incrementAsnOffset();
    
    // wiggle debug pins
-   debugpins_slot_toggle();
+//   debugpins_slot_toggle();
    if (ieee154e_vars.slotOffset==0) {
       debugpins_frame_toggle();
    }

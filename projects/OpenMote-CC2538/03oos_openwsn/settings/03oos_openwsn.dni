@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=446651839
+Checksum=-1213443307
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -19,15 +19,10 @@ ShowArgs=0
 MixedMode=1
 [JLinkDriver]
 CStepIntDis=_ 1
-[CallStackLog]
-Enabled=0
-[CallStackStripe]
-ShowTiming=1
 [Disassemble mode]
 mode=0
 [Breakpoints2]
-Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c}.324.12" 0 0 1 "" 0 "" 0
-Count=1
+Count=0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -38,3 +33,7 @@ LogFile=_ ""
 [Aliases]
 Count=0
 SuppressDialog=0
+[CallStackLog]
+Enabled=0
+[CallStackStripe]
+ShowTiming=1
