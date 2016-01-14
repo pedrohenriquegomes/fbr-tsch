@@ -125,12 +125,12 @@ void sixtop_init() {
       sixtop_maintenance_timer_cb
    );
    
-   sixtop_vars.timeoutTimerId     = opentimers_start(
-      SIX2SIX_TIMEOUT_MS,
-      TIMER_ONESHOT,
-      TIME_MS,
-      sixtop_timeout_timer_cb
-   );
+//   sixtop_vars.timeoutTimerId     = opentimers_start(
+//      SIX2SIX_TIMEOUT_MS,
+//      TIMER_ONESHOT,
+//      TIME_MS,
+//      sixtop_timeout_timer_cb
+//   );
 }
 
 void sixtop_setEBPeriod(uint8_t ebPeriod) {
@@ -227,10 +227,10 @@ void task_sixtopNotifSendDone() {
          );
          break;
       
-      case COMPONENT_SIXTOP_RES:
-         sixtop_six2six_sendDone(msg,msg->l2_sendDoneError);
-         break;
-      
+//      case COMPONENT_SIXTOP_RES:
+//         sixtop_six2six_sendDone(msg,msg->l2_sendDoneError);
+//         break;
+//      
       case COMPONENT_LIGHT:
          light_sendDone(msg,msg->l2_sendDoneError);
          break;

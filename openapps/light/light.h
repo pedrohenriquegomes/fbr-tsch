@@ -6,7 +6,7 @@
 //=========================== define ==========================================
 
 #define LIGHT_SEND_PERIOD_MS       100
-#define LIGHT_SEND_RETRIES         5
+#define LIGHT_SEND_RETRIES         3
 #define LUX_THRESHOLD              1000
 
 #define SINK_ID             0xed4f
