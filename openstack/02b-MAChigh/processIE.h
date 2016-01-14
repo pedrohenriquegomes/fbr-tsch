@@ -134,7 +134,9 @@ void             processIE_prependMLMEIE(
 );
 
 //===== prepend IEs
-
+uint8_t          processIE_prependCounterIE(
+   OpenQueueEntry_t*    pkt
+);
 uint8_t          processIE_prependSyncIE(
    OpenQueueEntry_t*    pkt
 );

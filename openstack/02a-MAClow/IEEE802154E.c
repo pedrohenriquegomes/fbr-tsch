@@ -658,135 +658,56 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 
 port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    uint8_t               ptr;
-   uint8_t               temp_8b;
-   uint8_t               gr_elem_id;
-   uint8_t               subid;
-   uint16_t              temp_16b;
-   uint16_t              len;
-   uint16_t              sublen;
+
    // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
    bool                  f_asn2slotoffset;
    uint8_t               i; // used for find the index in channel hopping template
    
    ptr=0;
    
-   // payload IE header, header IE is processed before when retrieve header  
-   
-   //candidate IE header  if type ==0 header IE if type==1 payload IE
-//   temp_8b    = *((uint8_t*)(pkt->payload)+ptr);
-//   ptr++;
-//   
-//   temp_16b   = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr)) << 8);
-//   ptr++;
-//   
-//   /* Changed for flooding - it will be always the same value */
-////   temp_16b = 34824;
-//   
-//   *lenIE     = ptr;
-//   
-//   if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == IEEE802154E_DESC_TYPE_PAYLOAD_IE){
-//      // payload IE
-//      
-//      len          = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
-//      gr_elem_id   = (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT;
-//   } else {
-//      // header IE
-//      
-//      len          = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
-//      gr_elem_id   = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT; 
-//   }
-//   
-//   *lenIE         += len;
-//   
-//   //===== sub-elements
-//   
-//   switch(gr_elem_id){
-//      
-//      case IEEE802154E_MLME_IE_GROUPID:
-//         // MLME IE
-//         f_asn2slotoffset = FALSE;
-//         do {
-//            
-//            //read sub IE header
-//            temp_8b     = *((uint8_t*)(pkt->payload)+ptr);
-//            ptr         = ptr + 1;
-//            temp_16b    = temp_8b  + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
-//            ptr         = ptr + 1;
-//            
-//            len         = len - 2; //remove header fields len
-//            
-//            if ((temp_16b & IEEE802154E_DESC_TYPE_LONG) == IEEE802154E_DESC_TYPE_LONG){
-//               // long sub-IE
-//               
-//               sublen   = temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK;
-//               subid    = (temp_16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT; 
-//            } else {
-//               // short sub-IE
-//               
-//               sublen   = temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK;
-//               subid    = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
-//            }
-//
-//            switch(subid){
-//               
-//               case IEEE802154E_MLME_SYNC_IE_SUBID:
-                  // Sync IE: ASN and Join Priority 
-                  
-                  if (idmanager_getIsDAGroot()==FALSE) {
-                     // ASN
-                     asnStoreFromEB((uint8_t*)(pkt->payload)+ptr);
-                     // ASN is known, but the frame length is not
-                     // frame length will be known after parsing the frame and link IE
-                     f_asn2slotoffset = TRUE;
-                     ptr = ptr + 5;
-                     // join priority
-                     joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
-                     ptr = ptr + 1;
-                  }
-//                  break;
-//               
-//               default:
-//                  return FALSE;
-//                  break;
-//            }
-//            
-//            len = len - sublen;
-//         } while(len>0);
-         if (f_asn2slotoffset == TRUE) {
-            // at this point, ASN and frame length are known
-            // the current slotoffset can be inferred
-            ieee154e_syncSlotOffset();
-            schedule_syncSlotOffset(ieee154e_vars.slotOffset);
-            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-            /* 
-            infer the asnOffset based on the fact that
-            ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
-            */
-            for (i=0;i<16;i++){
-                if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
-                    break;
-                }
+    if (idmanager_getIsDAGroot()==FALSE) {
+       // ASN
+       asnStoreFromEB((uint8_t*)(pkt->payload)+ptr);
+       
+       // ASN is known, but the frame length is not
+       // frame length will be known after parsing the frame and link IE
+       f_asn2slotoffset = TRUE;
+       ptr = ptr + 5;
+       // join priority
+       joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+       ptr = ptr + 1;
+    }
+
+     if (f_asn2slotoffset == TRUE) {
+        // at this point, ASN and frame length are known
+        // the current slotoffset can be inferred
+        ieee154e_syncSlotOffset();
+        schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+        ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+        /* 
+        infer the asnOffset based on the fact that
+        ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
+        */
+        for (i=0;i<16;i++){
+            if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
+                break;
             }
-            ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
-         }
-//         break;
-//         
-//      default:
-//         *lenIE = 0; //no header or not recognized.
-//         return FALSE;
-//   }
-   
+        }
+        ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
+     }
+
    *lenIE = 6;
-         
-//   if(*lenIE>127) {
-//      // log the error
-//      openserial_printError(
-//         COMPONENT_IEEE802154E,
-//         ERR_HEADER_TOO_LONG,
-//         (errorparameter_t)*lenIE,
-//         (errorparameter_t)1
-//      );
-//   }
+   
+   // process the counter and state
+   uint8_t cnt1 = *((uint8_t*)(pkt->payload)+ptr);
+   uint8_t cnt2 = *((uint8_t*)(pkt->payload)+ptr+1);
+   ieee154e_vars.dataReceived->l2_floodingCounter = cnt1 | (cnt2 << 8);
+   
+   ptr += 2;
+   ieee154e_vars.dataReceived->l2_floodingState = *((bool*)(pkt->payload)+ptr);
+   
+   *lenIE += 3;
+
    return TRUE;
 }
 
@@ -851,7 +772,7 @@ port_INLINE void activity_ti1ORri1() {
       light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
       lux = light_read_cb();
       
-      //first time
+      // first time
       if (!light_is_initialized())
       {
         light_send(lux, (lux >= LUX_THRESHOLD) ? TRUE : FALSE);
@@ -1828,7 +1749,6 @@ port_INLINE void joinPriorityStoreFromEB(uint8_t jp){
   ieee154e_vars.dataReceived->l2_joinPriorityPresent = TRUE;     
 }
 
-
 port_INLINE void asnStoreFromEB(uint8_t* asn) {
    
    // store the ASN
@@ -2224,4 +2144,12 @@ void endSlot() {
 
 bool ieee154e_isSynch(){
    return ieee154e_vars.isSync;
+}
+
+uint16_t ieee154e_getCounter(){
+  return ieee154e_vars.floodingCounter;
+}
+
+bool ieee154e_getState(){
+  return ieee154e_vars.floodingState;
 }

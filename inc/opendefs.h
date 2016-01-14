@@ -253,6 +253,7 @@ enum {
    ERR_LIGHT_THRESHOLD                 = 0x3f, // light measurement {0}
    ERR_FLOOD_STATE                     = 0x40, // sink state {0}
    ERR_FLOOD_DROP                      = 0X41, // flooding packet dropped, seq {0}, state {1}
+   ERR_FLOOD_GEN                       = 0X42, // flooding packet generated, seq {0}, state {1}
 };
 
 //=========================== typedef =========================================
@@ -328,6 +329,8 @@ typedef struct {
 //   uint8_t       commandFrameIdentifier;         //used in case of Command Frames
    bool           l2_rankPresent;
    uint16_t       l2_rank;
+   uint16_t       l2_floodingCounter;
+   bool           l2_floodingState;
 //   uint8_t*      l2_FrameCounter;                //pointer to the FrameCounter in the MAC header
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at

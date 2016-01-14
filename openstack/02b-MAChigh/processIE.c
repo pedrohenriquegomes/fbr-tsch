@@ -40,22 +40,19 @@ port_INLINE void processIE_prependMLMEIE(
 
 //===== prepend IEs
 
-port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
-   mlme_IE_ht mlme_subHeader;
-   uint8_t    len;
-  
-   len = 0;
-  
-   /* Inserting Counter and State into Beacon */
+port_INLINE uint8_t processIE_prependCounterIE(OpenQueueEntry_t* pkt){
+
+   // inserting counter and state into the EB
    packetfunctions_reserveHeaderSize(pkt,3);
    
    *((uint16_t*)&pkt->payload[0]) = light_counter();
    *((uint8_t*)&pkt->payload[2]) = light_state();
        
-   len += 3;
-   
-   //=== sync IE
-   
+   return 3;
+}
+
+port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
+
    // reserve space
    packetfunctions_reserveHeaderSize(
       pkt,
@@ -67,29 +64,7 @@ port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
    //    IEEE802.15.4e when transmitting
    pkt->l2_ASNpayload               = pkt->payload; 
    
-   len += sizeof(sync_IE_ht);
-   
-   //=== MLME IE
-  
-//   // reserve space
-//   packetfunctions_reserveHeaderSize(
-//      pkt,
-//      sizeof(mlme_IE_ht)
-//   );
-//   
-//   // prepare header
-//   mlme_subHeader.length_subID_type = sizeof(sync_IE_ht);
-//   mlme_subHeader.length_subID_type |= 
-//      (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT)|
-//      IEEE802154E_DESC_TYPE_SHORT;
-//   
-//   // copy header
-//   pkt->payload[0]= mlme_subHeader.length_subID_type        & 0xFF;
-//   pkt->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
-//   
-//   len += 2;
-   
-   return len;
+   return 6;
 }
 
 port_INLINE uint8_t processIE_prependScheduleIE(

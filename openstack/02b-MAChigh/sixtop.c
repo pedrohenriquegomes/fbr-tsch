@@ -183,11 +183,6 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->l2_frameType = IEEE154_TYPE_DATA;
 
    msg->l2_rankPresent = FALSE;
-   
-   // set l2-security attributes
-//   msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
-//   msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
-//   msg->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
 
    if (msg->l2_payloadIEpresent == FALSE) {
       return sixtop_send_internal(
@@ -323,12 +318,18 @@ void task_sixtopNotifReceive() {
       case IEEE154_TYPE_BEACON:
         // update the rank
          neighbors_indicateRxEB(msg);
-         openqueue_freePacketBuffer(msg);
+         // if the beacon comes from a lower node we should check if the node is up-to-date
+         if (msg->l2_rank < neighbors_getMyDAGrank())
+         {
+           light_receive_beacon(msg);
+         } else {
+            openqueue_freePacketBuffer(msg);
+         }
          break;
       case IEEE154_TYPE_DATA:
-        //we only have one type of data packet. It is from sixtop light application
+        // we only have one type of data packet. It is from sixtop light application
         if (msg->length>0) {
-           light_receive(msg);
+           light_receive_data(msg);
          } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
@@ -510,11 +511,8 @@ port_INLINE void sixtop_sendEB() {
    
    // reserve space for EB-specific header
    // reserving for IEs.
-//   len += processIE_prependTSCHTimeslotIE(eb);
+   len += processIE_prependCounterIE(eb);
    len += processIE_prependSyncIE(eb);
-   
-   //add IE header 
-//   processIE_prependMLMEIE(eb,len);
   
    // some l2 information about this packet
    eb->l2_frameType                     = IEEE154_TYPE_BEACON;

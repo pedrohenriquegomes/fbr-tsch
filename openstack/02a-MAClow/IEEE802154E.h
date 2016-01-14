@@ -237,6 +237,10 @@ typedef struct {
    bool                      isSecurityEnabled;       // whether security is applied
    // time correction
    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
+   // flooding counter
+   uint16_t                  floodingCounter;
+   // flooding state
+   bool                      floodingState;
 } ieee154e_vars_t;
 
 BEGIN_PACK
@@ -278,6 +282,9 @@ bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
 bool               debugPrint_macStats(void);
 
+uint16_t ieee154e_getCounter();
+bool ieee154e_getState();
+  
 /**
 \}
 \}
