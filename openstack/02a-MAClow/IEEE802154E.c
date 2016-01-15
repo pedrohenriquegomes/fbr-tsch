@@ -112,8 +112,8 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
-//   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
-   ieee154e_vars.singleChannel     = 0;
+   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
+//   ieee154e_vars.singleChannel     = 0;
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
    // default hopping template
@@ -903,16 +903,6 @@ port_INLINE void activity_ti2() {
    // make a local copy of the frame
    packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
 
-   // check if packet needs to be encrypted/authenticated before transmission 
-//   if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
-//      // encrypt in a local copy
-//      if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
-//         // keep the frame in the OpenQueue in order to retry later
-//         endSlot(); // abort
-//         return;
-//      }
-//   }
-   
    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
    

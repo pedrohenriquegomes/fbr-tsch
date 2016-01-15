@@ -9,7 +9,7 @@
 #define LIGHT_SEND_RETRIES         3
 #define LUX_THRESHOLD              1000
 
-#define SINK_ID             0xed4f
+#define SINK_ID             0x13cf
 #define SENSOR_ID           0xecbf
 
 //=========================== typedef =========================================
