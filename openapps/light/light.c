@@ -90,7 +90,7 @@ void light_send(uint16_t lux, bool state)
       light_timer_cb
    );
   
-  sixtop_multiplyEBPeriod(2);
+//  sixtop_multiplyEBPeriod(2);
 }
 
 // fires the multiples transmissions
