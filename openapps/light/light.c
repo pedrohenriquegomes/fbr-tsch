@@ -19,10 +19,13 @@
 
 light_vars_t        light_vars;
 
+opentimer_id_t      debugTimer;
+
 //=========================== prototypes ======================================
 
 void light_timer_cb(opentimer_id_t id);
 void light_send_task_cb(void);
+void debugTimer_cb(opentimer_id_t id);
 
 //=========================== procedures ======================================
 
@@ -47,8 +50,11 @@ void light_init()
                           (errorparameter_t)lux,
                           0);
    }
-#endif
    
+   // Output signal
+   debugpins_user1_clr();
+   
+#endif
 }
 
 void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -163,10 +169,19 @@ void light_receive_data(OpenQueueEntry_t* pkt)
    // if I am the sink, process the message (update the state)
    if (light_checkMyId(SINK_ID)) 
    {  
-     /* TURN ON/OFF THE LIGHT AT THE SINK */
+     /* TURN ON/OFF THE LIGHT AT THE SINK */    
+     if (light_vars.state)
+     {
+       debugpins_user1_set();
+     }
+     else
+     {
+       debugpins_user1_clr();
+     }
+     
      openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_STATE,
                          (errorparameter_t)state,
-                         (errorparameter_t)0);
+                         (errorparameter_t)0);     
      return;
    }
    

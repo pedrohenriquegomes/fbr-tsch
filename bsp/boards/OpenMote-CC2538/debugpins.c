@@ -38,7 +38,7 @@ void bspDBpinToggle(uint32_t base,uint8_t ui8Pin);
 
 void debugpins_init() {
    //GPIOPinTypeGPIOOutput(BSP_PINA_BASE, BSP_PINA_4 | BSP_PINA_5);
-  GPIOPinTypeGPIOOutput(BSP_PINA_BASE, BSP_PINA_4 | BSP_PINA_5 | BSP_PINA_2 | BSP_PINA_3);
+   GPIOPinTypeGPIOOutput(BSP_PINA_BASE, BSP_PINA_4 | BSP_PINA_5 | BSP_PINA_2 | BSP_PINA_3);
    GPIOPinTypeGPIOOutput(BSP_PIND_BASE, BSP_PIND_3 | BSP_PIND_2 | BSP_PIND_1 | BSP_PIND_0);
 
    //GPIOPinWrite(BSP_PINA_BASE, (BSP_PINA_4 | BSP_PINA_5), 0x00);
