@@ -49,6 +49,7 @@ void light_init()
    }
 #endif
    
+   debugpins_user1_clr();
 }
 
 void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -161,6 +162,16 @@ void light_receive_data(OpenQueueEntry_t* pkt)
    // if I am the sink, process the message (update the state)
    if (light_checkMyId(SINK_ID)) 
    {  
+     
+     if (light_vars.state)
+     {
+      debugpins_user1_set();
+     }
+     else
+     {
+       debugpins_user1_clr();
+     }
+     
      /* TURN ON/OFF THE LIGHT AT THE SINK */
      openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_STATE,
                          (errorparameter_t)state,
