@@ -19,6 +19,7 @@
 //=========================== prototypes ======================================
 
 // address translation
+void     packetfunctions_ip128bToMac64b(open_addr_t* ip128b,open_addr_t* prefix64btoWrite,open_addr_t* mac64btoWrite);
 void     packetfunctions_mac64bToMac16b(open_addr_t* mac64b, open_addr_t* mac16btoWrite);
 
 // address recognition

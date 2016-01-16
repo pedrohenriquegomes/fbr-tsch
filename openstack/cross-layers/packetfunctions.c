@@ -12,6 +12,24 @@ void onesComplementSum(uint8_t* global_sum, uint8_t* ptr, int length);
 
 //======= address translation
 
+//assuming an ip128b is a concatenation of prefix64b followed by a mac64b
+void packetfunctions_ip128bToMac64b(
+      open_addr_t* ip128b,
+      open_addr_t* prefix64btoWrite,
+      open_addr_t* mac64btoWrite) {
+   if (ip128b->type!=ADDR_128B) {
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+                            (errorparameter_t)ip128b->type,
+                            (errorparameter_t)0);
+      mac64btoWrite->type=ADDR_NONE;
+      return;
+   }
+   prefix64btoWrite->type=ADDR_PREFIX;
+   memcpy(prefix64btoWrite->prefix, &(ip128b->addr_128b[0]), 8);
+   mac64btoWrite->type=ADDR_64B;
+   memcpy(mac64btoWrite->addr_64b , &(ip128b->addr_128b[8]), 8);
+}
+
 //assuming an mac16b is lower 2B of mac64b
 void packetfunctions_mac64bToMac16b(open_addr_t* mac64b, open_addr_t* mac16btoWrite) {
    if (mac64b->type!=ADDR_64B) {
