@@ -31,6 +31,7 @@ typedef struct {
    uint8_t         linkoptions;
 } cellInfo_ht;
 
+
 /**
 \brief Header of header IEs.
 */
@@ -47,7 +48,25 @@ typedef struct{
 
 //======= header IEs
 
+/**
+\brief TSCH ACK/NACK TimeCorrection IE
+
+IEEE802.15.4e-2012, Section 5.2.4.11, p. 88.
+*/
+typedef struct {
+   int16_t        timesync_info;
+} timecorrection_IE_ht;
+
 //======= payload IEs
+
+/**
+\brief MLME IE common header
+
+IEEE802.15.4e-2012, Section 5.2.4.5, p. 82.
+*/
+typedef struct{
+   uint16_t        length_subID_type;
+} mlme_IE_ht;
 
 /**
 \brief TSCH Synchronization IE
@@ -58,6 +77,50 @@ typedef struct {
    uint8_t         asn[5];
    uint8_t         join_priority;
 } sync_IE_ht;
+
+/**
+\brief TSCH Slotframe and Link IE
+
+http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.2
+*/
+typedef struct {
+   uint8_t         slotframehandle;
+   uint16_t        slotframesize;
+   uint8_t         numlinks;
+} slotframeLink_IE_ht;
+
+/**
+\brief 6top Opcode IE
+
+http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.5
+*/
+typedef struct {
+   uint8_t         opcode;
+} opcode_IE_ht;
+
+/**
+\brief 6top Bandwidth IE
+
+http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.6
+*/
+typedef struct{
+   uint8_t         slotframeID;
+   uint8_t         numOfLinks;
+} bandwidth_IE_ht;
+
+/**
+\brief 6top Generic Schedule IE
+
+http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.8
+*/
+typedef struct{
+   uint8_t         type;
+   uint8_t         length;
+   uint8_t         frameID;
+   uint8_t         numberOfcells;
+   bool            flag;
+   cellInfo_ht     cellList[SCHEDULEIEMAXNUMCELLS];
+} schedule_IE_ht;
 
 END_PACK
 
@@ -72,5 +135,4 @@ uint8_t          processIE_prependCounterIE(
 uint8_t          processIE_prependSyncIE(
    OpenQueueEntry_t*    pkt
 );
-
 #endif

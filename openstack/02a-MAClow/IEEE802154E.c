@@ -825,9 +825,9 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
               
-              // Insert HERE a condition to transmit the EB in the next frequency in a given order
-              // PHG
-
+               // Insert HERE a condition to transmit the EB in the next frequency in a given order
+               // PHG
+              
                couldSendEB=TRUE;
                // look for an EB packet in the queue
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
@@ -859,6 +859,16 @@ port_INLINE void activity_ti1ORri1() {
             radiotimer_schedule(DURATION_tt1);
             break;
          }
+      case CELLTYPE_RX:
+         if (changeToRX==FALSE) {
+            // stop using serial
+            openserial_stop();
+         }
+         // change state
+         changeState(S_RXDATAOFFSET);
+         // arm rt1
+         radiotimer_schedule(DURATION_rt1);
+         break;
       case CELLTYPE_SERIALRX:
          // stop using serial
          openserial_stop();
@@ -903,6 +913,16 @@ port_INLINE void activity_ti2() {
    // make a local copy of the frame
    packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
 
+   // check if packet needs to be encrypted/authenticated before transmission 
+//   if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
+//      // encrypt in a local copy
+//      if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
+//         // keep the frame in the OpenQueue in order to retry later
+//         endSlot(); // abort
+//         return;
+//      }
+//   }
+   
    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
    

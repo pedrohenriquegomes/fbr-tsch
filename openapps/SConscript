@@ -8,7 +8,7 @@ localEnv      = env.Clone()
 
 # apps which should always be built
 defaultApps   = [
-    'light',
+    'sixtop_light',
 ]
 if localEnv['board']=='python':
     defaultApps  += [
@@ -16,7 +16,7 @@ if localEnv['board']=='python':
 
 # apps which should always be present
 defaultAppsInit   = [
-    'light',
+    'sixtop_light',
 ]
 
 # additional apps the user wants to build

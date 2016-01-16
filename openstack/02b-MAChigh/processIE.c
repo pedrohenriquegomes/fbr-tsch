@@ -12,6 +12,10 @@
 #include "packetfunctions.h"
 #include "light.h"
 
+//=========================== variables =======================================
+
+//=========================== public ==========================================
+
 //===== prepend IEs
 
 port_INLINE uint8_t processIE_prependCounterIE(OpenQueueEntry_t* pkt){

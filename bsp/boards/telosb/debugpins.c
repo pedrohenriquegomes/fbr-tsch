@@ -90,19 +90,6 @@ void debugpins_radio_set() {
    P6OUT |=  0x02;
 }
 
-void debugpins_user1_toggle() {
-}
-void debugpins_user1_clr() {
-}
-void debugpins_user1_set() {
-}
-
-void debugpins_user2_toggle() {
-}
-void debugpins_user2_clr() {
-}
-void debugpins_user2_set() {
-}
 
 void    leds_toggle_2x(void){
 
