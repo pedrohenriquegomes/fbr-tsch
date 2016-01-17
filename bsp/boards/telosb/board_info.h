@@ -57,7 +57,8 @@ to this board.
 
 // time-slot related
 //#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
-#define PORT_TsSlotDuration                 197 // TsTxOffset (131) + WdDataDuration (66)
+//#define PORT_TsSlotDuration                 197 // TsTxOffset (131) + WdDataDuration (66)
+#define PORT_TsSlotDuration                 197
 
 // execution speed related
 #define PORT_maxTxDataPrepare               100    //  2899us (measured 2420us)

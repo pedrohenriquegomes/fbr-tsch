@@ -19,6 +19,9 @@
 
 light_vars_t        light_vars;
 
+opentimer_id_t      test_timer;
+void test_timer_cb(opentimer_id_t id);
+
 //=========================== prototypes ======================================
 
 void light_timer_cb(opentimer_id_t id);
@@ -34,14 +37,14 @@ void light_init()
 #if THRESHOLD_TEST == TRUE
    
    // printout the current lux as a way of finding out the correct thresholds
-   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
+   //if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
    if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
    {
       callbackRead_cbt             light_read_cb;
       uint16_t                     lux = 0;
       
-      light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
-	  //light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
+      //light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
+      light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
       lux = light_read_cb();
       
       openserial_printInfo(COMPONENT_LIGHT,ERR_LIGHT_THRESHOLD,
@@ -51,6 +54,17 @@ void light_init()
 #endif
    
    debugpins_user1_clr();
+   
+//  test_timer = opentimers_start(
+//      1000,
+//      TIMER_PERIODIC,
+//      TIME_MS,
+//      test_timer_cb
+//   );
+}
+
+void test_timer_cb(opentimer_id_t id) {
+    debugpins_user1_toggle();
 }
 
 void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -254,7 +268,8 @@ port_INLINE void light_tx_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool s
 
    // payload
    packetfunctions_reserveHeaderSize(pkt,3);
-   *((uint16_t*)&pkt->payload[0]) = counter;
+   *((uint8_t*)&pkt->payload[0]) = light_vars.counter & 0xff;
+   *((uint8_t*)&pkt->payload[1]) = light_vars.counter >> 8;
    *((uint8_t*)&pkt->payload[2]) = state;
        
    pkt->l2_nextORpreviousHop.type        = ADDR_16B;
@@ -286,7 +301,8 @@ void light_send_task_cb()
 
    // payload
    packetfunctions_reserveHeaderSize(pkt,3);
-   *((uint16_t*)&pkt->payload[0]) = light_vars.counter;
+   *((uint8_t*)&pkt->payload[0]) = light_vars.counter & 0xff;
+   *((uint8_t*)&pkt->payload[1]) = light_vars.counter >> 8;
    *((uint8_t*)&pkt->payload[2]) = light_vars.state;
        
    pkt->l2_nextORpreviousHop.type        = ADDR_16B;

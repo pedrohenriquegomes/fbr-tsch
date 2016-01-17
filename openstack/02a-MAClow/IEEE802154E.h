@@ -158,10 +158,10 @@ enum ieee154e_atomicdurations_enum {
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-//   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdDataDuration            =   66,
-//   wdAckDuration             =   98,                  //  3000us (measured 1000us)
-   wdAckDuration             =   0,
+   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+//   wdDataDuration            =   66,                  // 2000us
+   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+//   wdAckDuration             =   0,
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

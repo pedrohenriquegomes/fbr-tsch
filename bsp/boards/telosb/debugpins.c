@@ -22,6 +22,8 @@ void debugpins_init() {
    P2DIR |=  0x40;      // task  [P2.6]
    P6DIR |=  0x01;      // isr   [P6.0]
    P6DIR |=  0x02;      // radio [P6.1] 
+   P6DIR |=  0x04;      // user1 [P6.2] 
+   P6DIR |=  0x08;      // user2 [P6.3] 
 }
 
 // P6.6
@@ -90,13 +92,18 @@ void debugpins_radio_set() {
    P6OUT |=  0x02;
 }
 
+// P6.2
 void debugpins_user1_toggle() {
+  P6OUT ^=  0x04;
 }
 void debugpins_user1_clr() {
+  P6OUT &= ~0x04;
 }
 void debugpins_user1_set() {
+  P6OUT |=  0x04;
 }
 
+// P6.3
 void debugpins_user2_toggle() {
 }
 void debugpins_user2_clr() {

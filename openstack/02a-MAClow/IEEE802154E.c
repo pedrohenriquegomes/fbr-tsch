@@ -769,11 +769,11 @@ port_INLINE void activity_ti1ORri1() {
    callbackRead_cbt             light_read_cb;
    uint16_t                     lux = 0;
    
-   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
-   //if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
+   //if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
+   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
    {
-      //light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
-      light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
+      light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
+      //light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
       lux = light_read_cb();
       
       // first time

@@ -23,7 +23,10 @@ port_INLINE uint8_t processIE_prependCounterIE(OpenQueueEntry_t* pkt){
    // inserting counter and state into the EB
    packetfunctions_reserveHeaderSize(pkt,3);
    
-   *((uint16_t*)&pkt->payload[0]) = light_counter();
+   uint16_t counter = light_counter();
+   
+   *((uint8_t*)&pkt->payload[0]) = counter & 0xff;
+   *((uint8_t*)&pkt->payload[1]) = counter >> 8;
    *((uint8_t*)&pkt->payload[2]) = light_state();
        
    return 3;
