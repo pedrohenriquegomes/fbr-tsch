@@ -111,7 +111,8 @@ bool          sixtop_areAvailableCellsToBeScheduled(
 
 void sixtop_init() {
    
-   sixtop_vars.periodMaintenance  = 930 +(openrandom_get16b()&0x3f);
+   //sixtop_vars.periodMaintenance  = 930 +(openrandom_get16b()&0x3f);
+   sixtop_vars.periodMaintenance  = 60 +(openrandom_get16b()&0x3f);
    sixtop_vars.busySendingEB      = FALSE;
    sixtop_vars.dsn                = 0;
    sixtop_vars.mgtTaskCounter     = 0;
@@ -127,6 +128,10 @@ void sixtop_init() {
 
 void sixtop_setEBPeriod(uint8_t ebPeriod) {
    sixtop_vars.ebPeriod = ebPeriod;
+}
+
+uint8_t      sixtop_getEBPeriod(void) {
+  return sixtop_vars.ebPeriod;
 }
 
 void sixtop_setHandler(six2six_handler_t handler) {
@@ -217,18 +222,15 @@ void task_sixtopNotifSendDone() {
          openqueue_freePacketBuffer(msg);
          
          // restart a random timer
-         sixtop_vars.periodMaintenance  = 930 +(openrandom_get16b()&0x3f);
+         //sixtop_vars.periodMaintenance  = 930 +(openrandom_get16b()&0x3f);
+         sixtop_vars.periodMaintenance  = 60 +(openrandom_get16b()&0x3f);
          opentimers_setPeriod(
             sixtop_vars.maintenanceTimerId,
             TIME_MS,
             sixtop_vars.periodMaintenance
          );
          break;
-      
-//      case COMPONENT_SIXTOP_RES:
-//         sixtop_six2six_sendDone(msg,msg->l2_sendDoneError);
-//         break;
-//      
+  
       case COMPONENT_LIGHT:
          light_sendDone(msg,msg->l2_sendDoneError);
          break;
@@ -384,7 +386,11 @@ owerror_t sixtop_send_internal(
 // timer interrupt callbacks
 
 void sixtop_maintenance_timer_cb(opentimer_id_t id) {
-   scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
+  if (++sixtop_vars.mgtTaskCounter == sixtop_vars.ebPeriod)
+  {
+    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
+    sixtop_vars.mgtTaskCounter = 0;
+  }   
 }
 
 //======= EB/KA task
@@ -398,11 +404,7 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
-  if (++sixtop_vars.mgtTaskCounter == sixtop_vars.ebPeriod)
-  {
     sixtop_sendEB();
-    sixtop_vars.mgtTaskCounter = 0;
-  }
 }
 
 /**

@@ -97,14 +97,12 @@ void light_timer_cb(opentimer_id_t id){
   
   if (light_vars.n_tx < LIGHT_SEND_RETRIES)
   {
-    debugpins_slot_toggle();
     scheduler_push_task(light_send_task_cb, TASKPRIO_MAX);
     light_vars.n_tx++;
     
   }
   else
   {
-    debugpins_slot_clr();
     opentimers_stop(id);
     light_vars.n_tx = 0;
   }

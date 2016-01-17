@@ -24,6 +24,9 @@ ieee154e_vars_t    ieee154e_vars;
 ieee154e_stats_t   ieee154e_stats;
 ieee154e_dbg_t     ieee154e_dbg;
 
+opentimer_id_t     increase_eb_timer_id;
+void increase_eb_timer_cb (opentimer_id_t id);
+
 //=========================== prototypes ======================================
 
 // SYNCHRONIZING
@@ -112,8 +115,8 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
-   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
-//   ieee154e_vars.singleChannel     = 0;
+//   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
+   ieee154e_vars.singleChannel     = 0;
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
    // default hopping template
@@ -725,7 +728,7 @@ port_INLINE void activity_ti1ORri1() {
    incrementAsnOffset();
    
    // wiggle debug pins
-//   debugpins_slot_toggle();
+   debugpins_slot_toggle();
    if (ieee154e_vars.slotOffset==0) {
       debugpins_frame_toggle();
    }
@@ -825,12 +828,17 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
               
-               // Insert HERE a condition to transmit the EB in the next frequency in a given order
-               // PHG
-              
-               couldSendEB=TRUE;
-               // look for an EB packet in the queue
-               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+              ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
+               // If I am using FHSS force the transmission of EB in all channel, one after the other
+               if ((ieee154e_vars.singleChannel == SYNCHRONIZING_CHANNEL) ||
+                   ((ieee154e_vars.freq - 11) == ieee154e_vars.nextChannelEB))
+               {                   
+                 couldSendEB=TRUE;
+                 // look for an EB packet in the queue
+                 ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                 
+                 ieee154e_vars.nextChannelEB = (ieee154e_vars.nextChannelEB + 1) % 16;
+               }
             }
          }
          if (ieee154e_vars.dataToSend==NULL) {
@@ -912,16 +920,6 @@ port_INLINE void activity_ti2() {
 
    // make a local copy of the frame
    packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
-
-   // check if packet needs to be encrypted/authenticated before transmission 
-//   if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
-//      // encrypt in a local copy
-//      if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
-//         // keep the frame in the OpenQueue in order to retry later
-//         endSlot(); // abort
-//         return;
-//      }
-//   }
    
    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
@@ -1910,11 +1908,33 @@ void changeIsSync(bool newIsSync) {
    if (ieee154e_vars.isSync==TRUE) {
       leds_sync_on();
       resetStats();
+      
+      // start timer that will increase the EB period until reach max
+      sixtop_setEBPeriod(1);
+      increase_eb_timer_id = opentimers_start(
+          INCREASE_EB_PERIOD_TIMER,
+          TIMER_PERIODIC,
+          TIME_MS,
+          increase_eb_timer_cb
+       );      
    } else {
       leds_sync_off();
       schedule_resetBackoff();
+      
+      // stop timer that increase the EB period
+      opentimers_stop(increase_eb_timer_id);
+      sixtop_setEBPeriod(1);
    }
 }
+
+void increase_eb_timer_cb (opentimer_id_t id)
+{
+  if (sixtop_getEBPeriod() < INCREASE_EB_PERIOD_MAX)
+  {
+     sixtop_addEBPeriod(INCREASE_EB_PERIOD_AMOUNT);
+  }
+}
+
 
 //======= notifying upper layer
 

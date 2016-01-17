@@ -22,7 +22,7 @@ static const uint8_t chTemplate_default[] = {
 
 //=========================== define ==========================================
 
-#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
+#define SYNCHRONIZING_CHANNEL       11 // channel the mote listens on to synchronize
 #define TXRETRIES                    0 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
@@ -33,6 +33,10 @@ static const uint8_t chTemplate_default[] = {
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
+
+#define INCREASE_EB_PERIOD_TIMER   1000 // every 1 second increase the EB period by a certain amount
+#define INCREASE_EB_PERIOD_AMOUNT     1 // increase by 1 (multiples of 100 ms)
+#define INCREASE_EB_PERIOD_MAX       10 // max EB interval will be 10 (multiples of 100 ms)
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
@@ -241,6 +245,8 @@ typedef struct {
    uint16_t                  floodingCounter;
    // flooding state
    bool                      floodingState;
+   // next channel to send beacon
+   uint8_t                   nextChannelEB;
 } ieee154e_vars_t;
 
 BEGIN_PACK
