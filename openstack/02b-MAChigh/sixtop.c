@@ -112,7 +112,7 @@ bool          sixtop_areAvailableCellsToBeScheduled(
 void sixtop_init() {
    
    //sixtop_vars.periodMaintenance  = 930 +(openrandom_get16b()&0x3f);
-   sixtop_vars.periodMaintenance  = 60 +(openrandom_get16b()&0x3f);
+   sixtop_vars.periodMaintenance  = 45 +(openrandom_get16b()&0xf);
    sixtop_vars.busySendingEB      = FALSE;
    sixtop_vars.dsn                = 0;
    sixtop_vars.mgtTaskCounter     = 0;
@@ -223,7 +223,7 @@ void task_sixtopNotifSendDone() {
          
          // restart a random timer
          //sixtop_vars.periodMaintenance  = 930 +(openrandom_get16b()&0x3f);
-         sixtop_vars.periodMaintenance  = 60 +(openrandom_get16b()&0x3f);
+         sixtop_vars.periodMaintenance  = 45 +(openrandom_get16b()&0xf);
          opentimers_setPeriod(
             sixtop_vars.maintenanceTimerId,
             TIME_MS,
