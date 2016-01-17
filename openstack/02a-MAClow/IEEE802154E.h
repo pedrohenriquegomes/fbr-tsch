@@ -36,7 +36,7 @@ static const uint8_t chTemplate_default[] = {
 
 #define INCREASE_EB_PERIOD_TIMER   1000 // every 1 second increase the EB period by a certain amount
 #define INCREASE_EB_PERIOD_AMOUNT     1 // increase by 1 (multiples of 100 ms)
-#define INCREASE_EB_PERIOD_MAX       20 // max EB interval will be 10 (multiples of 100 ms)
+#define INCREASE_EB_PERIOD_MAX       10 // max EB interval will be 10 (multiples of 100 ms)
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
