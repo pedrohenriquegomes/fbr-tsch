@@ -34,14 +34,15 @@ void light_init()
 #if THRESHOLD_TEST == TRUE
    
    // printout the current lux as a way of finding out the correct thresholds
-   if (light_checkMyId(SENSOR_ID) &&
-       sensors_is_present(SENSOR_LIGHT))
+   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
+   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
    {
-      callbackRead_cbt             sixtop_light_read_cb;
+      callbackRead_cbt             light_read_cb;
       uint16_t                     lux = 0;
       
-      sixtop_light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
-      lux = sixtop_light_read_cb();
+      light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
+	  //light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
+      lux = light_read_cb();
       
       openserial_printInfo(COMPONENT_LIGHT,ERR_LIGHT_THRESHOLD,
                           (errorparameter_t)lux,
