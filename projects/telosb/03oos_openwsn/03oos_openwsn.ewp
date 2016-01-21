@@ -821,7 +821,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\config\linker\lnk430f1612.xcl</state>
+          <state>$TOOLKIT_DIR$\config\linker\lnk430f1611.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>

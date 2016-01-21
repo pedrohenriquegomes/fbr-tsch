@@ -146,6 +146,14 @@ void ieee154e_init() {
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
    radio_startTimer(TsSlotDuration);
+   
+   // starting a 1s timer to control EB rate as nodes are (de)synchronized
+   increase_eb_timer_id = opentimers_start(
+          EB_PERIOD_TIMER,
+          TIMER_PERIODIC,
+          TIME_MS,
+          increase_eb_timer_cb
+       );
 }
 
 //=========================== public ==========================================
@@ -831,6 +839,7 @@ port_INLINE void activity_ti1ORri1() {
             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
               
                ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
+               
                // If I am using FHSS force the transmission of EB in all channel, one after the other
                if ((ieee154e_vars.singleChannel == SYNCHRONIZING_CHANNEL) ||
                    ((ieee154e_vars.freq - 11) == ieee154e_vars.nextChannelEB))
@@ -1913,28 +1922,34 @@ void changeIsSync(bool newIsSync) {
       
       // start timer that will increase the EB period until reach max
       sixtop_setEBPeriod(1);
-      increase_eb_timer_id = opentimers_start(
-          INCREASE_EB_PERIOD_TIMER,
-          TIMER_PERIODIC,
-          TIME_MS,
-          increase_eb_timer_cb
-       );      
+            
    } else {
       leds_sync_off();
       schedule_resetBackoff();
-      
-      // stop timer that increase the EB period
-      opentimers_stop(increase_eb_timer_id);
-      sixtop_setEBPeriod(1);
    }
 }
 
 void increase_eb_timer_cb (opentimer_id_t id)
 {
-  if (sixtop_getEBPeriod() < INCREASE_EB_PERIOD_MAX)
+  // if we are synched, increase the EB interval up to INCREASE_EB_PERIOD_MAX
+  if (ieee154e_vars.isSync==TRUE) 
   {
-     sixtop_addEBPeriod(INCREASE_EB_PERIOD_AMOUNT);
-  }
+    if (sixtop_getEBPeriod() < EB_PERIOD_MAX)
+    {
+       sixtop_addEBPeriod(EB_PERIOD_AMOUNT);
+    }
+   // lets jump to another channel every  
+   } else {
+      ieee154e_vars.jumpCounter++;
+      
+      if (ieee154e_vars.jumpCounter == EB_JUMP_COUNTER)
+      {
+        ieee154e_vars.jumpCounter = 0;
+        
+        // jump to a random channel
+        ieee154e_setSingleChannel(11 + (openrandom_get16b()&0xf));
+      }
+   }
 }
 
 

@@ -29,14 +29,16 @@ static const uint8_t chTemplate_default[] = {
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
 #define EBPERIOD                     1 // in seconds: sending EB every 30 seconds
 #define MAXKAPERIOD                200 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
-#define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
+//#define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
+#define DESYNCTIMEOUT             4666 // in slots: @8ms per slot -> ~37 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
 
-#define INCREASE_EB_PERIOD_TIMER   2000 // every 2 second increase the EB period by a certain amount
-#define INCREASE_EB_PERIOD_AMOUNT     1 // increase by 1 (multiples of 100 ms)
-#define INCREASE_EB_PERIOD_MAX       10 // max EB interval will be 10 (multiples of 100 ms)
+#define EB_PERIOD_TIMER   2000 // every 2 seconds increase the EB period by a certain amount
+#define EB_PERIOD_AMOUNT     1 // increase by 1 (multiples of 100 ms)
+#define EB_PERIOD_MAX       10 // max EB interval will be 10 (multiples of 100 ms)
+#define EB_JUMP_COUNTER      2 // every 4 seconds jump to another channel
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
@@ -246,7 +248,7 @@ typedef struct {
    bool                      floodingState;
    // next channel to send beacon
    uint8_t                   nextChannelEB;
-   uint8_t                   ebCounter;
+   uint8_t                   jumpCounter;
 } ieee154e_vars_t;
 
 BEGIN_PACK
