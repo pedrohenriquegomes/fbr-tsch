@@ -22,7 +22,7 @@ static const uint8_t chTemplate_default[] = {
 
 //=========================== define ==========================================
 
-#define SYNCHRONIZING_CHANNEL       11 // channel the mote listens on to synchronize
+#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
 #define TXRETRIES                    0 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
@@ -34,7 +34,7 @@ static const uint8_t chTemplate_default[] = {
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
 
-#define INCREASE_EB_PERIOD_TIMER   1000 // every 1 second increase the EB period by a certain amount
+#define INCREASE_EB_PERIOD_TIMER   2000 // every 2 second increase the EB period by a certain amount
 #define INCREASE_EB_PERIOD_AMOUNT     1 // increase by 1 (multiples of 100 ms)
 #define INCREASE_EB_PERIOD_MAX       10 // max EB interval will be 10 (multiples of 100 ms)
 
@@ -158,10 +158,9 @@ enum ieee154e_atomicdurations_enum {
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-//   wdDataDuration            =   66,                  // 2000us
+//   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+   wdDataDuration            =   98,   
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
-//   wdAckDuration             =   0,
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
@@ -247,6 +246,7 @@ typedef struct {
    bool                      floodingState;
    // next channel to send beacon
    uint8_t                   nextChannelEB;
+   uint8_t                   ebCounter;
 } ieee154e_vars_t;
 
 BEGIN_PACK

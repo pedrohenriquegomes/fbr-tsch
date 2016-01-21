@@ -115,8 +115,9 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
-   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
-//   ieee154e_vars.singleChannel     = 0;
+//   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
+   ieee154e_vars.singleChannel     = 0;
+   ieee154e_vars.nextChannelEB     = SYNCHRONIZING_CHANNEL - 11;
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
    // default hopping template
@@ -829,7 +830,7 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
               
-              ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
+               ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
                // If I am using FHSS force the transmission of EB in all channel, one after the other
                if ((ieee154e_vars.singleChannel == SYNCHRONIZING_CHANNEL) ||
                    ((ieee154e_vars.freq - 11) == ieee154e_vars.nextChannelEB))
