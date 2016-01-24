@@ -158,6 +158,16 @@ void light_receive_data(OpenQueueEntry_t* pkt)
    // drop if we already received this packet
    if (counter <= light_vars.counter)
    {
+     // if I receive many packets with sequence number much smaller, the sensor node rebooted, I need to reet my counter
+     uint8_t diff = light_vars.counter - counter;
+     if (diff > LARGE_SEQUENCE_NUM_DIFF)
+     {
+       if (light_vars.n_large_seq_num++ > 3)
+       {
+         light_vars.counter = 0;
+       }
+     }
+     
 #if DEBUG == TRUE
      openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_DROP,
                          (errorparameter_t)counter,

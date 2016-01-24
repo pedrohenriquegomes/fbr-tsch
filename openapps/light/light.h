@@ -7,8 +7,8 @@
 
 #define LIGHT_SEND_PERIOD_MS       100
 #define LIGHT_SEND_RETRIES         3
-#define LUX_THRESHOLD              500
-//#define LUX_THRESHOLD              85
+#define LUX_THRESHOLD              250
+#define LARGE_SEQUENCE_NUM_DIFF    9
 
 //#define SINK_ID             0xed4f
 #define SINK_ID             0x13cf
@@ -26,6 +26,7 @@ typedef struct {
    bool                 state;          // current state
    bool                 initialized;    // flag to indicate the application has been initialized
    uint8_t              n_tx;           // controls the number of packets transmitted in each event
+   uint8_t              n_large_seq_num; // if I receive more than 3 packets with a large sequence number difference I restart my sequence number
 } light_vars_t;
 
 //=========================== prototypes ======================================
