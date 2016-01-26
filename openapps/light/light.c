@@ -26,6 +26,7 @@ void test_timer_cb(opentimer_id_t id);
 
 void light_timer_cb(opentimer_id_t id);
 void light_send_task_cb(void);
+void updateOutput(void);
 
 //=========================== procedures ======================================
 
@@ -159,14 +160,14 @@ void light_receive_data(OpenQueueEntry_t* pkt)
    if (counter <= light_vars.counter)
    {
      // if I receive many packets with sequence number much smaller, the sensor node rebooted, I need to reet my counter
-     uint8_t diff = light_vars.counter - counter;
-     if (diff > LARGE_SEQUENCE_NUM_DIFF)
-     {
-       if (light_vars.n_large_seq_num++ > 3)
-       {
-         light_vars.counter = 0;
-       }
-     }
+//     uint8_t diff = light_vars.counter - counter;
+//     if (diff > LARGE_SEQUENCE_NUM_DIFF)
+//     {
+//       if (light_vars.n_large_seq_num++ > 3)
+//       {
+//         light_vars.counter = 0;
+//       }
+//     }
      
 #if DEBUG == TRUE
      openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_DROP,
@@ -185,20 +186,7 @@ void light_receive_data(OpenQueueEntry_t* pkt)
    // if I am the sink, process the message (update the state)
    if (light_checkMyId(SINK_ID)) 
    {  
-     
-     if (light_vars.state)
-     {
-      debugpins_user1_set();
-     }
-     else
-     {
-       debugpins_user1_clr();
-     }
-     
-     /* TURN ON/OFF THE LIGHT AT THE SINK */
-     openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_STATE,
-                         (errorparameter_t)state,
-                         (errorparameter_t)0);
+     updateOutput();
      return;
    }
    
@@ -243,9 +231,23 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
    // free the packet
    openqueue_freePacketBuffer(pkt);
    
-   // drop if the beacon has a more recent counter
+   // update my info and drop if the beacon has a more recent counter
    if (counter >= light_vars.counter)
    {
+      // update my counter
+      light_vars.counter = counter;
+      
+      // update my state if I am not the sensor node
+      if (!light_checkMyId(SENSOR_ID))
+      {
+        light_vars.state = state;
+      }
+      
+      // if I am the sink, process the beacon (update the state)
+      if (light_checkMyId(SINK_ID)) 
+      {  
+         updateOutput();
+      }
       return;
    }
    
@@ -270,27 +272,6 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
 #endif
 }
 
-// send the packet to the lower layer (sixtop)
-port_INLINE void light_tx_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool state)
-{
-   pkt->owner                         = COMPONENT_LIGHT;
-   pkt->creator                       = COMPONENT_LIGHT;
-
-   // payload
-   packetfunctions_reserveHeaderSize(pkt,3);
-   *((uint8_t*)&pkt->payload[0]) = light_vars.counter & 0xff;
-   *((uint8_t*)&pkt->payload[1]) = light_vars.counter >> 8;
-   *((uint8_t*)&pkt->payload[2]) = state;
-       
-   pkt->l2_nextORpreviousHop.type        = ADDR_16B;
-   pkt->l2_nextORpreviousHop.addr_16b[0] = 0xff;
-   pkt->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-       
-   if ((sixtop_send(pkt))==E_FAIL) {
-      openqueue_freePacketBuffer(pkt);
-   }
-}
-
 // send a new packet when a state change happens
 void light_send_task_cb() 
 {
@@ -305,30 +286,52 @@ void light_send_task_cb()
       openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
       return;
    }
-     
+   light_tx_packet(pkt, light_vars.counter, light_vars.state);
+   
+#if DEBUG == TRUE    
+   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
+                       (errorparameter_t)light_vars.counter,
+                       (errorparameter_t)light_vars.state);
+#endif
+       
+}
+
+// send the packet to the lower layer (sixtop)
+port_INLINE void light_tx_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool state)
+{
    pkt->owner                         = COMPONENT_LIGHT;
    pkt->creator                       = COMPONENT_LIGHT;
 
    // payload
    packetfunctions_reserveHeaderSize(pkt,3);
-   *((uint8_t*)&pkt->payload[0]) = light_vars.counter & 0xff;
-   *((uint8_t*)&pkt->payload[1]) = light_vars.counter >> 8;
-   *((uint8_t*)&pkt->payload[2]) = light_vars.state;
+   *((uint8_t*)&pkt->payload[0]) = counter & 0xff;
+   *((uint8_t*)&pkt->payload[1]) = counter >> 8;
+   *((uint8_t*)&pkt->payload[2]) = state;
        
    pkt->l2_nextORpreviousHop.type        = ADDR_16B;
    pkt->l2_nextORpreviousHop.addr_16b[0] = 0xff;
    pkt->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-
-#if DEBUG == TRUE    
-   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
-                       (errorparameter_t)light_vars.counter,
-//                     (errorparameter_t)light_vars.lux,
-                       (errorparameter_t)light_vars.state);
-#endif
        
    if ((sixtop_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }
+}
+
+void updateOutput(void)
+{
+  if (light_vars.state)
+  {
+    debugpins_user1_set();
+  }
+  else
+  {
+    debugpins_user1_clr();
+  }
+     
+  /* TURN ON/OFF THE LIGHT AT THE SINK */
+  openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_STATE,
+                      (errorparameter_t)light_vars.state,
+                      (errorparameter_t)0);
 }
 
 // check if my id is equal to addr
