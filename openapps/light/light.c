@@ -159,14 +159,14 @@ void light_receive_data(OpenQueueEntry_t* pkt)
    if (counter <= light_vars.counter)
    {
      // if I receive many packets with sequence number much smaller, the sensor node rebooted, I need to reet my counter
-     uint8_t diff = light_vars.counter - counter;
-     if (diff > LARGE_SEQUENCE_NUM_DIFF)
-     {
-       if (light_vars.n_large_seq_num++ > 3)
-       {
-         light_vars.counter = 0;
-       }
-     }
+//     uint8_t diff = light_vars.counter - counter;
+//     if (diff > LARGE_SEQUENCE_NUM_DIFF)
+//     {
+//       if (light_vars.n_large_seq_num++ > 3)
+//       {
+//         light_vars.counter = 0;
+//       }
+//     }
      
 #if DEBUG == TRUE
      openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_DROP,
@@ -240,22 +240,43 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
    // retrieve the state
    state = pkt->l2_floodingState;
    
-   // free the packet
-   openqueue_freePacketBuffer(pkt);
-   
-   // drop if the beacon has a more recent counter
+   // update my info and drop if the beacon has a more recent counter
    if (counter >= light_vars.counter)
    {
-      return;
+     light_vars.counter = counter;
+     light_vars.state = state;
+  
+     // if I am the sink, process the beacon (update the state)
+     if (light_checkMyId(SINK_ID)) 
+     {  
+     
+       if (light_vars.state)
+       {
+          debugpins_user1_set();
+       }
+       else
+       {
+         debugpins_user1_clr();
+       }
+     
+       /* TURN ON/OFF THE LIGHT AT THE SINK */
+       openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_STATE,
+                           (errorparameter_t)state,
+                           (errorparameter_t)0);
+     }
+     
+     return;
    }
    
    // if I received a beacon that is older, but has the same state it means the other node is not out-of-date
-   if (light_vars.state == state)
+   // if the other node is not closer to the sink, also discard the packet
+   if ((light_vars.state == state) || (pkt->l2_rank >= neighbors_getMyDAGrank()))
    {
      return;
    }
    
-   // if I received a beacon that is older and the node is out-of-date, we should update it asap
+   // if I received a beacon that is older from a node closer to the sink
+   // and the node is out-of-date, we should update it asap
    fw = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
    if (fw==NULL) {
      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
@@ -268,6 +289,31 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
                        (errorparameter_t)light_vars.counter,
                        (errorparameter_t)light_vars.state);
 #endif
+}
+
+// send a new packet when a state change happens
+void light_send_task_cb() 
+{
+   OpenQueueEntry_t*    pkt;
+   
+   // increment the counter
+   light_vars.counter++;
+      
+   // get a free packet buffer
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
+   if (pkt==NULL) {
+      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
+      return;
+   }
+   light_tx_packet(pkt, light_vars.counter, light_vars.state);
+     
+#if DEBUG == TRUE    
+   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
+                       (errorparameter_t)light_vars.counter,
+//                     (errorparameter_t)light_vars.lux,
+                       (errorparameter_t)light_vars.state);
+#endif
+
 }
 
 // send the packet to the lower layer (sixtop)
@@ -285,46 +331,6 @@ port_INLINE void light_tx_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool s
    pkt->l2_nextORpreviousHop.type        = ADDR_16B;
    pkt->l2_nextORpreviousHop.addr_16b[0] = 0xff;
    pkt->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-       
-   if ((sixtop_send(pkt))==E_FAIL) {
-      openqueue_freePacketBuffer(pkt);
-   }
-}
-
-// send a new packet when a state change happens
-void light_send_task_cb() 
-{
-   OpenQueueEntry_t*    pkt;
-   
-   // increment the counter
-   light_vars.counter++;
-      
-   // get a free packet buffer
-   pkt = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
-   if (pkt==NULL) {
-      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
-      return;
-   }
-     
-   pkt->owner                         = COMPONENT_LIGHT;
-   pkt->creator                       = COMPONENT_LIGHT;
-
-   // payload
-   packetfunctions_reserveHeaderSize(pkt,3);
-   *((uint8_t*)&pkt->payload[0]) = light_vars.counter & 0xff;
-   *((uint8_t*)&pkt->payload[1]) = light_vars.counter >> 8;
-   *((uint8_t*)&pkt->payload[2]) = light_vars.state;
-       
-   pkt->l2_nextORpreviousHop.type        = ADDR_16B;
-   pkt->l2_nextORpreviousHop.addr_16b[0] = 0xff;
-   pkt->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-
-#if DEBUG == TRUE    
-   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
-                       (errorparameter_t)light_vars.counter,
-//                     (errorparameter_t)light_vars.lux,
-                       (errorparameter_t)light_vars.state);
-#endif
        
    if ((sixtop_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);

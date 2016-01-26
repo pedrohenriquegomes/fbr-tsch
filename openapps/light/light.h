@@ -5,9 +5,9 @@
 
 //=========================== define ==========================================
 
-#define LIGHT_SEND_PERIOD_MS       100
+#define LIGHT_SEND_PERIOD_MS       500
 #define LIGHT_SEND_RETRIES         3
-#define LUX_THRESHOLD              250
+#define LUX_THRESHOLD              90
 #define LARGE_SEQUENCE_NUM_DIFF    9
 
 //#define SINK_ID             0xed4f

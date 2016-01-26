@@ -225,21 +225,6 @@ void isr_ieee154e_timer() {
       case S_TXDATA:
          activity_tie3();
          break;
-//      case S_RXACKOFFSET:
-//         activity_ti6();
-//         break;
-//      case S_RXACKPREPARE:
-//         activity_tie4();
-//         break;
-//      case S_RXACKREADY:
-//         activity_ti7();
-//         break;
-//      case S_RXACKLISTEN:
-//         activity_tie5();
-//         break;
-//      case S_RXACK:
-//         activity_tie6();
-//         break;
       case S_RXDATAOFFSET:
          activity_ri2(); 
          break;
@@ -255,21 +240,6 @@ void isr_ieee154e_timer() {
       case S_RXDATA:
          activity_rie3();
          break;
-//      case S_TXACKOFFSET: 
-//         activity_ri6();
-//         break;
-//      case S_TXACKPREPARE:
-//         activity_rie4();
-//         break;
-//      case S_TXACKREADY:
-//         activity_ri7();
-//         break;
-//      case S_TXACKDELAY:
-//         activity_rie5();
-//         break;
-//      case S_TXACK:
-//         activity_rie6();
-//         break;
       default:
          // log the error
          openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_TIMERFIRES,
@@ -295,17 +265,6 @@ void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
          case S_TXDATADELAY:   
             activity_ti4(capturedTime);
             break;
-//         case S_RXACKREADY:
-            /*
-            It is possible to receive in this state for radio where there is no
-            way of differentiated between "ready to listen" and "listening"
-            (e.g. CC2420). We must therefore expect to the start of a packet in
-            this "ready" state.
-            */
-            // no break!
-//         case S_RXACKLISTEN:
-//            activity_ti8(capturedTime);
-//            break;
          case S_RXDATAREADY:
             /*
             Similarly as above.
@@ -314,9 +273,6 @@ void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
          case S_RXDATALISTEN:
             activity_ri4(capturedTime);
             break;
-//         case S_TXACKDELAY:
-//            activity_ri8(capturedTime);
-//            break;
          default:
             // log the error
             openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_NEWSLOT,
@@ -343,15 +299,9 @@ void ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
          case S_TXDATA:
             activity_ti5(capturedTime);
             break;
-//         case S_RXACK:
-//            activity_ti9(capturedTime);
-//            break;
          case S_RXDATA:
             activity_ri5(capturedTime);
             break;
-//         case S_TXACK:
-//            activity_ri9(capturedTime);
-//            break;
          default:
             // log the error
             openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDOFFRAME,
@@ -1523,7 +1473,7 @@ void increase_eb_timer_cb (opentimer_id_t id)
     }
    // lets jump to another channel every  
    } else {
-      ieee154e_vars.jumpCounter++;
+      /*ieee154e_vars.jumpCounter++;
       
       if (ieee154e_vars.jumpCounter == EB_JUMP_COUNTER)
       {
@@ -1531,7 +1481,7 @@ void increase_eb_timer_cb (opentimer_id_t id)
         
         // jump to a random channel
         ieee154e_setSingleChannel(11 + (openrandom_get16b()&0xf));
-      }
+      }*/
    }
 }
 

@@ -214,13 +214,8 @@ void task_sixtopNotifReceive() {
       case IEEE154_TYPE_BEACON:
         // update the rank
          neighbors_indicateRxEB(msg);
-         // if the beacon comes from an upper node we should check if the node is up-to-date
-         if (msg->l2_rank < neighbors_getMyDAGrank())
-         {
-           light_receive_beacon(msg);
-         } else {
-            openqueue_freePacketBuffer(msg);
-         }
+         light_receive_beacon(msg);
+         openqueue_freePacketBuffer(msg);
          break;
       case IEEE154_TYPE_DATA:
         // we only have one type of data packet. It is from sixtop light application
