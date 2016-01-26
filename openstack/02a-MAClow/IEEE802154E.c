@@ -103,8 +103,8 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
-   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
-//   ieee154e_vars.singleChannel     = 0;
+//   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
+   ieee154e_vars.singleChannel     = 0;
    ieee154e_vars.nextChannelEB     = SYNCHRONIZING_CHANNEL - 11;
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
@@ -1473,15 +1473,15 @@ void increase_eb_timer_cb (opentimer_id_t id)
     }
    // lets jump to another channel every  
    } else {
-      ieee154e_vars.jumpCounter++;
-      
-      if (ieee154e_vars.jumpCounter == EB_JUMP_COUNTER)
-      {
-        ieee154e_vars.jumpCounter = 0;
-        
-        // jump to a random channel
-        ieee154e_setSingleChannel(11 + (openrandom_get16b()&0xf));
-      }
+//      ieee154e_vars.jumpCounter++;
+//      
+//      if (ieee154e_vars.jumpCounter == EB_JUMP_COUNTER)
+//      {
+//        ieee154e_vars.jumpCounter = 0;
+//        
+//        // jump to a random channel
+//        ieee154e_setSingleChannel(11 + (openrandom_get16b()&0xf));
+//      }
    }
 }
 

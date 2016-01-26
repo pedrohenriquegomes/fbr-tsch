@@ -36,8 +36,8 @@ static const uint8_t chTemplate_default[] = {
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
 
 #define EB_PERIOD_TIMER   2000 // every 2 seconds increase the EB period by a certain amount
-#define EB_PERIOD_AMOUNT     1 // increase by 1 (multiples of 100 ms)
-#define EB_PERIOD_MAX       10 // max EB interval will be 10 (multiples of 100 ms)
+#define EB_PERIOD_AMOUNT     2 // increase by 1 (multiples of 100 ms)
+#define EB_PERIOD_MAX       20 // max EB interval will be 10 (multiples of 100 ms)
 #define EB_JUMP_COUNTER      2 // every 4 seconds jump to another channel
 
 //15.4e information elements related
