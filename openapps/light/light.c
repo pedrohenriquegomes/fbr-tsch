@@ -18,13 +18,15 @@
 //=========================== variables =======================================
 
 light_vars_t        light_vars;
+OpenQueueEntry_t*   pktToForward;
 
 opentimer_id_t      test_timer;
 void test_timer_cb(opentimer_id_t id);
 
 //=========================== prototypes ======================================
 
-void light_timer_cb(opentimer_id_t id);
+void light_timer_send_cb(opentimer_id_t id);
+void light_timer_fw_cb(opentimer_id_t id);
 void light_send_task_cb(void);
 void updateOutput(void);
 
@@ -34,7 +36,8 @@ void light_init()
 {  
    // clear local variables
    memset(&light_vars,0,sizeof(light_vars_t));
-  
+   pktToForward = NULL;
+   
 #if THRESHOLD_TEST == TRUE
    
    // printout the current lux as a way of finding out the correct thresholds
@@ -104,12 +107,12 @@ void light_send(uint16_t lux, bool state)
       LIGHT_SEND_PERIOD_MS,
       TIMER_PERIODIC,
       TIME_MS,
-      light_timer_cb
+      light_timer_send_cb
    );
 }
 
 // fires the multiples transmissions
-void light_timer_cb(opentimer_id_t id){
+void light_timer_send_cb(opentimer_id_t id){
   
   if (light_vars.n_tx < LIGHT_SEND_RETRIES)
   {
@@ -159,15 +162,6 @@ void light_receive_data(OpenQueueEntry_t* pkt)
    // drop if we already received this packet
    if (counter <= light_vars.counter)
    {
-     // if I receive many packets with sequence number much smaller, the sensor node rebooted, I need to reet my counter
-//     uint8_t diff = light_vars.counter - counter;
-//     if (diff > LARGE_SEQUENCE_NUM_DIFF)
-//     {
-//       if (light_vars.n_large_seq_num++ > 3)
-//       {
-//         light_vars.counter = 0;
-//       }
-//     }
      
 #if DEBUG == TRUE
      openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_DROP,
@@ -190,13 +184,27 @@ void light_receive_data(OpenQueueEntry_t* pkt)
      return;
    }
    
+   if (light_vars.isForwarding)
+   {
+     return;
+   }
+   
    // if I am not the sink, lets forward
    fw = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
    if (fw==NULL) {
      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
      return;
    }
-   light_tx_packet(fw, counter, state);
+   light_prepare_packet(fw, counter, state);
+   
+   pktToForward = fw;
+   light_vars.isForwarding = TRUE;
+   light_vars.fwTimerId = opentimers_start(
+      (openrandom_get16b()&0x3f),
+      TIMER_ONESHOT,
+      TIME_MS,
+      light_timer_fw_cb
+   );
    
 #if DEBUG == TRUE
    openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_FW,
@@ -252,7 +260,8 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
    }
    
    // if I received a beacon that is older, but has the same state it means the other node is not out-of-date
-   if (light_vars.state == state)
+   if ((light_vars.state == state) ||
+       (light_vars.isForwarding == TRUE))
    {
      return;
    }
@@ -263,13 +272,31 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
      return;
    }
-   light_tx_packet(fw, light_vars.counter, light_vars.state);
+   light_prepare_packet(fw, light_vars.counter, light_vars.state);
+
+   pktToForward = fw;
+   light_vars.isForwarding = TRUE;
+   light_vars.fwTimerId = opentimers_start(
+      (openrandom_get16b()&0x3f),
+      TIMER_ONESHOT,
+      TIME_MS,
+      light_timer_fw_cb
+   );
    
 #if DEBUG == TRUE
    openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_GEN,
                        (errorparameter_t)light_vars.counter,
                        (errorparameter_t)light_vars.state);
 #endif
+}
+
+void light_timer_fw_cb(opentimer_id_t id)
+{
+   if ((sixtop_send(pktToForward))==E_FAIL) {
+      openqueue_freePacketBuffer(pktToForward);
+   }
+   light_vars.isForwarding = FALSE;
+   pktToForward = NULL;
 }
 
 // send a new packet when a state change happens
@@ -286,7 +313,7 @@ void light_send_task_cb()
       openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
       return;
    }
-   light_tx_packet(pkt, light_vars.counter, light_vars.state);
+   light_prepare_packet(pkt, light_vars.counter, light_vars.state);
    
 #if DEBUG == TRUE    
    openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
@@ -294,10 +321,13 @@ void light_send_task_cb()
                        (errorparameter_t)light_vars.state);
 #endif
        
+   if ((sixtop_send(pkt))==E_FAIL) {
+      openqueue_freePacketBuffer(pkt);
+   }
 }
 
 // send the packet to the lower layer (sixtop)
-port_INLINE void light_tx_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool state)
+port_INLINE void light_prepare_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool state)
 {
    pkt->owner                         = COMPONENT_LIGHT;
    pkt->creator                       = COMPONENT_LIGHT;
@@ -311,10 +341,6 @@ port_INLINE void light_tx_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool s
    pkt->l2_nextORpreviousHop.type        = ADDR_16B;
    pkt->l2_nextORpreviousHop.addr_16b[0] = 0xff;
    pkt->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-       
-   if ((sixtop_send(pkt))==E_FAIL) {
-      openqueue_freePacketBuffer(pkt);
-   }
 }
 
 void updateOutput(void)

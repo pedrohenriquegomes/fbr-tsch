@@ -21,10 +21,12 @@
 
 typedef struct {
    opentimer_id_t       sendTimerId;    // timer ID for sending multiple packets in every event
+   opentimer_id_t       fwTimerId;      // timer ID for forwarding one packet
    int16_t              counter;        // event sequence number
    uint16_t             lux;            // current lux read
    bool                 state;          // current state
    bool                 initialized;    // flag to indicate the application has been initialized
+   bool                 isForwarding;   // flag to indicate if we are forwarding a packet
    uint8_t              n_tx;           // controls the number of packets transmitted in each event
    uint8_t              n_large_seq_num; // if I receive more than 3 packets with a large sequence number difference I restart my sequence number
 } light_vars_t;
@@ -41,6 +43,6 @@ bool light_is_initialized(void);
 bool light_state(void);
 uint16_t light_counter(void);
 bool light_checkMyId(uint16_t addr);
-void light_tx_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool state);
+void light_prepare_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool state);
 
 #endif
