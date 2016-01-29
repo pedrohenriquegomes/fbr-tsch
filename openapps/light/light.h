@@ -5,14 +5,14 @@
 
 //=========================== define ==========================================
 
-#define LIGHT_SEND_PERIOD_MS       500
-#define LIGHT_SEND_RETRIES         3
-#define LUX_THRESHOLD              90
-#define LARGE_SEQUENCE_NUM_DIFF    9
+#define LIGHT_SEND_PERIOD_MS       100
+#define LIGHT_SEND_RETRIES         5
+#define LUX_THRESHOLD              85
+//#define LUX_THRESHOLD              2000
 
-//#define SINK_ID             0xed4f
+//#define SINK_ID             0xeca3
 #define SINK_ID             0x13cf
-//#define SENSOR_ID           0xecbf
+//#define SENSOR_ID           0xed4e
 #define SENSOR_ID           0x5a53
 
 //=========================== typedef =========================================

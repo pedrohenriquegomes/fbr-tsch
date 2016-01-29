@@ -31,6 +31,7 @@ void sensors_init(void) {
    adc_sensor_init();
    sensors_vars.sensorsTypes[SENSOR_ADC_PHOTOSYNTHETIC] = 1;
    sensors_vars.sensorsTypes[SENSOR_ADC_TOTAL_SOLAR] = 1;
+   sensors_vars.sensorsTypes[SENSOR_LIGHT] = 1;
    
 }
 
@@ -59,6 +60,8 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
         return &adc_sens_read_photosynthetic;
       case SENSOR_ADC_TOTAL_SOLAR:
          return &adc_sens_read_total_solar;
+      case SENSOR_LIGHT:
+         return &adc_sens_read_photosynthetic;   
       default:
          return NULL;
    }
@@ -81,6 +84,8 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
          return &adc_sens_convert_photosynthetic;
       case SENSOR_ADC_TOTAL_SOLAR:
          return &adc_sens_convert_total_solar;
+      case SENSOR_LIGHT:
+         return &adc_sens_convert_photosynthetic;
       default:
          return NULL;
    }

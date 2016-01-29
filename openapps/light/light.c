@@ -11,6 +11,7 @@
 #include "IEEE802154E.h"
 #include "sixtop.h"
 #include "debugpins.h"
+#include "openrandom.h"
 
 #define DEBUG               TRUE
 #define THRESHOLD_TEST      TRUE
@@ -41,14 +42,12 @@ void light_init()
 #if THRESHOLD_TEST == TRUE
    
    // printout the current lux as a way of finding out the correct thresholds
-   //if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
-   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
+   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
    {
       callbackRead_cbt             light_read_cb;
       uint16_t                     lux = 0;
       
-      //light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
-      light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
+      light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
       lux = light_read_cb();
       
       openserial_printInfo(COMPONENT_LIGHT,ERR_LIGHT_THRESHOLD,
@@ -192,7 +191,7 @@ void light_receive_data(OpenQueueEntry_t* pkt)
    // if I am not the sink, lets forward
    fw = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
    if (fw==NULL) {
-     openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
+     openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,1,0);
      return;
    }
    light_prepare_packet(fw, counter, state);
@@ -223,7 +222,6 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
    // don't run if not synched
    if (ieee154e_isSynch() == FALSE)
    {
-     openqueue_freePacketBuffer(pkt);
      return;
    }
    
@@ -236,40 +234,44 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
    // retrieve the state
    state = pkt->l2_floodingState;
    
-   // free the packet
-   openqueue_freePacketBuffer(pkt);
-   
    // update my info and drop if the beacon has a more recent counter
    if (counter >= light_vars.counter)
    {
       // update my counter
       light_vars.counter = counter;
       
-      // update my state if I am not the sensor node
-      if (!light_checkMyId(SENSOR_ID))
+      if (light_vars.state != state)
       {
-        light_vars.state = state;
-      }
-      
-      // if I am the sink, process the beacon (update the state)
-      if (light_checkMyId(SINK_ID)) 
-      {  
-         updateOutput();
+        // update my state if I am not the sensor node
+        if (!light_checkMyId(SENSOR_ID))
+        {
+          light_vars.state = state;
+        }
+        
+        // if I am the sink, process the beacon (update the state)
+        if (light_checkMyId(SINK_ID)) 
+        {  
+           updateOutput();
+        }
       }
       return;
    }
    
-   // if I received a beacon that is older, but has the same state it means the other node is not out-of-date
+   // if the packet has the same state as mine dont need to update the neighbor
+   // if I am already forwarding a packet, return
+   // if the packet comes from a node further from the sink, return
    if ((light_vars.state == state) ||
-       (light_vars.isForwarding == TRUE))
+       (light_vars.isForwarding == TRUE) ||
+       (pkt->l2_rank >= neighbors_getMyDAGrank()))
    {
      return;
    }
    
-   // if I received a beacon that is older and the node is out-of-date, we should update it asap
+   // if I received a beacon that is older and the node is out-of-date and closer to the sink, 
+   // we should update it asap
    fw = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
    if (fw==NULL) {
-     openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
+     openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,2,0);
      return;
    }
    light_prepare_packet(fw, light_vars.counter, light_vars.state);

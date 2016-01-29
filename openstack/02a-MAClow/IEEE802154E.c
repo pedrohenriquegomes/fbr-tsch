@@ -103,8 +103,8 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
-   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
-//   ieee154e_vars.singleChannel     = 0;
+//   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
+   ieee154e_vars.singleChannel     = 0;
    ieee154e_vars.nextChannelEB     = SYNCHRONIZING_CHANNEL - 11;
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
@@ -620,10 +620,8 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
        // ASN is known, but the frame length is not
        // frame length will be known after parsing the frame and link IE
        f_asn2slotoffset = TRUE;
-       ptr = ptr + 5;
        // join priority
-       joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
-       ptr = ptr + 1;
+       joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr+5));
     }
 
      if (f_asn2slotoffset == TRUE) {
@@ -645,14 +643,13 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
      }
 
    *lenIE = 6;
+   ptr = ptr + 6;
    
    // process the counter and state
    uint8_t cnt1 = *((uint8_t*)(pkt->payload)+ptr);
    uint8_t cnt2 = *((uint8_t*)(pkt->payload)+ptr+1);
    ieee154e_vars.dataReceived->l2_floodingCounter = cnt1 | (cnt2 << 8);
-   
-   ptr += 2;
-   ieee154e_vars.dataReceived->l2_floodingState = *((bool*)(pkt->payload)+ptr);
+   ieee154e_vars.dataReceived->l2_floodingState = *((bool*)(pkt->payload)+ptr+2);
    
    *lenIE += 3;
 
@@ -714,11 +711,9 @@ port_INLINE void activity_ti1ORri1() {
    callbackRead_cbt             light_read_cb;
    uint16_t                     lux = 0;
    
-   //if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
-   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_ADC_TOTAL_SOLAR))
+   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
    {
-      light_read_cb = sensors_getCallbackRead(SENSOR_ADC_TOTAL_SOLAR);
-      //light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
+      light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
       lux = light_read_cb();
       
       // first time
