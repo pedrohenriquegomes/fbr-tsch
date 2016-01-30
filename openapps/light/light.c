@@ -13,7 +13,7 @@
 #include "debugpins.h"
 #include "openrandom.h"
 
-#define DEBUG               TRUE
+#define DEBUG               FALSE
 #define THRESHOLD_TEST      TRUE
 
 //=========================== variables =======================================

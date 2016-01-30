@@ -48,9 +48,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t temp_8b;
    uint8_t ielistpresent = IEEE154_IELIST_NO;
    bool    rankPresent;
-   int16_t timeCorrection;
    uint16_t rank;
-   header_IE_ht header_desc;
    bool    headerIEPresent = FALSE;
    
    rankPresent = msg->l2_rankPresent;
@@ -179,11 +177,6 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                ieee802154_header_iht* ieee802514_header) {
    uint8_t  temp_8b;
    uint16_t temp_16b;
-   uint16_t len;
-   uint8_t  gr_elem_id;
-   uint8_t  byte0;
-   uint8_t  byte1;
-   int16_t  timeCorrection;
    // by default, let's assume the header is not valid, in case we leave this
    // function because the packet ends up being shorter than the header.
    ieee802514_header->valid=FALSE;
