@@ -105,10 +105,13 @@ void debugpins_user1_set() {
 
 // P6.3
 void debugpins_user2_toggle() {
+  P6OUT ^=  0x08;
 }
 void debugpins_user2_clr() {
+  P6OUT &= ~0x08;
 }
 void debugpins_user2_set() {
+  P6OUT |=  0x08;
 }
 
 void    leds_toggle_2x(void){

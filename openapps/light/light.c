@@ -13,7 +13,7 @@
 #include "debugpins.h"
 #include "openrandom.h"
 
-#define DEBUG               FALSE
+#define DEBUG               TRUE
 #define THRESHOLD_TEST      TRUE
 
 //=========================== variables =======================================
@@ -56,7 +56,8 @@ void light_init()
    }
 #endif
    
-   debugpins_user1_clr();
+  debugpins_user1_clr();
+  debugpins_user2_clr();
    
 //  test_timer = opentimers_start(
 //      1000,

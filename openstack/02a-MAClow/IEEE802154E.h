@@ -65,29 +65,8 @@ static const uint8_t chTemplate_default[] = {
 
 #define IEEE802154E_DESC_TYPE_IE_SHIFT                     15
 
-//MLME Sub IE LONG page 83
-#define IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK             0x07FF
-#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK           0x7800
 
 #define IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT          11
-
-//MLME Sub IE SHORT page 82
-#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK            0x00FF
-#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK          0x7F00
-
-#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT         8
-
-#define IEEE802154E_MLME_SYNC_IE_SUBID                     0x1A
-#define IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT               8
-#define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID           0x1B
-#define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID_SHIFT     8
-#define IEEE802154E_MLME_TIMESLOT_IE_SUBID                 0x1c
-#define IEEE802154E_MLME_TIMESLOT_IE_SUBID_SHIFT           8
-#define IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID           0x09
-#define IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID_SHIFT     11
-
-#define IEEE802154E_MLME_IE_GROUPID                        0x01
-#define IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID      0x1E
 
 /**
 When a packet is received, it is written inside the OpenQueueEntry_t->packet
@@ -144,7 +123,7 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-   TsTxOffset                =  131,                  //  4000us
+   TsTxOffset                =  114,
    TsLongGT                  =   43,                  //  1300us
 //   TsTxAckDelay              =  151,                  //  4606us
    TsTxAckDelay              =  0,
@@ -152,17 +131,14 @@ enum ieee154e_atomicdurations_enum {
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
-   maxRxAckPrepare           =  PORT_maxRxAckPrepare,
    maxRxDataPrepare          =  PORT_maxRxDataPrepare,
-   maxTxAckPrepare           =  PORT_maxTxAckPrepare,
    // radio speed related
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
 //   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdDataDuration            =   98,   
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+   wdDataDuration            =   82,
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
@@ -179,26 +155,13 @@ enum ieee154e_linkOption_enum {
 #define DURATION_tt2 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx
 #define DURATION_tt3 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx+wdRadioTx
 #define DURATION_tt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_tt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx-maxRxAckPrepare
-#define DURATION_tt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx
-#define DURATION_tt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay+TsShortGT
-#define DURATION_tt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 // RX
 #define DURATION_rt1 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx-maxRxDataPrepare
 #define DURATION_rt2 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx
 #define DURATION_rt3 ieee154e_vars.lastCapturedTime+TsTxOffset+TsLongGT
 #define DURATION_rt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_rt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx-maxTxAckPrepare
-#define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
-#define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
-#define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 
 //=========================== typedef =========================================
-
-// IEEE802.15.4E acknowledgement (ACK)
-typedef struct {
-   PORT_SIGNED_INT_WIDTH timeCorrection;
-} IEEE802154E_ACK_ht;
 
 // includes payload header IE short + MLME short Header + Sync IE
 #define EB_PAYLOAD_LENGTH sizeof(payload_IE_ht) + \

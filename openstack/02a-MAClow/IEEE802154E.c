@@ -56,8 +56,6 @@ void     activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime);
 
 // frame validity check
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
-bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
-                    OpenQueueEntry_t*          packetSent);
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 // ASN handling
@@ -72,7 +70,6 @@ void     timeslotTemplateIDStoreFromEB(uint8_t id);
 void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // synchronization
 void     synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived);
-void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
 void     changeIsSync(bool newIsSync);
 // notifying upper layer
 void     notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error);
@@ -105,9 +102,9 @@ void ieee154e_init() {
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
    ieee154e_vars.syncChannel   = SYNCHRONIZING_CHANNEL;
-//   ieee154e_vars.singleChannel     = ieee154e_vars.syncChannel
+   ieee154e_vars.singleChannel     = ieee154e_vars.syncChannel;
 //   ieee154e_vars.syncChannel       = (openrandom_get16b()&0x0f) + 11;
-   ieee154e_vars.singleChannel     = 0;
+//   ieee154e_vars.singleChannel     = 0;
    ieee154e_vars.nextChannelEB     = ieee154e_vars.syncChannel - 11;
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
@@ -138,7 +135,7 @@ void ieee154e_init() {
    // have the radio start its timer
    radio_startTimer(TsSlotDuration);
    
-   // starting a 1s timer to control EB rate as nodes are (de)synchronized
+   // starting a 2s timer to control EB rate as nodes are (de)synchronized
    increase_eb_timer_id = opentimers_start(
           EB_PERIOD_TIMER,
           TIMER_PERIODIC,
@@ -669,6 +666,8 @@ port_INLINE void activity_ti1ORri1() {
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
 
+   debugpins_user2_set();
+   
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
    
@@ -695,6 +694,7 @@ port_INLINE void activity_ti1ORri1() {
             
          // abort
          endSlot();
+         debugpins_user2_clr();
          return;
       }
    }
@@ -707,6 +707,7 @@ port_INLINE void activity_ti1ORri1() {
                             (errorparameter_t)ieee154e_vars.slotOffset);
       // abort
       endSlot();
+      debugpins_user2_clr();
       return;
    }
    
@@ -754,6 +755,7 @@ port_INLINE void activity_ti1ORri1() {
       endSlot();
       //start outputing serial
       openserial_startOutput();
+      debugpins_user2_clr();
       return;
    }
    
@@ -857,6 +859,7 @@ port_INLINE void activity_ti1ORri1() {
          endSlot();
          break;
    }
+   debugpins_user2_clr();
 }
 
 port_INLINE void activity_ti2() {
@@ -1226,39 +1229,6 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
           );
 }
 
-/**
-\brief Decides whether the packet I just received is a valid ACK.
-
-A packet is a valid ACK if it satisfies the following conditions:
-- the IEEE802.15.4 header is valid
-- the frame type is 'ACK'
-- the sequence number in the ACK matches the sequence number of the packet sent
-- the ACK contains my PANid
-- the packet is unicast to me
-- the packet comes from the neighbor I sent the data to
-
-\param[in] ieee802514_header IEEE802.15.4 header of the packet I just received
-\param[in] packetSent points to the packet I just sent
-
-\returns TRUE if packet is a valid ACK, FALSE otherwise.
-*/
-port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueEntry_t* packetSent) {
-   /*
-   return ieee802514_header->valid==TRUE                                                           && \
-          ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
-          ieee802514_header->dsn==packetSent->l2_dsn                                               && \
-          packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
-          idmanager_isMyAddress(&ieee802514_header->dest)                                          && \
-          packetfunctions_sameAddress(&ieee802514_header->src,&packetSent->l2_nextORpreviousHop);
-   */
-   // poipoi don't check for seq num
-   return ieee802514_header->valid==TRUE                                                           && \
-          ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
-          packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
-          idmanager_isMyAddress(&ieee802514_header->dest)                                          && \
-          packetfunctions_sameAddress(&ieee802514_header->src,&packetSent->l2_nextORpreviousHop);
-}
-
 //======= ASN handling
 
 port_INLINE void incrementAsnOffset() {
@@ -1406,40 +1376,6 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    
    // update the stats
    ieee154e_stats.numSyncPkt++;
-   updateStats(timeCorrection);
-   
-}
-
-void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
-   PORT_RADIOTIMER_WIDTH newPeriod;
-   PORT_RADIOTIMER_WIDTH currentPeriod;
-   
-   // calculate new period
-   currentPeriod                  =  radio_getTimerPeriod();
-   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);
-
-   // resynchronize by applying the new period
-   radio_setTimerPeriod(newPeriod);
-   
-   // reset the de-synchronization timeout
-   ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
-   // indicate time correction to adaptive sync module
-   adaptive_sync_indicateTimeCorrection((-timeCorrection),ieee154e_vars.ackReceived->l2_nextORpreviousHop);
-   // log a large timeCorrection
-   if (
-         ieee154e_vars.isSync==TRUE &&
-         (
-            timeCorrection<-LIMITLARGETIMECORRECTION ||
-            timeCorrection> LIMITLARGETIMECORRECTION
-         )
-      ) {
-      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
-                            (errorparameter_t)timeCorrection,
-                            (errorparameter_t)1);
-   }
-
-   // update the stats
-   ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
    
 }
