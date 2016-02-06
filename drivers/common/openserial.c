@@ -443,9 +443,6 @@ void openserial_goldenImageCommands(void){
    uint8_t  input_buffer[7];
    uint8_t  numDataBytes;
    uint8_t  version;
-#ifndef GOLDEN_IMAGE_NONE
-   uint8_t  type;
-#endif
    uint8_t  commandId;
    uint8_t  commandLen;
    uint8_t  comandParam_8;
@@ -455,27 +452,11 @@ void openserial_goldenImageCommands(void){
    //copying the buffer
    openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
    version = openserial_vars.inputBuf[1];
-#ifndef GOLDEN_IMAGE_NONE
-   type    = openserial_vars.inputBuf[2];
-#endif
    if (version != GOLDEN_IMAGE_VERSION) {
       // the version of command is wrong
       // log this info and return
       return;
    }
-   
-#ifdef GOLDEN_IMAGE_ROOT 
-   if ( type != GD_TYPE_ROOT ){
-       // image type is wrong
-       return;
-   }
-#endif
-#ifdef GOLDEN_IMAGE_SNIFFER
-   if (type != GD_TYPE_SNIFFER) {
-       // image type is wrong
-       return;
-   }
-#endif
    commandId  = openserial_vars.inputBuf[3];
    commandLen = openserial_vars.inputBuf[4];
    
@@ -497,14 +478,6 @@ void openserial_goldenImageCommands(void){
            sixtop_setEBPeriod(comandParam_8); // one byte, in seconds
            break;
        case COMMAND_SET_CHANNEL:
-#ifdef GOLDEN_IMAGE_ROOT
-               //  this is dagroot image
-               ieee154e_setSingleChannel(comandParam_8); // one byte
-#endif
-#ifdef GOLDEN_IMAGE_SNIFFER
-               // this is sniffer image
-               sniffer_setListeningChannel(comandParam_8); // one byte
-#endif
            break;
        case COMMAND_PING_MOTE:
            // this should not happen

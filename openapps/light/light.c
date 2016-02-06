@@ -56,8 +56,8 @@ void light_init()
    }
 #endif
    
-  debugpins_user1_clr();
-  debugpins_user2_clr();
+   debugpins_user1_clr();
+   debugpins_user2_clr();
    
 //  test_timer = opentimers_start(
 //      1000,
@@ -68,7 +68,7 @@ void light_init()
 }
 
 void test_timer_cb(opentimer_id_t id) {
-    debugpins_user1_toggle();
+    debugpins_user2_toggle();
 }
 
 void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {

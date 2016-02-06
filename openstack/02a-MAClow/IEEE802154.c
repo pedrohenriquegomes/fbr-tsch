@@ -48,7 +48,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t temp_8b;
    uint8_t ielistpresent = IEEE154_IELIST_NO;
    bool    rankPresent;
+   int16_t timeCorrection;
    uint16_t rank;
+   header_IE_ht header_desc;
    bool    headerIEPresent = FALSE;
    
    rankPresent = msg->l2_rankPresent;
