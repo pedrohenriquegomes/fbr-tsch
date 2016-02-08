@@ -8,6 +8,7 @@
 #define LIGHT_SEND_PERIOD_MS       100
 #define LIGHT_SEND_RETRIES         5
 #define LUX_THRESHOLD              85
+#define LUX_HYSTERESIS             10
 //#define LUX_THRESHOLD              2000
 
 //#define SINK_ID             0xeca3

@@ -179,19 +179,11 @@ enum ieee154e_linkOption_enum {
 #define DURATION_tt2 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx
 #define DURATION_tt3 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx+wdRadioTx
 #define DURATION_tt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_tt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx-maxRxAckPrepare
-#define DURATION_tt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx
-#define DURATION_tt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay+TsShortGT
-#define DURATION_tt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 // RX
 #define DURATION_rt1 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx-maxRxDataPrepare
 #define DURATION_rt2 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx
 #define DURATION_rt3 ieee154e_vars.lastCapturedTime+TsTxOffset+TsLongGT
 #define DURATION_rt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_rt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx-maxTxAckPrepare
-#define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
-#define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
-#define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 
 //=========================== typedef =========================================
 

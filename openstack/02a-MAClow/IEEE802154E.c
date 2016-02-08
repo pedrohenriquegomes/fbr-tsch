@@ -721,11 +721,11 @@ port_INLINE void activity_ti1ORri1() {
       }
       else
       {
-        if (!light_state() && (lux >= LUX_THRESHOLD)) // turned on
+        if (!light_state() && (lux >= (LUX_THRESHOLD + LUX_HYSTERESIS))) // turned on
         {
           light_send(lux, TRUE);
         }
-        else if (light_state() && (lux < LUX_THRESHOLD)) // turned off
+        else if (light_state() && (lux < (LUX_THRESHOLD - LUX_HYSTERESIS))) // turned off
         {
           light_send(lux, FALSE);
         }
