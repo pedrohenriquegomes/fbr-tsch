@@ -658,7 +658,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
 port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
-   uint8_t     i;
+   //uint8_t     i;
    sync_IE_ht  sync_IE;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
@@ -802,6 +802,7 @@ port_INLINE void activity_ti1ORri1() {
          radio_setTimerPeriod(TsSlotDuration*(NUMSERIALRX));
          
          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
+         /*
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
             // advance the schedule
@@ -809,6 +810,7 @@ port_INLINE void activity_ti1ORri1() {
             // find the next one
             ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
          }
+         */
          // deal with the case when schedule multi slots
          adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
          break;

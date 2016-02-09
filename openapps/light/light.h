@@ -31,8 +31,7 @@ typedef struct {
    uint16_t             seqnum;             // event sequence number
    uint16_t             light_reading;      // current light sensor reading
    bool                 light_state;        // current state of the light (TRUE==on, FALSE==off)
-   bool                 firstPacketSent;    // flag to indicate we sent the first packet
-   bool                 isForwarding;       // flag to indicate if we are forwarding a packet
+   bool                 busyForwarding;     // I'm busy forwarding a packet
    uint8_t              n_tx;               // controls the number of packets transmitted in each event
    uint8_t              received_asn[5];    // holds the ASN of last event
    OpenQueueEntry_t*    pktToForward;       // packet to forward
