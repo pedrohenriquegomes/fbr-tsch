@@ -70,7 +70,7 @@ typedef struct {
 // admin
 void      sixtop_init(void);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
-uint8_t      sixtop_getEBPeriod(void);
+uint8_t   sixtop_getEBPeriod(void);
 void      sixtop_setHandler(six2six_handler_t handler);
 void      sixtop_multiplyEBPeriod(uint8_t factor);
 void      sixtop_addEBPeriod(uint8_t factor);

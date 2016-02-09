@@ -686,7 +686,7 @@ port_INLINE void activity_ti1ORri1() {
             
          // update the statistics
          ieee154e_stats.numDeSync++;
-            
+         
          // abort
          endSlot();
          return;
@@ -704,7 +704,7 @@ port_INLINE void activity_ti1ORri1() {
       return;
    }
    
-   // trigger packet transmission
+   // trigger application, which can send packet
    light_trigger();
    
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {

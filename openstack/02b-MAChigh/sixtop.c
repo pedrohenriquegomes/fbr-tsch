@@ -394,7 +394,7 @@ port_INLINE void sixtop_sendEB() {
    // It has an IE in my payload
    eb->l2_payloadIEpresent   = TRUE;
 
-   // lets embedd the rank
+   // lets embed the rank
    eb->l2_rankPresent        = TRUE;
    eb->l2_rank               = neighbors_getMyDAGrank();
      
