@@ -250,7 +250,7 @@ enum {
    ERR_FLOOD_RCV                       = 0x3d, // flooding packet rcv, seq {0}, state {1}
    ERR_FLOOD_FW                        = 0x3e, // flooding packet fw, seq {0}, state {1}
    ERR_LIGHT_THRESHOLD                 = 0x3f, // light measurement {0}
-   ERR_FLOOD_STATE                     = 0x40, // sink state {0}
+   ERR_FLOOD_STATE                     = 0x40, // sink state {0}, delay {1}
    ERR_FLOOD_DROP                      = 0X41, // flooding packet dropped, seq {0}, state {1}
    ERR_FLOOD_GEN                       = 0X42, // flooding packet generated, seq {0}, state {1}
 };

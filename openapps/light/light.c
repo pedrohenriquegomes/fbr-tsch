@@ -15,6 +15,7 @@
 
 #define DEBUG               TRUE
 #define THRESHOLD_TEST      TRUE
+#define CALCULATE_DELAY     TRUE
 
 //=========================== variables =======================================
 
@@ -101,6 +102,11 @@ void light_send(uint16_t lux, bool state)
   
   light_vars.lux = lux;
   light_vars.state = state;
+
+#if CALCULATE_DELAY == TRUE  
+  // get the current ASN
+  ieee154e_getAsn(light_vars.asn);
+#endif
   
   // start timer for additional packets
   light_vars.sendTimerId = opentimers_start(
@@ -131,8 +137,11 @@ void light_timer_send_cb(opentimer_id_t id){
 void light_receive_data(OpenQueueEntry_t* pkt) 
 {
    OpenQueueEntry_t* fw;
-   int16_t counter;
+   uint16_t counter;
    bool state;
+#if CALCULATE_DELAY == TRUE 
+   uint8_t asn[5];
+#endif
    
    // don't run if not synched
    if (ieee154e_isSynch() == FALSE)
@@ -149,7 +158,16 @@ void light_receive_data(OpenQueueEntry_t* pkt)
 
    // retrieve the state
    state = (bool)pkt->payload[2];
-     
+
+#if CALCULATE_DELAY == TRUE 
+   // retrieve the asn from the packet
+   uint8_t i;
+   for (i=0; i<5; i++)
+   {
+     asn[i] = pkt->payload[3+i];
+   }
+#endif
+   
 #if DEBUG == TRUE
    openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_RCV,
                        (errorparameter_t)counter,
@@ -176,6 +194,14 @@ void light_receive_data(OpenQueueEntry_t* pkt)
    
    // update the state
    light_vars.state = state;
+
+#if CALCULATE_DELAY == TRUE 
+   // retrieve the asn from the packet
+   for (i=0; i<5; i++)
+   {
+     light_vars.asn[i] = asn[i];
+   }
+#endif
    
    // if I am the sink, process the message (update the state)
    if (light_checkMyId(SINK_ID)) 
@@ -195,7 +221,7 @@ void light_receive_data(OpenQueueEntry_t* pkt)
      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,1,0);
      return;
    }
-   light_prepare_packet(fw, counter, state);
+   light_prepare_packet(fw);
    
    pktToForward = fw;
    light_vars.isForwarding = TRUE;
@@ -275,7 +301,7 @@ void light_receive_beacon(OpenQueueEntry_t* pkt)
      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,2,0);
      return;
    }
-   light_prepare_packet(fw, light_vars.counter, light_vars.state);
+   light_prepare_packet(fw);
 
    pktToForward = fw;
    light_vars.isForwarding = TRUE;
@@ -316,7 +342,7 @@ void light_send_task_cb()
       openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
       return;
    }
-   light_prepare_packet(pkt, light_vars.counter, light_vars.state);
+   light_prepare_packet(pkt);
    
 #if DEBUG == TRUE    
    openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_SEND,
@@ -330,17 +356,27 @@ void light_send_task_cb()
 }
 
 // send the packet to the lower layer (sixtop)
-port_INLINE void light_prepare_packet(OpenQueueEntry_t* pkt, uint16_t counter, bool state)
+
+port_INLINE void light_prepare_packet(OpenQueueEntry_t* pkt)
 {
    pkt->owner                         = COMPONENT_LIGHT;
    pkt->creator                       = COMPONENT_LIGHT;
 
+#if CALCULATE_DELAY == TRUE
+   packetfunctions_reserveHeaderSize(pkt,5);
+   uint8_t i;
+   for (i = 0; i < 5; i++)
+   {
+     *((uint8_t*)&pkt->payload[i]) = light_vars.asn[i];
+   }
+#endif
+   
    // payload
    packetfunctions_reserveHeaderSize(pkt,3);
-   *((uint8_t*)&pkt->payload[0]) = counter & 0xff;
-   *((uint8_t*)&pkt->payload[1]) = counter >> 8;
-   *((uint8_t*)&pkt->payload[2]) = state;
-       
+   *((uint8_t*)&pkt->payload[0]) = light_vars.counter & 0xff;
+   *((uint8_t*)&pkt->payload[1]) = light_vars.counter >> 8;
+   *((uint8_t*)&pkt->payload[2]) = light_vars.state;
+   
    pkt->l2_nextORpreviousHop.type        = ADDR_16B;
    pkt->l2_nextORpreviousHop.addr_16b[0] = 0xff;
    pkt->l2_nextORpreviousHop.addr_16b[1] = 0xff;
@@ -356,11 +392,24 @@ void updateOutput(void)
   {
     debugpins_user1_clr();
   }
-     
+
+#if CALCULATE_DELAY == TRUE 
+  // calculate the time difference
+  asn_t event_asn;
+  event_asn.byte4 = light_vars.asn[4];
+  event_asn.bytes2and3 = (light_vars.asn[3] << 8) | light_vars.asn[2];
+  event_asn.bytes0and1 = (light_vars.asn[1] << 8) | light_vars.asn[0];
+  
+  uint16_t diff = ieee154e_asnDiff(&event_asn);
+  openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_STATE,
+                      (errorparameter_t)light_vars.state,
+                      (errorparameter_t)diff);
+#else 
   /* TURN ON/OFF THE LIGHT AT THE SINK */
   openserial_printInfo(COMPONENT_LIGHT,ERR_FLOOD_STATE,
                       (errorparameter_t)light_vars.state,
                       (errorparameter_t)0);
+#endif
 }
 
 // check if my id is equal to addr

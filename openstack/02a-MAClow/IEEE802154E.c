@@ -100,8 +100,8 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
-//   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
-   ieee154e_vars.singleChannel     = 0;
+   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
+//   ieee154e_vars.singleChannel     = 0;
    ieee154e_vars.nextChannelEB     = SYNCHRONIZING_CHANNEL - 11;
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
@@ -132,7 +132,7 @@ void ieee154e_init() {
    // have the radio start its timer
    radio_startTimer(TsSlotDuration);
    
-   // starting a 1s timer to control EB rate as nodes are (de)synchronized
+   // starting a 2s timer to control EB rate as nodes are (de)synchronized
    increase_eb_timer_id = opentimers_start(
           EB_PERIOD_TIMER,
           TIMER_PERIODIC,
@@ -876,6 +876,7 @@ port_INLINE void activity_ti2() {
    
    // enable the radio in Tx mode. This does not send the packet.
    radio_txEnable();
+   
    ieee154e_vars.radioOnInit=radio_getTimerValue();
    ieee154e_vars.radioOnThisSlot=TRUE;
    // arm tt2
@@ -904,6 +905,7 @@ port_INLINE void activity_ti3() {
    
    // give the 'go' to transmit
    radio_txNow();
+//   debugpins_user1_set();
 }
 
 port_INLINE void activity_tie2() {
@@ -951,6 +953,8 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    
    // turn off the radio
    radio_rfOff();
+//   debugpins_user1_clr();
+   
    ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
    
    // record the captured time
@@ -982,6 +986,9 @@ port_INLINE void activity_ri2() {
    
    // enable the radio in Rx mode. The radio does not actively listen yet.
    radio_rxEnable();
+   
+//   debugpins_user2_set();
+   
    ieee154e_vars.radioOnInit=radio_getTimerValue();
    ieee154e_vars.radioOnThisSlot=TRUE;
    
@@ -1058,6 +1065,9 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 
    // turn off the radio
    radio_rfOff();
+   
+//   debugpins_user2_clr();
+   
    ieee154e_vars.radioOnTics+=radio_getTimerValue()-ieee154e_vars.radioOnInit;
    // get a buffer to put the (received) data in
    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
@@ -1563,6 +1573,8 @@ void endSlot() {
   
    // turn off the radio
    radio_rfOff();
+//   debugpins_user2_clr();
+//   debugpins_user1_clr();
    // compute the duty cycle if radio has been turned on
    if (ieee154e_vars.radioOnThisSlot==TRUE){  
       ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
