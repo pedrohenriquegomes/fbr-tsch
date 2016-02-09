@@ -25,9 +25,6 @@ ieee154e_vars_t    ieee154e_vars;
 ieee154e_stats_t   ieee154e_stats;
 ieee154e_dbg_t     ieee154e_dbg;
 
-opentimer_id_t     increase_eb_timer_id;
-void increase_eb_timer_cb (opentimer_id_t id);
-
 //=========================== prototypes ======================================
 
 // SYNCHRONIZING
@@ -131,14 +128,6 @@ void ieee154e_init() {
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
    radio_startTimer(TsSlotDuration);
-   
-   // starting a 2s timer to control EB rate as nodes are (de)synchronized
-   increase_eb_timer_id = opentimers_start(
-          EB_PERIOD_TIMER,
-          TIMER_PERIODIC,
-          TIME_MS,
-          increase_eb_timer_cb
-       );
 }
 
 //=========================== public ==========================================
@@ -448,8 +437,6 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
 }
 
 port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
-   ieee802154_header_iht ieee802514_header;
-   uint16_t              lenIE;
    
    // check state
    if (ieee154e_vars.state!=S_SYNCRX) {
@@ -501,17 +488,13 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
                                    &ieee154e_vars.dataReceived->l1_lqi,
                                    &ieee154e_vars.dataReceived->l1_crc);
       
-      // break if packet too short
-      if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
-         // break from the do-while loop and execute abort code below
-          openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
-                            (errorparameter_t)0,
-                            ieee154e_vars.dataReceived->length);
+      // break if packet wrong length
+      if (ieee154e_vars.dataReceived->length!=sizeof(eb_ht)+2) {
          break;
       }
       
       // toss CRC (2 last bytes)
-      packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
+      packetfunctions_tossFooter(ieee154e_vars.dataReceived, LENGTH_CRC);
       
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
@@ -519,52 +502,16 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
          break;
       }
       
-      // parse the IEEE802.15.4 header (synchronize, end of frame)
-      ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
-      
-      // break if invalid IEEE802.15.4 header
-      if (ieee802514_header.valid==FALSE) {
-         // break from the do-while loop and execute the clean-up code below
+      // break if wrong type
+      if (((eb_ht*)(ieee154e_vars.dataReceived->payload))->type != 0xbbbb) {
          break;
       }
       
-      // store header details in packet buffer
-      ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
-      ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
-      memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
-
-      if(ieee802514_header.rankPresent == TRUE)
-      {
-        ieee154e_vars.dataReceived->l2_rankPresent = TRUE;
-        ieee154e_vars.dataReceived->l2_rank = ieee802514_header.rank;
-      }
-      
-      // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
-      // next.
-      packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-     
-      // process IEs
-      lenIE = 0;
-      if (
-            (
-               ieee802514_header.valid==TRUE                                                       &&
-               ieee802514_header.ieListPresent==TRUE                                               &&
-               ieee802514_header.frameType==IEEE154_TYPE_BEACON                                    &&
-               packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) &&
-               ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE)
-            )==FALSE) {
-         // break from the do-while loop and execute the clean-up code below
-         break;
-      }
-    
       // turn off the radio
       radio_rfOff();
       
       // compute radio duty cycle
       ieee154e_vars.radioOnTics += (radio_getTimerValue()-ieee154e_vars.radioOnInit);
-
-      // toss the IEs
-      packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
       
       // synchronize (for the first time) to the sender's EB
       synchronizePacket(ieee154e_vars.syncCapturedTime);
@@ -573,11 +520,14 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       changeIsSync(TRUE);
       
       // log the info
-      openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
-                            (errorparameter_t)ieee154e_vars.slotOffset,
-                            (errorparameter_t)0);
+      openserial_printInfo(
+         COMPONENT_IEEE802154E,
+         ERR_SYNCHRONIZED,
+         (errorparameter_t)ieee154e_vars.slotOffset,
+         (errorparameter_t)0
+      );
       
-      // send received EB up the stack so RES can update statistics (synchronizing)
+      // send received EB up the stack to 6top
       notif_receive(ieee154e_vars.dataReceived);
       
       // clear local variable
@@ -659,7 +609,6 @@ port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
    //uint8_t     i;
-   sync_IE_ht  sync_IE;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
 
@@ -770,9 +719,7 @@ port_INLINE void activity_ti1ORri1() {
             if (couldSendEB==TRUE) {        // I will be sending an EB
                //copy synch IE  -- should be Little endian???
                // fill in the ASN field of the EB
-               ieee154e_getAsn(sync_IE.asn);
-               sync_IE.join_priority = (neighbors_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
-               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
+               ieee154e_getAsn((uint8_t*)ieee154e_vars.dataToSend->l2_ASNpayload);
             }
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
@@ -1153,8 +1100,10 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       }
       // indicate reception to upper layer (no ACK asked)
       notif_receive(ieee154e_vars.dataReceived);
+      
       // reset local variable
       ieee154e_vars.dataReceived = NULL;
+      
       // abort
       endSlot();
       
@@ -1358,39 +1307,11 @@ void changeIsSync(bool newIsSync) {
    if (ieee154e_vars.isSync==TRUE) {
       leds_sync_on();
       resetStats();
-      
-      // start timer that will increase the EB period until reach max
-      sixtop_setEBPeriod(1);
-            
    } else {
       leds_sync_off();
       schedule_resetBackoff();
    }
 }
-
-void increase_eb_timer_cb (opentimer_id_t id)
-{
-  // if we are synched, increase the EB interval up to INCREASE_EB_PERIOD_MAX
-  if (ieee154e_vars.isSync==TRUE) 
-  {
-    if (sixtop_getEBPeriod() < EB_PERIOD_MAX)
-    {
-       sixtop_addEBPeriod(EB_PERIOD_AMOUNT);
-    }
-   // lets jump to another channel every  
-   } else {
-//      ieee154e_vars.jumpCounter++;
-//      
-//      if (ieee154e_vars.jumpCounter == EB_JUMP_COUNTER)
-//      {
-//        ieee154e_vars.jumpCounter = 0;
-//        
-//        // jump to a random channel
-//        ieee154e_setSingleChannel(11 + (openrandom_get16b()&0xf));
-//      }
-   }
-}
-
 
 //======= notifying upper layer
 
@@ -1411,17 +1332,14 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
 void notif_receive(OpenQueueEntry_t* packetReceived) {
    // record the current ASN
    memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
+   
    // indicate reception to the schedule, to keep statistics
    schedule_indicateRx(&packetReceived->l2_asn);
+   
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;
-#ifdef GOLDEN_IMAGE_ROOT
-   openserial_printInfo(COMPONENT_IEEE802154E,ERR_PACKET_SYNC,
-                   (errorparameter_t)packetReceived->l2_asn.bytes0and1,
-                   (errorparameter_t)packetReceived->l2_timeCorrection);
-#endif
-   // post RES's Receive task
+   // post 6top's Receive task
    scheduler_push_task(task_sixtopNotifReceive,TASKPRIO_SIXTOP_NOTIF_RX);
    // wake up the scheduler
    SCHEDULER_WAKEUP();

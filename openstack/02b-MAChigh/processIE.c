@@ -31,19 +31,3 @@ port_INLINE uint8_t processIE_prependCounterIE(OpenQueueEntry_t* pkt){
    
    return 3;
 }
-
-port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
-
-   // reserve space
-   packetfunctions_reserveHeaderSize(
-      pkt,
-      sizeof(sync_IE_ht)
-   );
-   
-   // Keep a pointer to where the ASN will be
-   // Note: the actual value of the current ASN and JP will be written by the
-   //    IEEE802.15.4e when transmitting
-   pkt->l2_ASNpayload               = pkt->payload; 
-   
-   return 6;
-}

@@ -19,39 +19,41 @@ void idmanager_init() {
    
    // reset local variables
    memset(&idmanager_vars, 0, sizeof(idmanager_vars_t));
-  
+   
    // myPANID
-   idmanager_vars.myPANID.type         = ADDR_PANID;
-   idmanager_vars.myPANID.panid[0]     = 0xca;
-   idmanager_vars.myPANID.panid[1]     = 0xfe;
+   idmanager_vars.myPANID.type              = ADDR_PANID;
+   idmanager_vars.myPANID.panid[0]          = 0xca;
+   idmanager_vars.myPANID.panid[1]          = 0xfe;
    
    // my64bID
-   idmanager_vars.my64bID.type         = ADDR_64B;
+   idmanager_vars.my64bID.type              = ADDR_64B;
    eui64_get(idmanager_vars.my64bID.addr_64b);
+   
+   // myID
+   idmanager_vars.myShortID                 = 0;
+   idmanager_vars.myShortID                |= idmanager_vars.my64bID.addr_64b[7]<<0;
+   idmanager_vars.myShortID                |= idmanager_vars.my64bID.addr_64b[6]<<8;
    
    // isDAGroot
    if (light_checkMyId(SINK_ID)) {
-    idmanager_vars.isDAGroot            = TRUE;
+      idmanager_vars.isDAGroot              = TRUE;
    } else {
-    idmanager_vars.isDAGroot            = FALSE;
+      idmanager_vars.isDAGroot              = FALSE;
    }
    
    // myPrefix
-   idmanager_vars.myPrefix.type        = ADDR_PREFIX;
-   if (light_checkMyId(SINK_ID))
-   {
-     idmanager_vars.myPrefix.prefix[0]   = 0xbb;
-     idmanager_vars.myPrefix.prefix[1]   = 0xbb;
-     idmanager_vars.myPrefix.prefix[2]   = 0x00;
-     idmanager_vars.myPrefix.prefix[3]   = 0x00;
-     idmanager_vars.myPrefix.prefix[4]   = 0x00;
-     idmanager_vars.myPrefix.prefix[5]   = 0x00;
-     idmanager_vars.myPrefix.prefix[6]   = 0x00;
-     idmanager_vars.myPrefix.prefix[7]   = 0x00;
-   }
-   else
-   {
-     memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
+   idmanager_vars.myPrefix.type             = ADDR_PREFIX;
+   if (light_checkMyId(SINK_ID)) {
+      idmanager_vars.myPrefix.prefix[0]     = 0xbb;
+      idmanager_vars.myPrefix.prefix[1]     = 0xbb;
+      idmanager_vars.myPrefix.prefix[2]     = 0x00;
+      idmanager_vars.myPrefix.prefix[3]     = 0x00;
+      idmanager_vars.myPrefix.prefix[4]     = 0x00;
+      idmanager_vars.myPrefix.prefix[5]     = 0x00;
+      idmanager_vars.myPrefix.prefix[6]     = 0x00;
+      idmanager_vars.myPrefix.prefix[7]     = 0x00;
+   } else {
+      memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
    }
    
    // my16bID
@@ -96,6 +98,10 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
    }
    ENABLE_INTERRUPTS();
    return res;
+}
+
+uint16_t idmanager_getMyShortID() {
+   return idmanager_vars.myShortID;
 }
 
 owerror_t idmanager_setMyID(open_addr_t* newID) {

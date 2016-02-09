@@ -38,6 +38,7 @@ typedef struct {
    open_addr_t   my16bID;
    open_addr_t   my64bID;
    open_addr_t   myPrefix;
+   uint16_t      myShortID;
 } idmanager_vars_t;
 
 //=========================== prototypes ======================================
@@ -47,7 +48,7 @@ bool         idmanager_getIsDAGroot(void);
 open_addr_t* idmanager_getMyID(uint8_t type);
 owerror_t    idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
-
+uint16_t     idmanager_getMyShortID();
 bool         debugPrint_id(void);
 
 /**
