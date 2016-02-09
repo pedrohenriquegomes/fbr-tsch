@@ -40,9 +40,9 @@ void leds_error_blink() {
    P5OUT     |=  0x70;
    
    // blink error LED for ~10s
-   for (i=0;i<80;i++) {
+   for (i=0;i<3;i++) {
       P5OUT     ^=  0x10;
-      for (delay=0xffff;delay>0;delay--);
+      for (delay=0xff;delay>0;delay--);
    }
 }
 
