@@ -22,7 +22,7 @@ static const uint8_t chTemplate_default[] = {
 
 //=========================== define ==========================================
 
-#define SYNCHRONIZING_CHANNEL       25 // channel the mote listens on to synchronize
+#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
 #define TXRETRIES                    0 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
@@ -281,9 +281,6 @@ void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
 bool               debugPrint_macStats(void);
-
-uint16_t ieee154e_getCounter();
-bool ieee154e_getState();
   
 /**
 \}

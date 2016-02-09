@@ -30,15 +30,12 @@ void idmanager_init() {
    eui64_get(idmanager_vars.my64bID.addr_64b);
    
    // isDAGroot
-   if (light_checkMyId(SINK_ID))
-   {
+   if (light_checkMyId(SINK_ID)) {
     idmanager_vars.isDAGroot            = TRUE;
-   }
-   else
-   {
+   } else {
     idmanager_vars.isDAGroot            = FALSE;
    }
-
+   
    // myPrefix
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
    if (light_checkMyId(SINK_ID))

@@ -101,8 +101,8 @@ void ieee154e_init() {
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
    ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
-//   ieee154e_vars.singleChannel     = 0;
    ieee154e_vars.nextChannelEB     = SYNCHRONIZING_CHANNEL - 11;
+   
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
    // default hopping template
@@ -704,33 +704,8 @@ port_INLINE void activity_ti1ORri1() {
       return;
    }
    
-    // check if light threshold has been reached
-   callbackRead_cbt             light_read_cb;
-   uint16_t                     lux = 0;
-   
-   if (light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT))
-   {
-      light_read_cb = sensors_getCallbackRead(SENSOR_LIGHT);
-      lux = light_read_cb();
-      
-      // first time
-      if (!light_is_initialized())
-      {
-        light_send(lux, (lux >= LUX_THRESHOLD) ? TRUE : FALSE);
-        light_initialize(TRUE);
-      }
-      else
-      {
-        if (!light_state() && (lux >= (LUX_THRESHOLD + LUX_HYSTERESIS))) // turned on
-        {
-          light_send(lux, TRUE);
-        }
-        else if (light_state() && (lux < (LUX_THRESHOLD - LUX_HYSTERESIS))) // turned off
-        {
-          light_send(lux, FALSE);
-        }
-      }
-   }
+   // trigger packet transmission
+   light_trigger();
    
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
       // this is the next active slot
@@ -905,7 +880,6 @@ port_INLINE void activity_ti3() {
    
    // give the 'go' to transmit
    radio_txNow();
-//   debugpins_user1_set();
 }
 
 port_INLINE void activity_tie2() {
@@ -953,7 +927,6 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    
    // turn off the radio
    radio_rfOff();
-//   debugpins_user1_clr();
    
    ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
    
@@ -986,8 +959,6 @@ port_INLINE void activity_ri2() {
    
    // enable the radio in Rx mode. The radio does not actively listen yet.
    radio_rxEnable();
-   
-//   debugpins_user2_set();
    
    ieee154e_vars.radioOnInit=radio_getTimerValue();
    ieee154e_vars.radioOnThisSlot=TRUE;
@@ -1065,8 +1036,6 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 
    // turn off the radio
    radio_rfOff();
-   
-//   debugpins_user2_clr();
    
    ieee154e_vars.radioOnTics+=radio_getTimerValue()-ieee154e_vars.radioOnInit;
    // get a buffer to put the (received) data in
@@ -1506,7 +1475,6 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
         // channel hopping enabled, use the channel depending on hopping template
         return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
     }
-    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
 
 /**
@@ -1573,8 +1541,7 @@ void endSlot() {
   
    // turn off the radio
    radio_rfOff();
-//   debugpins_user2_clr();
-//   debugpins_user1_clr();
+   
    // compute the duty cycle if radio has been turned on
    if (ieee154e_vars.radioOnThisSlot==TRUE){  
       ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
@@ -1655,12 +1622,4 @@ void endSlot() {
 
 bool ieee154e_isSynch(){
    return ieee154e_vars.isSync;
-}
-
-uint16_t ieee154e_getCounter(){
-  return ieee154e_vars.floodingCounter;
-}
-
-bool ieee154e_getState(){
-  return ieee154e_vars.floodingState;
 }

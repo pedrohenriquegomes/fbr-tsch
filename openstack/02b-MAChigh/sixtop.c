@@ -283,7 +283,7 @@ IEEE802154E will handle the packet.
 owerror_t sixtop_send_internal(
    OpenQueueEntry_t* msg, 
    bool    payloadIEPresent) {
-
+   
    // assign a number of retries
    if (
       packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE
@@ -391,12 +391,12 @@ port_INLINE void sixtop_sendEB() {
    eb->l2_nextORpreviousHop.addr_16b[0] = 0xff;
    eb->l2_nextORpreviousHop.addr_16b[1] = 0xff;
    
-   //I has an IE in my payload
-   eb->l2_payloadIEpresent = TRUE;
+   // It has an IE in my payload
+   eb->l2_payloadIEpresent   = TRUE;
 
-   // lets embedd the Rank
-   eb->l2_rankPresent     = TRUE;
-   eb->l2_rank            = neighbors_getMyDAGrank();
+   // lets embedd the rank
+   eb->l2_rankPresent        = TRUE;
+   eb->l2_rank               = neighbors_getMyDAGrank();
      
    // put in queue for MAC to handle
    sixtop_send_internal(eb,eb->l2_payloadIEpresent);

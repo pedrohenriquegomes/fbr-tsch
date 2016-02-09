@@ -16,5 +16,5 @@
 //=========================== private =========================================
 
 void openapps_init(void) {
-  light_init();
+   light_init();
 }
