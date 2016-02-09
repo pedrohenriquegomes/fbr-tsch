@@ -33,10 +33,10 @@ void schedule_init() {
    for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
       schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
    }
-   schedule_vars.backoffExponent = MINBE-1;
-   schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
+   schedule_vars.backoffExponent  = MINBE-1;
+   schedule_vars.maxActiveSlots   = MAXACTIVESLOTS;
    
-   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+   start_slotOffset               = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
 //   if (idmanager_getIsDAGroot()==TRUE) {
       schedule_startDAGroot();
 //   }

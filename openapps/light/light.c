@@ -362,7 +362,6 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
 #endif
 }
 
-
 //=== misc
 
 port_INLINE bool light_get_light_state(void) {

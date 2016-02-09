@@ -36,3 +36,6 @@
 *.d43
 *.pbd
 *.pyc
+/projects/telosb/settings
+/projects/telosb/03oos_openwsn/Debug
+/projects/telosb/03oos_openwsn/settings
