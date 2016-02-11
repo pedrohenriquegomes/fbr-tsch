@@ -172,7 +172,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>LIGHT_FAKESEND</state>
+          <state></state>
         </option>
         <option>
           <name>CCPreprocFile</name>

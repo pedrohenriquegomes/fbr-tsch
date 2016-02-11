@@ -108,10 +108,9 @@ enum {
    STATUS_ASN                          =  4,
    STATUS_MACSTATS                     =  5,
    STATUS_SCHEDULE                     =  6,
-   STATUS_BACKOFF                      =  7,
-   STATUS_QUEUE                        =  8,
-   STATUS_NEIGHBORS                    =  9,
-   STATUS_MAX                          = 10,
+   STATUS_QUEUE                        =  7,
+   STATUS_NEIGHBORS                    =  8,
+   STATUS_MAX                          =  9,
 };
 
 //component identifiers

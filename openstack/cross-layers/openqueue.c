@@ -187,7 +187,7 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
 
 //======= called by IEEE80215E
 
-OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
+OpenQueueEntry_t* openqueue_macGetDataPacket(void) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();

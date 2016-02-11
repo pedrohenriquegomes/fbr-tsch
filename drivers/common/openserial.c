@@ -343,10 +343,6 @@ void openserial_startOutput() {
          if(debugPrint_schedule()==TRUE) {
             break;
          }
-      case STATUS_BACKOFF:
-         if(debugPrint_backoff()==TRUE) {
-            break;
-         }
       case STATUS_QUEUE:
          if(debugPrint_queue()==TRUE) {
             break;
@@ -446,7 +442,6 @@ void openserial_goldenImageCommands(void){
    uint8_t  commandId;
    uint8_t  commandLen;
    uint8_t  comandParam_8;
-   uint16_t comandParam_16;
    
    numDataBytes = openserial_getNumDataBytes();
    //copying the buffer
@@ -467,9 +462,6 @@ void openserial_goldenImageCommands(void){
        if (commandLen == 1) {
            comandParam_8 = openserial_vars.inputBuf[5];
        } else {
-           // commandLen == 2
-           comandParam_16 = (openserial_vars.inputBuf[5]      & 0x00ff) | \
-                            ((openserial_vars.inputBuf[6]<<8) & 0xff00); 
        }
    }
    
@@ -478,9 +470,6 @@ void openserial_goldenImageCommands(void){
            break;
        case COMMAND_PING_MOTE:
            // this should not happen
-           break;
-       case COMMAND_SET_FRAMELENGTH: // two bytes
-           schedule_setFrameLength(comandParam_16);
            break;
        case COMMAND_SET_ACK_STATUS:
            if (comandParam_8 == 1) {

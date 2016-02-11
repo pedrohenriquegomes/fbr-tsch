@@ -569,9 +569,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 
 port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
-   open_addr_t neighbor;
-   //uint8_t     i;
-   bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
 
    // increment ASN (do this first so debug pins are in sync)
@@ -640,46 +637,41 @@ port_INLINE void activity_ti1ORri1() {
    // check the schedule to see what type of slot this is
    cellType = schedule_getType();
    switch (cellType) {
+      case CELLTYPE_EB:
       case CELLTYPE_TXRX:
          // stop using serial
          openserial_stop();
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
          // check whether we can send
-         if (schedule_getOkToSend()) {
-            schedule_getNeighbor(&neighbor);
-            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+         ieee154e_vars.dataToSend = openqueue_macGetDataPacket();
+         if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+           
+            ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
+            
+            // If I am using FHSS force the transmission of EB in all channel, one after the other
+            if ((ieee154e_vars.singleChannel == SYNCHRONIZING_CHANNEL) ||
+                ((ieee154e_vars.freq - 11) == ieee154e_vars.nextChannelEB))
+            {                   
+              couldSendEB=TRUE;
+              // look for an EB packet in the queue
+              ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
               
-               ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
-               
-               // If I am using FHSS force the transmission of EB in all channel, one after the other
-               if ((ieee154e_vars.singleChannel == SYNCHRONIZING_CHANNEL) ||
-                   ((ieee154e_vars.freq - 11) == ieee154e_vars.nextChannelEB))
-               {                   
-                 couldSendEB=TRUE;
-                 // look for an EB packet in the queue
-                 ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-                 
-                 ieee154e_vars.nextChannelEB = (ieee154e_vars.nextChannelEB + 1) % 16;
-               }
+              ieee154e_vars.nextChannelEB = (ieee154e_vars.nextChannelEB + 1) % 16;
             }
          }
+         
          if (ieee154e_vars.dataToSend==NULL) {
-            if (cellType==CELLTYPE_TX) {
-               // abort
-               endSlot();
-               break;
-            } else {
-               changeToRX=TRUE;
-            }
+            // change state
+            changeState(S_RXDATAOFFSET);
+            // arm rt1
+            radiotimer_schedule(DURATION_rt1);
          } else {
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
             if (couldSendEB==TRUE) {        // I will be sending an EB
-               //copy synch IE  -- should be Little endian???
                // fill in the ASN field of the EB
                ieee154e_getAsn((uint8_t*)ieee154e_vars.dataToSend->l2_ASNpayload);
             }
@@ -687,44 +679,7 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
             radiotimer_schedule(DURATION_tt1);
-            break;
          }
-      case CELLTYPE_RX:
-         if (changeToRX==FALSE) {
-            // stop using serial
-            openserial_stop();
-         }
-         // change state
-         changeState(S_RXDATAOFFSET);
-         // arm rt1
-         radiotimer_schedule(DURATION_rt1);
-         break;
-      case CELLTYPE_SERIALRX:
-         // stop using serial
-         openserial_stop();
-         // abort the slot
-         endSlot();
-         //start inputting serial data
-         openserial_startInput();
-         //this is to emulate a set of serial input slots without having the slotted structure.
-
-         radio_setTimerPeriod(TsSlotDuration*(NUMSERIALRX));
-         
-         //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
-         /*
-         for (i=0;i<NUMSERIALRX-1;i++){
-            incrementAsnOffset();
-            // advance the schedule
-            schedule_advanceSlot();
-            // find the next one
-            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-         }
-         */
-         // deal with the case when schedule multi slots
-         adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
-         break;
-      case CELLTYPE_MORESERIALRX:
-         // do nothing (not even endSlot())
          break;
       default:
          // stop using serial
@@ -846,7 +801,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    
    // we do not listen for ACK
       
-   // indicate succesful Tx to schedule to keep statistics
+    // indicate succesful Tx to schedule to keep statistics
     schedule_indicateTx(&ieee154e_vars.asn,TRUE);
     // indicate to upper later the packet was sent successfully
     notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
@@ -1079,7 +1034,6 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
 //======= ASN handling
 
 port_INLINE void incrementAsnOffset() {
-   frameLength_t frameLength;
    
    // increment the asn
    ieee154e_vars.asn.bytes0and1++;
@@ -1091,12 +1045,7 @@ port_INLINE void incrementAsnOffset() {
    }
    
    // increment the offsets
-   frameLength = schedule_getFrameLength();
-   if (frameLength == 0) {
-      ieee154e_vars.slotOffset++;
-   } else {
-      ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%frameLength;
-   }
+   ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%SLOTFRAME_LENGTH;
    ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%16;
 }
 
@@ -1137,20 +1086,17 @@ port_INLINE void asnStoreFromEB(uint8_t* asn) {
 }
 
 port_INLINE void ieee154e_syncSlotOffset() {
-   frameLength_t frameLength;
    uint32_t slotOffset;
-   
-   frameLength = schedule_getFrameLength();
    
    // determine the current slotOffset
    slotOffset = ieee154e_vars.asn.byte4;
-   slotOffset = slotOffset % frameLength;
+   slotOffset = slotOffset % SLOTFRAME_LENGTH;
    slotOffset = slotOffset << 16;
    slotOffset = slotOffset + ieee154e_vars.asn.bytes2and3;
-   slotOffset = slotOffset % frameLength;
+   slotOffset = slotOffset % SLOTFRAME_LENGTH;
    slotOffset = slotOffset << 16;
    slotOffset = slotOffset + ieee154e_vars.asn.bytes0and1;
-   slotOffset = slotOffset % frameLength;
+   slotOffset = slotOffset % SLOTFRAME_LENGTH;
    
    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
 }
@@ -1239,7 +1185,6 @@ void changeIsSync(bool newIsSync) {
       resetStats();
    } else {
       leds_sync_off();
-      schedule_resetBackoff();
    }
 }
 
