@@ -181,6 +181,8 @@ void light_receive_beacon(OpenQueueEntry_t* pkt) {
 
 void light_receive_data(OpenQueueEntry_t* pkt) {
    light_ht*         rxPkt;
+   uint8_t           pkt_burstId;
+   uint8_t           pkt_pktId;
    
    // handle the packet
    do {
@@ -198,14 +200,41 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       pkt->owner = COMPONENT_LIGHT;
       
       // parse packet
-      rxPkt = (light_ht*)pkt->payload;
+      rxPkt       = (light_ht*)pkt->payload;
+      pkt_burstId = (rxPkt->seqnum & 0xf0)>>4;
+      pkt_pktId   = rxPkt->seqnum & 0x0f;
       
-      // abort if this an old burstID
-      // TODO Fix #13
+      // filter burstID
+      if (pkt_burstId!=light_vars.burstId) {
+         if ( ((pkt_burstId-light_vars.burstId)&0x0f) <=7) {
+            // new burstID
+            
+            // reset pktIDMap
+            light_vars.pktIDMap = 0x00;
+            
+            // remove old packets from queue
+            // TODO Fix #17
+            
+         } else {
+            // old burstID
+            
+            // abort
+            break;
+         }
+      }
+      
+      // abort if this is a pktId I already sent
+      if ( light_vars.pktIDMap & (1<<pkt_pktId) ) {
+          // already sent
+          break;
+      } else {
+          // remember I sent that one
+          light_vars.pktIDMap |= (1<<pkt_pktId);
+      }
       
       // update the burstId, pktId and light_state
-      light_vars.burstId     = (rxPkt->seqnum & 0xf0)>>4;
-      light_vars.pktId       = rxPkt->seqnum & 0x0f;
+      light_vars.burstId     = pkt_burstId;
+      light_vars.pktId       = pkt_pktId;
       light_vars.light_state = rxPkt->light_state;
       
       // map received light_state to light debug pin

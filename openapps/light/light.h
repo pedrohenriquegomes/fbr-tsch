@@ -12,7 +12,7 @@
 
 // defines
 #define LIGHT_FAKESEND_PERIOD     1000 // period, in slots, of sending data
-#define LIGHT_BURSTSIZE           1    // number of packets sent on each light event
+#define LIGHT_BURSTSIZE           3    // number of packets sent on each light event
 #define LUX_THRESHOLD             500
 #define LUX_HYSTERESIS            100
 
@@ -47,8 +47,9 @@ END_PACK
 
 typedef struct {
    // app state
-   uint16_t             burstId;            // burst ID of the event
-   uint16_t             pktId  ;            // packet ID
+   uint16_t             burstId;            // current burst ID (identifying the event)
+   uint16_t             pktId;              // current packet ID (identifying the packet in a burst)
+   uint8_t              pktIDMap;           // each flag is set when the corresponding pktId was sent
    uint16_t             light_reading;      // current light sensor reading
    bool                 light_state;        // current state of the light (TRUE==on, FALSE==off)
    asn_t                lastEventAsn;       // holds the ASN of last event
