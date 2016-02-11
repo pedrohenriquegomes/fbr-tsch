@@ -25,7 +25,7 @@ static const uint8_t chTemplate_default[] = {
 #define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
 #define TXRETRIES                    0 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
-#define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
+#define RESYNCHRONIZATIONGUARD      60 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
 #define EBPERIOD                  1000 // in ms, EB sending period
 #define MAXKAPERIOD                200 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
@@ -233,6 +233,7 @@ typedef struct {
    bool                      isSecurityEnabled;       // whether security is applied
    // time correction
    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
+   uint16_t                  syncSlotLength;
    // flooding counter
    uint16_t                  floodingCounter;
    // flooding state

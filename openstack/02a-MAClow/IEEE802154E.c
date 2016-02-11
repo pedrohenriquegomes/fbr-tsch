@@ -125,6 +125,7 @@ void ieee154e_init() {
    radio_setStartFrameCb(ieee154e_startOfFrame);
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
+   ieee154e_vars.syncSlotLength = TsSlotDuration;
    radio_startTimer(TsSlotDuration);
 }
 
@@ -169,8 +170,11 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
-   radio_setTimerPeriod(TsSlotDuration);
    if (ieee154e_vars.isSync==FALSE) {
+      radio_setTimerPeriod(ieee154e_vars.syncSlotLength);
+      ieee154e_vars.syncSlotLength = TsSlotDuration;
+      debugpins_slot_set();
+      debugpins_slot_clr();
       if (idmanager_getIsDAGroot()==TRUE) {
          changeIsSync(TRUE);
          incrementAsnOffset();
@@ -180,8 +184,7 @@ void isr_ieee154e_newSlot() {
          activity_synchronize_newSlot();
       }
    } else {
-     // adaptive synchronization
-      adaptive_sync_countCompensationTimeout();
+      radio_setTimerPeriod(TsSlotDuration);
       activity_ti1ORri1();
    }
    ieee154e_dbg.num_newSlot++;
@@ -435,7 +438,7 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
 }
 
 port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
-   uint8_t i;
+   uint8_t              i;
    
    // check state
    if (ieee154e_vars.state!=S_SYNCRX) {
@@ -502,6 +505,20 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
          break;
       }
       
+      // break if I received packet less than RESYNCHRONIZATIONGUARD from slot edge
+      // (we will wait for next EB)
+      if (
+            TsSlotDuration-ieee154e_vars.syncCapturedTime<RESYNCHRONIZATIONGUARD
+      ) {
+         ieee154e_vars.syncSlotLength = (TsSlotDuration*25)/10;
+         break;
+      }
+      
+      //=== if I get here, I got a valid beacon at the right time, I can stop listening
+      
+      // turn off the radio
+      radio_rfOff();
+      
       //=== synchronize to the ASN
       // store ASN
       asnStoreFromEB((uint8_t*)&(((eb_ht*)(ieee154e_vars.dataReceived->payload))->asn));
@@ -517,9 +534,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
          }
       }
       ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
-      
-      // turn off the radio
-      radio_rfOff();
       
       // compute radio duty cycle
       ieee154e_vars.radioOnTics += (radio_getTimerValue()-ieee154e_vars.radioOnInit);
@@ -1131,30 +1145,15 @@ port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id){
 void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    PORT_SIGNED_INT_WIDTH timeCorrection;
    PORT_RADIOTIMER_WIDTH newPeriod;
-   PORT_RADIOTIMER_WIDTH currentValue;
-   PORT_RADIOTIMER_WIDTH currentPeriod;
-   
-   // record the current timer value and period
-   currentValue                   =  radio_getTimerValue();
-   currentPeriod                  =  radio_getTimerPeriod();
    
    // calculate new period
    timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
-
    newPeriod                      =  TsSlotDuration;
-   
-   // detect whether I'm too close to the edge of the slot, in that case,
-   // skip a slot and increase the temporary slot length to be 2 slots long
-   if (currentValue<timeReceived || currentPeriod-currentValue<RESYNCHRONIZATIONGUARD) {
-      newPeriod                  +=  TsSlotDuration;
-      incrementAsnOffset();
-   }
    newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
    
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
-   // indicate time correction to adaptive sync module
-   //adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
+   
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    
@@ -1174,7 +1173,6 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // update the stats
    ieee154e_stats.numSyncPkt++;
    updateStats(timeCorrection);
-   
 }
 
 void changeIsSync(bool newIsSync) {
