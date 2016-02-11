@@ -201,10 +201,8 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       // parse packet
       rxPkt = (light_ht*)pkt->payload;
       
-      // abort if this an old packet
-      if (rxPkt->seqnum < light_vars.seqnum) {
-         break;
-      }
+      // abort if this an old burstID
+      // TODO Fix #13
       
       // update the seqnum and light_state
       light_vars.seqnum      = rxPkt->seqnum;
@@ -219,7 +217,7 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       
       // retransmit packet
       if (idmanager_getMyShortID()!=SINK_ID) {
-        // TODO: Fix in #19
+         light_send_one_packet();
       }
    } while(0);
    

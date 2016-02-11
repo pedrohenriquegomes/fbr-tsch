@@ -45,6 +45,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               bool              payloadIEPresent,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
+   /*
    uint8_t temp_8b;
    uint8_t ielistpresent = IEEE154_IELIST_NO;
    bool    rankPresent;
@@ -163,6 +164,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    }
    temp_8b             |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
    *((uint8_t*)(msg->payload)) = temp_8b;
+   */
 }
 
 /**
@@ -175,6 +177,7 @@ Note We are writing the fields from the begnning of the header to the end.
 */
 void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                ieee802154_header_iht* ieee802514_header) {
+   /*
    uint8_t  temp_8b;
    uint16_t temp_16b;
    // by default, let's assume the header is not valid, in case we leave this
@@ -323,6 +326,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    }
    // if you reach this, the header is valid
    ieee802514_header->valid=TRUE;
+   */
 }
 
 //=========================== private =========================================
