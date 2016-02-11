@@ -20,14 +20,11 @@ light_vars_t        light_vars;
 //=========================== prototypes =======================================
 
 // transmitting
-void     light_send_timer_cb(opentimer_id_t id);
-void     light_send_task(void);
 void     light_format_packet(OpenQueueEntry_t* pkt);
 // receiving
 void     light_consume_packet(void);
 // forward
 void     light_fwd_packet(void);
-void     light_fwd_timer_cb(opentimer_id_t id);
 
 //=========================== public ===========================================
 
@@ -72,6 +69,8 @@ void light_init(void) {
 */
 void light_trigger(void) {
    bool                 iShouldSend;
+   uint8_t              i;
+   OpenQueueEntry_t*    pktToSend;
 #ifdef LIGHT_FAKESEND
    uint16_t             numAsnSinceLastEvent;
 #else
@@ -127,7 +126,7 @@ void light_trigger(void) {
       return;
    }
    
-   //=== if I get here, I will send a packet
+   //=== if I get here, I send a packet
    
    // remember the current ASN
    ieee154e_getAsnStruct(&light_vars.lastEventAsn);
@@ -135,41 +134,25 @@ void light_trigger(void) {
    // increment the seqnum
    light_vars.seqnum++;
    
-   // initiate the burst of packets
-   light_vars.numBurstPktsSent = 0;
-   
-   // start timer for sending packets
-   light_vars.sendTimerId = opentimers_start(
-      LIGHT_SEND_PERIOD_MS,
-      TIMER_PERIODIC,
-      TIME_MS,
-      light_send_timer_cb
-   );
-}
-
-void light_send_timer_cb(opentimer_id_t timerId) {
-   if (light_vars.numBurstPktsSent<LIGHT_BURSTSIZE) {
-      light_vars.numBurstPktsSent++;
-      scheduler_push_task(light_send_task, TASKPRIO_MAX);
-   } else {
-      opentimers_stop(timerId);
+   // send burst of LIGHT_BURSTSIZE packets
+   for (i=0;i<LIGHT_BURSTSIZE;i++) {
+      
+      // get a free packet buffer
+      pktToSend = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
+      if (pktToSend==NULL) {
+         openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
+         return;
+      }
+      
+      // format
+      light_format_packet(pktToSend);
+      
+      // send
+      if ((sixtop_send(pktToSend))==E_FAIL) {
+         openqueue_freePacketBuffer(pktToSend);
+      }
    }
-}
-
-void light_send_task() {
-   OpenQueueEntry_t*    pktToSend;
    
-   // get a free packet buffer
-   pktToSend = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
-   if (pktToSend==NULL) {
-      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
-      return;
-   }
-   light_format_packet(pktToSend);
-   
-   if ((sixtop_send(pktToSend))==E_FAIL) {
-      openqueue_freePacketBuffer(pktToSend);
-   }
 }
 
 port_INLINE void light_format_packet(OpenQueueEntry_t* pkt) {
@@ -266,16 +249,7 @@ void light_consume_packet(void) {
 }
 
 void light_fwd_packet(void) {
-   opentimers_start(
-      (openrandom_get16b()&0x3f),
-      TIMER_ONESHOT,
-      TIME_MS,
-      light_fwd_timer_cb
-   );
-}
-
-void light_fwd_timer_cb(opentimer_id_t timerId) {
-   scheduler_push_task(light_send_task, TASKPRIO_MAX);
+  // TODO Fix in #19
 }
 
 //=========================== private ==========================================

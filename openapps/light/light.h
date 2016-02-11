@@ -12,8 +12,7 @@
 
 // defines
 #define LIGHT_FAKESEND_PERIOD     1000 // period, in slots, of sending data
-#define LIGHT_SEND_PERIOD_MS      100
-#define LIGHT_BURSTSIZE           3    // number of packets sent on each light event
+#define LIGHT_BURSTSIZE           1    // number of packets sent on each light event
 #define LUX_THRESHOLD             500
 #define LUX_HYSTERESIS            100
 
@@ -53,7 +52,6 @@ typedef struct {
    bool                 light_state;        // current state of the light (TRUE==on, FALSE==off)
    asn_t                lastEventAsn;       // holds the ASN of last event
    // timers
-   opentimer_id_t       sendTimerId;        // timer ID for sending multiple packets in every event
    opentimer_id_t       fwdTimerId;         // timer ID for forwarding one packet
    // sending
    uint8_t              numBurstPktsSent;   // controls the number of packets transmitted in each event
