@@ -26,19 +26,20 @@
 
 BEGIN_PACK
 typedef struct {
-   bool             used;
-   uint8_t          parentPreference;
-   bool             stableNeighbor;
-   uint8_t          switchStabilityCounter;
-   open_addr_t      addr_64b;
-   dagrank_t        DAGrank;
-   int8_t           rssi;
-   uint8_t          numRx;
-   uint8_t          numTx;
-   uint8_t          numTxACK;
-   uint8_t          numWraps;//number of times the tx counter wraps. can be removed if memory is a restriction. also check openvisualizer then.
-   asn_t            asn;
-   uint8_t          joinPrio;
+   bool            used;
+   uint8_t         parentPreference;
+   bool            stableNeighbor;
+   uint8_t         switchStabilityCounter;
+   uint16_t        shortID;
+   open_addr_t     addr_64b;
+   dagrank_t       DAGrank;
+   int8_t          rssi;
+   uint8_t         numRx;
+   uint8_t         numTx;
+   uint8_t         numTxACK;
+   uint8_t         numWraps;//number of times the tx counter wraps. can be removed if memory is a restriction. also check openvisualizer then.
+   asn_t           asn;
+   uint8_t         joinPrio;
 } neighborRow_t;
 END_PACK
 

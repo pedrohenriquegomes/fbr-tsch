@@ -11,6 +11,7 @@
 #include "opentimers.h"
 #include "opendefs.h"
 #include "processIE.h"
+
 //=========================== define ==========================================
 
 enum sixtop_CommandID_num{
@@ -45,6 +46,15 @@ typedef enum {
    SIX_HANDLER_OTF                     = 0x02  // the handler is otf
 } six2six_handler_t;
 
+BEGIN_PACK
+typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
+   uint16_t  type;
+   uint16_t  src;
+   uint16_t  rank;
+   asn_t     asn;
+} eb_ht;
+END_PACK
+
 //=========================== typedef =========================================
 
 #define SIX2SIX_TIMEOUT_MS 4000
@@ -55,9 +65,8 @@ typedef enum {
 typedef struct {
    uint16_t             periodMaintenance;
    bool                 busySendingEB;           // TRUE when busy sending an enhanced beacon
-   uint8_t              dsn;                     // current data sequence number
    uint8_t              mgtTaskCounter;          // counter to determine what management task to do
-   opentimer_id_t       maintenanceTimerId;
+   opentimer_id_t       sendEBTimerId;
    opentimer_id_t       timeoutTimerId;          // TimeOut timer id
    uint16_t             ebPeriod;                // period of sending EB
    six2six_state_t      six2six_state;
@@ -69,11 +78,6 @@ typedef struct {
 
 // admin
 void      sixtop_init(void);
-void      sixtop_setEBPeriod(uint8_t ebPeriod);
-uint8_t   sixtop_getEBPeriod(void);
-void      sixtop_setHandler(six2six_handler_t handler);
-void      sixtop_multiplyEBPeriod(uint8_t factor);
-void      sixtop_addEBPeriod(uint8_t factor);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer

@@ -22,3 +22,7 @@ int mote_main(void) {
    scheduler_start();
    return 0; // this line should never be reached
 }
+
+int __low_level_init(void) {
+   return 0;
+}

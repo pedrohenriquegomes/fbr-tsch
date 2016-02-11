@@ -474,9 +474,6 @@ void openserial_goldenImageCommands(void){
    }
    
    switch(commandId) {
-       case COMMAND_SET_EBPERIOD:
-           sixtop_setEBPeriod(comandParam_8); // one byte, in seconds
-           break;
        case COMMAND_SET_CHANNEL:
            break;
        case COMMAND_PING_MOTE:
