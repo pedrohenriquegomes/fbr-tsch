@@ -48,7 +48,7 @@ bool         idmanager_getIsDAGroot(void);
 open_addr_t* idmanager_getMyID(uint8_t type);
 owerror_t    idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
-uint16_t     idmanager_getMyShortID();
+uint16_t     idmanager_getMyShortID(void);
 bool         debugPrint_id(void);
 
 /**

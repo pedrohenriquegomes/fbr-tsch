@@ -100,7 +100,7 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
    return res;
 }
 
-uint16_t idmanager_getMyShortID() {
+uint16_t idmanager_getMyShortID(void) {
    return idmanager_vars.myShortID;
 }
 

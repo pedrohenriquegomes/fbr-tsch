@@ -300,7 +300,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
 
 //===== maintenance
 
-void  neighbors_removeOld() {
+void  neighbors_removeOld(void) {
    uint8_t    i;
    uint16_t   timeSinceHeard;
    
