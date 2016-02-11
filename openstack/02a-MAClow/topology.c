@@ -50,30 +50,30 @@ topology.
 \return TRUE if the packet can be received.
 \return FALSE if the packet should be silently dropped.
 */
-bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
+bool topology_isAcceptablePacket(uint16_t shortID) {
 #ifdef FORCETOPOLOGY
    bool returnVal;
    
    returnVal=FALSE;
-   switch (idmanager_getMyID(ADDR_64B)->addr_64b[7]) {
-      case 0x4f:
+   switch (idmanager_getMyShortID()) {
+      case 0x6f16:
          if (
-               ieee802514_header->src.addr_64b[7]==0x81
+               shortID==0x3bdd
             ) {
             returnVal=TRUE;
          }
          break;     
-      case 0x81:
+      case 0x3bdd:
          if (
-               ieee802514_header->src.addr_64b[7]==0x4f ||
-               ieee802514_header->src.addr_64b[7]==0xbf
+               shortID==0x6f16 ||
+               shortID==0xb957
             ) {
             returnVal=TRUE;
          }
          break;    
-      case 0xbf:
+      case 0xb957:
          if (
-               ieee802514_header->src.addr_64b[7]==0x81
+               shortID==0x3bdd
             ) {
             returnVal=TRUE;
          }

@@ -93,24 +93,24 @@ void debugpins_radio_set() {
 }
 
 // P6.2
-void debugpins_rxlight_toggle() {
+void debugpins_light_toggle() {
   P6OUT ^=  0x04;
 }
-void debugpins_rxlight_clr() {
+void debugpins_light_clr() {
   P6OUT &= ~0x04;
 }
-void debugpins_rxlight_set() {
+void debugpins_light_set() {
   P6OUT |=  0x04;
 }
 
 // P6.3
-void debugpins_txlight_toggle() {
+void debugpins_user_toggle() {
   P6OUT ^=  0x08;
 }
-void debugpins_txlight_clr() {
+void debugpins_user_clr() {
   P6OUT &= ~0x08;
 }
-void debugpins_txlight_set() {
+void debugpins_user_set() {
   P6OUT |=  0x08;
 }
 

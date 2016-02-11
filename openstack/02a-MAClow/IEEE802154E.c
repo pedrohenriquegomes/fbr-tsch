@@ -18,6 +18,7 @@
 #include "processIE.h"
 #include "light.h"
 #include "sensors.h"
+#include "topology.h"
 
 //=========================== variables =======================================
 
@@ -505,6 +506,12 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
          break;
       }
       
+      // break if from node outside of allowable topology
+      if (topology_isAcceptablePacket(((eb_ht*)(ieee154e_vars.dataReceived->payload))->src)==FALSE) {
+         // the topology filter does accept this packet, return
+         return;
+      }
+      
       // break if I received packet less than RESYNCHRONIZATIONGUARD from slot edge
       // (we will wait for next EB)
       if (
@@ -980,6 +987,12 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // break if wrong type
       if ( eb->type!=0xbbbb && eb->type!=0xdddd) {
          break;
+      }
+      
+      // break if from node outside of allowable topology
+      if (topology_isAcceptablePacket(eb->src)==FALSE) {
+         // the topology filter does accept this packet, return
+         return;
       }
       
       // record the captured time

@@ -19,12 +19,7 @@ light_vars_t        light_vars;
 
 //=========================== prototypes =======================================
 
-// transmitting
-void     light_format_packet(OpenQueueEntry_t* pkt);
-// receiving
-void     light_consume_packet(void);
-// forward
-void     light_fwd_packet(void);
+void light_send_one_packet(void);
 
 //=========================== public ===========================================
 
@@ -58,8 +53,7 @@ void light_init(void) {
    }
 #endif
    
-   debugpins_rxlight_clr();
-   debugpins_txlight_clr();
+   debugpins_light_clr();
 }
 
 //=== transmitting
@@ -70,7 +64,6 @@ void light_init(void) {
 void light_trigger(void) {
    bool                 iShouldSend;
    uint8_t              i;
-   OpenQueueEntry_t*    pktToSend;
 #ifdef LIGHT_FAKESEND
    uint16_t             numAsnSinceLastEvent;
 #else
@@ -107,13 +100,13 @@ void light_trigger(void) {
       // light was just turned on
       
       light_vars.light_state = TRUE;
-      debugpins_txlight_set();
+      debugpins_light_set();
       iShouldSend = TRUE;
    } else if (light_vars.light_state==TRUE  && (light_vars.light_reading <  (LUX_THRESHOLD - LUX_HYSTERESIS))) {
       // light was just turned off
       
       light_vars.light_state = FALSE;
-      debugpins_txlight_clr();
+      debugpins_light_clr();
       iShouldSend = TRUE;
    } else {
       // light stays in same state
@@ -136,30 +129,24 @@ void light_trigger(void) {
    
    // send burst of LIGHT_BURSTSIZE packets
    for (i=0;i<LIGHT_BURSTSIZE;i++) {
-      
-      // get a free packet buffer
-      pktToSend = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
-      if (pktToSend==NULL) {
-         openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
-         return;
-      }
-      
-      // format
-      light_format_packet(pktToSend);
-      
-      // send
-      if ((sixtop_send(pktToSend))==E_FAIL) {
-         openqueue_freePacketBuffer(pktToSend);
-      }
+      light_send_one_packet();
    }
-   
 }
 
-port_INLINE void light_format_packet(OpenQueueEntry_t* pkt) {
+port_INLINE void light_send_one_packet(void) {
+   OpenQueueEntry_t*    pkt;
+   
+   // get a free packet buffer
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
+   if (pkt==NULL) {
+      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
+      return;
+   }
+   
    // take ownership over the packet
    pkt->owner                               = COMPONENT_LIGHT;
    pkt->creator                             = COMPONENT_LIGHT;
-
+   
 #ifdef LIGHT_CALCULATE_DELAY
    // TODO add light_vars.lastEventAsn into packet
 #endif
@@ -170,6 +157,11 @@ port_INLINE void light_format_packet(OpenQueueEntry_t* pkt) {
    ((light_ht*)(pkt->payload))->src         = idmanager_getMyShortID();
    ((light_ht*)(pkt->payload))->seqnum      = light_vars.seqnum;
    ((light_ht*)(pkt->payload))->light_state = light_vars.light_state;
+   
+   // send
+   if ((sixtop_send(pkt))==E_FAIL) {
+      openqueue_freePacketBuffer(pkt);
+   }
 }
 
 void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -191,21 +183,9 @@ void light_receive_beacon(OpenQueueEntry_t* pkt) {
 void light_receive_data(OpenQueueEntry_t* pkt) {
    light_ht*         rxPkt;
    
-   // don't run if not synched
-   if (ieee154e_isSynch() == FALSE) {
-      openqueue_freePacketBuffer(pkt);
-      return;
-   }
-   
-   // take ownserhip over the packet
-   pkt->owner = COMPONENT_LIGHT;
-   
-   // parse packet
-   rxPkt = (light_ht*)pkt->payload;
-   
    // handle the packet
    do {
-      // abort if not sync'ed
+      // abort if I'm not sync'ed
       if (ieee154e_isSynch()==FALSE) {
          break;
       }
@@ -215,7 +195,13 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
          break;
       }
       
-      // abort if this an old packet already received this packet
+      // take ownserhip over the packet
+      pkt->owner = COMPONENT_LIGHT;
+      
+      // parse packet
+      rxPkt = (light_ht*)pkt->payload;
+      
+      // abort if this an old packet
       if (rxPkt->seqnum < light_vars.seqnum) {
          break;
       }
@@ -224,32 +210,21 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       light_vars.seqnum      = rxPkt->seqnum;
       light_vars.light_state = rxPkt->light_state;
       
-      // process packet
-      if (idmanager_getMyShortID()==SINK_ID) {
-         // I'm the sink: consume
-         light_consume_packet();
+      // map received light_state to light debug pin
+      if (light_vars.light_state==TRUE) {
+         debugpins_light_set();
       } else {
-         // I'm NOT the sink: forward
-         light_fwd_packet();
+         debugpins_light_clr();
+      }
+      
+      // retransmit packet
+      if (idmanager_getMyShortID()!=SINK_ID) {
+        // TODO: Fix in #19
       }
    } while(0);
    
    // free the packet
    openqueue_freePacketBuffer(pkt);
-}
-
-void light_consume_packet(void) {
-   
-   // switch rxlight pin high/low
-   if (light_vars.light_state==TRUE) {
-      debugpins_rxlight_set();
-   } else {
-      debugpins_rxlight_clr();
-   }
-}
-
-void light_fwd_packet(void) {
-  // TODO Fix in #19
 }
 
 //=========================== private ==========================================
