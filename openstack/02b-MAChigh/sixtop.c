@@ -20,29 +20,13 @@
 
 //=========================== variables =======================================
 
-sixtop_vars_t sixtop_vars;
-
 //=========================== prototypes ======================================
 
-// send internal
 owerror_t     sixtop_send_internal(OpenQueueEntry_t* msg);
-
-// sending EBs
-void          sixtop_sendEB_timer_cb(opentimer_id_t id);
-void          timer_sixtop_sendEB_fired(void);
-void          sixtop_sendEB(void);
 
 //=========================== public ==========================================
 
 void sixtop_init() {
-   sixtop_vars.busySendingEB = FALSE;
-   
-   sixtop_vars.sendEBTimerId = opentimers_start(
-      EBPERIOD,
-      TIMER_PERIODIC,
-      TIME_MS,
-      sixtop_sendEB_timer_cb
-   );
 }
 
 //======= from upper layer
@@ -59,7 +43,59 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
 //======= from lower layer
 
-void task_sixtopNotifSendDone() {
+/**
+\brief Send an EB.
+
+This is one of the MAC management tasks. This function inlines in the
+timers_res_fired() function, but is declared as a separate function for better
+readability of the code.
+*/
+port_INLINE void sixtop_sendEB(void) {
+   OpenQueueEntry_t* eb;
+   
+   if (neighbors_getMyDAGrank()==DEFAULTDAGRANK){
+      // I have not acquired a DAGrank yet
+      
+      // delete EBs packets from openqueue
+      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
+      
+      // stop here
+      return;
+   }
+   
+   // get a free packet buffer
+   eb = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
+   if (eb==NULL) {
+      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
+      return;
+   }
+   
+   // declare ownership over that packet
+   eb->creator                              = COMPONENT_SIXTOP;
+   eb->owner                                = COMPONENT_SIXTOP;
+   
+   // fill in EB
+   packetfunctions_reserveHeaderSize(eb,sizeof(eb_ht));
+   ((eb_ht*)(eb->payload))->type            = 0xbbbb;
+   ((eb_ht*)(eb->payload))->src             = idmanager_getMyShortID();
+   ((eb_ht*)(eb->payload))->rank            = neighbors_getMyDAGrank();
+   
+   // remember where to write the ASN to
+   eb->l2_ASNpayload                        = (uint8_t*)(&((eb_ht*)(eb->payload))->asn);
+   
+   // some l2 information about this packet
+   eb->l2_frameType                         = IEEE154_TYPE_BEACON;
+   eb->l2_nextORpreviousHop.type            = ADDR_16B;
+   eb->l2_nextORpreviousHop.addr_16b[0]     = 0xff;
+   eb->l2_nextORpreviousHop.addr_16b[1]     = 0xff;
+   
+   // put in queue for MAC to handle
+   sixtop_send_internal(eb);
+}
+
+void task_sixtopNotifSendDone(void) {
    OpenQueueEntry_t* msg;
    
    // get recently-sent packet from openqueue
@@ -83,9 +119,6 @@ void task_sixtopNotifSendDone() {
       case COMPONENT_SIXTOP:
          // this is a EB
             
-         // not busy sending EB anymore
-         sixtop_vars.busySendingEB = FALSE;
-         
          // discard packets
          openqueue_freePacketBuffer(msg);
          
@@ -103,7 +136,7 @@ void task_sixtopNotifSendDone() {
    }
 }
 
-void task_sixtopNotifReceive() {
+void task_sixtopNotifReceive(void) {
    OpenQueueEntry_t*    msg;
    eb_ht*               eb;
    
@@ -165,7 +198,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_myDAGrank() {
+bool debugPrint_myDAGrank(void) {
    uint16_t output;
    
    output = 0;
@@ -205,85 +238,3 @@ owerror_t sixtop_send_internal(OpenQueueEntry_t* msg) {
    return E_SUCCESS;
 }
 
-// timer interrupt callbacks
-
-void sixtop_sendEB_timer_cb(opentimer_id_t id) {
-   scheduler_push_task(timer_sixtop_sendEB_fired,TASKPRIO_SIXTOP);
-}
-
-/**
-\brief Timer handlers which triggers MAC management task.
-
-This function is called in task context by the scheduler after the RES timer
-has fired. This timer is set to fire every second, on average.
-
-The body of this function executes one of the MAC management task.
-*/
-void timer_sixtop_sendEB_fired(void) {
-    sixtop_sendEB();
-}
-
-/**
-\brief Send an EB.
-
-This is one of the MAC management tasks. This function inlines in the
-timers_res_fired() function, but is declared as a separate function for better
-readability of the code.
-*/
-port_INLINE void sixtop_sendEB() {
-   OpenQueueEntry_t* eb;
-   
-   if ((ieee154e_isSynch()==FALSE) || (neighbors_getMyDAGrank()==DEFAULTDAGRANK)){
-      // I'm not sync'ed or I did not acquire a DAGrank
-      
-      // delete packets genereted by this module (EB and KA) from openqueue
-      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
-      
-      // I'm not busy sending an EB
-      sixtop_vars.busySendingEB = FALSE;
-      
-      // stop here
-      return;
-   }
-   
-   if (sixtop_vars.busySendingEB==TRUE) {
-      // don't continue if I'm still sending a previous EB
-      return;
-   }
-   
-   // if I get here, I will send an EB
-   
-   // get a free packet buffer
-   eb = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
-   if (eb==NULL) {
-      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
-      return;
-   }
-   
-   // declare ownership over that packet
-   eb->creator                              = COMPONENT_SIXTOP;
-   eb->owner                                = COMPONENT_SIXTOP;
-   
-   // fill in EB
-   packetfunctions_reserveHeaderSize(eb,sizeof(eb_ht));
-   ((eb_ht*)(eb->payload))->type            = 0xbbbb;
-   ((eb_ht*)(eb->payload))->src             = idmanager_getMyShortID();
-   ((eb_ht*)(eb->payload))->rank            = neighbors_getMyDAGrank();
-   
-   // remember where to write the ASN to
-   eb->l2_ASNpayload                        = (uint8_t*)(&((eb_ht*)(eb->payload))->asn);
-   
-   // some l2 information about this packet
-   eb->l2_frameType                         = IEEE154_TYPE_BEACON;
-   eb->l2_nextORpreviousHop.type            = ADDR_16B;
-   eb->l2_nextORpreviousHop.addr_16b[0]     = 0xff;
-   eb->l2_nextORpreviousHop.addr_16b[1]     = 0xff;
-   
-   // put in queue for MAC to handle
-   sixtop_send_internal(eb);
-   
-   // I'm now busy sending an EB
-   sixtop_vars.busySendingEB = TRUE;
-}

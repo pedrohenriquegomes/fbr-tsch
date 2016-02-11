@@ -61,10 +61,10 @@ to this board.
 #define PORT_TsSlotDuration                   229
 
 // execution speed related
-#define PORT_maxTxDataPrepare               100    //  2899us (measured 2420us)
-#define PORT_maxRxAckPrepare                20    //   610us (measured  474us)
-#define PORT_maxRxDataPrepare               33    //  1000us (measured  477us)
-#define PORT_maxTxAckPrepare                40    //   792us (measured  746us)- cannot be bigger than 28.. is the limit for telosb as actvitiy_rt5 is executed almost there.
+#define PORT_maxTxDataPrepare               45     //  45=1374us (measured 1040us)
+#define PORT_maxRxAckPrepare                20     //   610us (measured  474us)
+#define PORT_maxRxDataPrepare               33     //  1000us (measured  477us)
+#define PORT_maxTxAckPrepare                40     //   792us (measured  746us)- cannot be bigger than 28.. is the limit for telosb as actvitiy_rt5 is executed almost there.
 
 // radio speed related
 #define PORT_delayTx                        12    //   366us (measured  352us)

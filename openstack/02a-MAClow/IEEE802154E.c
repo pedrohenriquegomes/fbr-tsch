@@ -569,8 +569,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 
 port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
-   bool        couldSendEB=FALSE;
-
+   
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
    
@@ -638,40 +637,41 @@ port_INLINE void activity_ti1ORri1() {
    cellType = schedule_getType();
    switch (cellType) {
       case CELLTYPE_EB:
+         // have 6top create an EB packet every MAXNUMNEIGHBORS EB slots, on average
+         if (openrandom_get16b()%MAXNUMNEIGHBORS==0) {
+            sixtop_sendEB();
+         }
       case CELLTYPE_TXRX:
          // stop using serial
          openserial_stop();
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
-         // check whether we can send
-         ieee154e_vars.dataToSend = openqueue_macGetDataPacket();
-         if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
-           
-            ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
-            
-            // If I am using FHSS force the transmission of EB in all channel, one after the other
-            if ((ieee154e_vars.singleChannel == SYNCHRONIZING_CHANNEL) ||
-                ((ieee154e_vars.freq - 11) == ieee154e_vars.nextChannelEB))
-            {                   
-              couldSendEB=TRUE;
-              // look for an EB packet in the queue
-              ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-              
-              ieee154e_vars.nextChannelEB = (ieee154e_vars.nextChannelEB + 1) % 16;
-            }
+         // check whether there is something to send
+         if (cellType==CELLTYPE_EB) {
+            // CELLTYPE_EB
+            ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+         } else {
+            // CELLTYPE_TXRX
+           ieee154e_vars.dataToSend = openqueue_macGetDataPacket();
          }
          
          if (ieee154e_vars.dataToSend==NULL) {
+            // listen
+            
             // change state
             changeState(S_RXDATAOFFSET);
             // arm rt1
             radiotimer_schedule(DURATION_rt1);
          } else {
+            // transmit
+            
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
-            if (couldSendEB==TRUE) {        // I will be sending an EB
+            if (cellType==CELLTYPE_EB) {
+               // I will be sending an EB
+               
                // fill in the ASN field of the EB
                ieee154e_getAsn((uint8_t*)ieee154e_vars.dataToSend->l2_ASNpayload);
             }

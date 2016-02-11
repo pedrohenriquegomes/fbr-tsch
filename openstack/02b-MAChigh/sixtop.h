@@ -62,18 +62,6 @@ END_PACK
 
 //=========================== module variables ================================
 
-typedef struct {
-   uint16_t             periodMaintenance;
-   bool                 busySendingEB;           // TRUE when busy sending an enhanced beacon
-   uint8_t              mgtTaskCounter;          // counter to determine what management task to do
-   opentimer_id_t       sendEBTimerId;
-   opentimer_id_t       timeoutTimerId;          // TimeOut timer id
-   uint16_t             ebPeriod;                // period of sending EB
-   six2six_state_t      six2six_state;
-   uint8_t              commandID;
-   six2six_handler_t    handler;
-} sixtop_vars_t;
-
 //=========================== prototypes ======================================
 
 // admin
@@ -81,6 +69,7 @@ void      sixtop_init(void);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer
+void      sixtop_sendEB(void);
 void      task_sixtopNotifSendDone(void);
 void      task_sixtopNotifReceive(void);
 // debugging
