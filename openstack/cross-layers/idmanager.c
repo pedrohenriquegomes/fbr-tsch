@@ -35,7 +35,7 @@ void idmanager_init() {
    idmanager_vars.myShortID                |= idmanager_vars.my64bID.addr_64b[6]<<8;
    
    // isDAGroot
-   if (light_checkMyId(SINK_ID)) {
+   if (idmanager_vars.myShortID==SINK_ID) {
       idmanager_vars.isDAGroot              = TRUE;
    } else {
       idmanager_vars.isDAGroot              = FALSE;
@@ -43,7 +43,7 @@ void idmanager_init() {
    
    // myPrefix
    idmanager_vars.myPrefix.type             = ADDR_PREFIX;
-   if (light_checkMyId(SINK_ID)) {
+   if (idmanager_vars.myShortID==SINK_ID) {
       idmanager_vars.myPrefix.prefix[0]     = 0xbb;
       idmanager_vars.myPrefix.prefix[1]     = 0xbb;
       idmanager_vars.myPrefix.prefix[2]     = 0x00;

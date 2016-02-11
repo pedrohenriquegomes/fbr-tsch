@@ -122,7 +122,6 @@ void task_sixtopNotifSendDone() {
 
 void task_sixtopNotifReceive() {
    OpenQueueEntry_t* msg;
-   uint16_t          lenIE;
    
    // get received packet from openqueue
    msg = openqueue_sixtopGetReceivedPacket();
@@ -154,18 +153,13 @@ void task_sixtopNotifReceive() {
    switch (*((uint16_t*)(msg->payload))) {
       case 0xbbbb:
          /*
-         TODO re-enable
          // update the rank
          neighbors_indicateRxEB(msg);
-         // if the beacon comes from an upper node we should check if the node is up-to-date
-         light_receive_beacon(msg);
          */
-         openqueue_freePacketBuffer(msg);
+         light_receive_beacon(msg);
          break;
       case 0xdddd:
-        // we only have one type of data packet, from the light application
         light_receive_data(msg);
-        openqueue_freePacketBuffer(msg);
         break;
       default:
          // free the packet's RAM memory

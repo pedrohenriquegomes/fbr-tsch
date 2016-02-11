@@ -20,12 +20,14 @@ light_vars_t        light_vars;
 //=========================== prototypes =======================================
 
 // transmitting
-void     light_timer_send_cb(opentimer_id_t id);
-void     light_send_task_cb(void);
+void     light_send_timer_cb(opentimer_id_t id);
+void     light_send_task(void);
 void     light_format_packet(OpenQueueEntry_t* pkt);
 // receiving
-void     light_timer_fwd_cb(opentimer_id_t id);
-void     light_process_packet_at_sink(void);
+void     light_consume_packet(void);
+// forward
+void     light_fwd_packet(void);
+void     light_fwd_timer_cb(opentimer_id_t id);
 
 //=========================== public ===========================================
 
@@ -45,7 +47,7 @@ void light_init(void) {
    
 #ifdef LIGHT_PRINTOUT_READING
    // printout the current light reading, used to calibrate LUX_THRESHOLD
-   if ( light_checkMyId(SENSOR_ID) && sensors_is_present(SENSOR_LIGHT) ) {
+   if ( idmanager_getMyShortID()==SENSOR_ID && sensors_is_present(SENSOR_LIGHT) ) {
       
       light_read_cb     = sensors_getCallbackRead(SENSOR_LIGHT);
       lux               = light_read_cb();
@@ -69,14 +71,15 @@ void light_init(void) {
 \brief Trigger the light app, which can decide to send a packet.
 */
 void light_trigger(void) {
-   callbackRead_cbt     light_read_cb;
    bool                 iShouldSend;
 #ifdef LIGHT_FAKESEND
    uint16_t             numAsnSinceLastEvent;
+#else
+   callbackRead_cbt     light_read_cb;
 #endif
    
    // stop if I'm not the SENSOR mote with a light sensor attached
-   if ( light_checkMyId(SENSOR_ID)==FALSE || sensors_is_present(SENSOR_LIGHT)==FALSE ) {
+   if ( idmanager_getMyShortID()!=SENSOR_ID || sensors_is_present(SENSOR_LIGHT)==FALSE ) {
       return;
    }
    
@@ -140,20 +143,20 @@ void light_trigger(void) {
       LIGHT_SEND_PERIOD_MS,
       TIMER_PERIODIC,
       TIME_MS,
-      light_timer_send_cb
+      light_send_timer_cb
    );
 }
 
-void light_timer_send_cb(opentimer_id_t timerId) {
+void light_send_timer_cb(opentimer_id_t timerId) {
    if (light_vars.numBurstPktsSent<LIGHT_BURSTSIZE) {
       light_vars.numBurstPktsSent++;
-      scheduler_push_task(light_send_task_cb, TASKPRIO_MAX);
+      scheduler_push_task(light_send_task, TASKPRIO_MAX);
    } else {
       opentimers_stop(timerId);
    }
 }
 
-void light_send_task_cb() {
+void light_send_task() {
    OpenQueueEntry_t*    pktToSend;
    
    // get a free packet buffer
@@ -164,15 +167,6 @@ void light_send_task_cb() {
    }
    light_format_packet(pktToSend);
    
-#ifdef LIGHT_DEBUG
-   openserial_printInfo(
-      COMPONENT_LIGHT,
-      ERR_FLOOD_SEND,
-      (errorparameter_t)light_vars.seqnum,
-      (errorparameter_t)light_vars.light_state
-   );
-#endif
-       
    if ((sixtop_send(pktToSend))==E_FAIL) {
       openqueue_freePacketBuffer(pktToSend);
    }
@@ -196,98 +190,23 @@ port_INLINE void light_format_packet(OpenQueueEntry_t* pkt) {
 }
 
 void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+   // cancel forwarding
+   
+   // free packet
    openqueue_freePacketBuffer(msg);
 }
 
 //== receiving
 
-// receive a beacon packet and analyse it
 void light_receive_beacon(OpenQueueEntry_t* pkt) {
-   OpenQueueEntry_t* fwPkt;
-   int16_t           counter;
-   bool              state;
+   // TODO: Fix #14
    
-   // abort if not sync'ed
-   if (ieee154e_isSynch() == FALSE) {
-     return;
-   }
-   
-   // acquire ownserhip over the packet
-   pkt->owner = COMPONENT_LIGHT;
-   
-   // retrieve the counter
-   counter    = pkt->l2_floodingCounter;
-   
-   // retrieve the state
-   state      = pkt->l2_floodingState;
-   
-   // update my info and drop if the beacon has a more recent counter
-   if (counter >= light_vars.seqnum) {
-      // update my counter
-      light_vars.seqnum = counter;
-      
-      if (light_vars.light_state != state) {
-        // update my state if I am not the sensor node
-        if (!light_checkMyId(SENSOR_ID)) {
-          light_vars.light_state = state;
-        }
-        
-        // if I am the sink, process the beacon (update the state)
-        if (light_checkMyId(SINK_ID)) {
-           light_process_packet_at_sink();
-        }
-      }
-      return;
-   }
-   
-   // if the packet has the same state as mine dont need to update the neighbor
-   // if I am already forwarding a packet, return
-   // if the packet comes from a node further from the sink, return
-   if (
-         (light_vars.light_state == state) ||
-         (light_vars.busyForwarding == TRUE) ||
-         (pkt->l2_rank >= neighbors_getMyDAGrank())
-      ){
-     return;
-   }
-   
-   // if I received a beacon that is older and the node is out-of-date and closer to the sink, 
-   // we should update it asap
-   fwPkt = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
-   if (fwPkt==NULL) {
-     openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,2,0);
-     return;
-   }
-   light_format_packet(fwPkt);
-
-   light_vars.pktToForward   = fwPkt;
-   light_vars.busyForwarding = TRUE;
-   light_vars.fwTimerId      = opentimers_start(
-      (openrandom_get16b()&0x3f),
-      TIMER_ONESHOT,
-      TIME_MS,
-      light_timer_fwd_cb
-   );
-   
-#ifdef LIGHT_DEBUG
-   openserial_printInfo(
-      COMPONENT_LIGHT,
-      ERR_FLOOD_GEN,
-      (errorparameter_t)light_vars.seqnum,
-      (errorparameter_t)light_vars.light_state
-   );
-#endif
+   // free packet
+   openqueue_freePacketBuffer(pkt);
 }
 
-// receive a data packet and analyse it
 void light_receive_data(OpenQueueEntry_t* pkt) {
-   OpenQueueEntry_t* fwpkt;
-   uint16_t          seqnum;
-   bool              light_state;
-#ifdef LIGHT_CALCULATE_DELAY
-   uint8_t           i;
-   uint8_t           asn[5];
-#endif
+   light_ht*         rxPkt;
    
    // don't run if not synched
    if (ieee154e_isSynch() == FALSE) {
@@ -298,120 +217,45 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
    // take ownserhip over the packet
    pkt->owner = COMPONENT_LIGHT;
    
-   // retrieve the counter
-   seqnum = pkt->payload[0] | (pkt->payload[1] << 8);
+   // parse packet
+   rxPkt = (light_ht*)pkt->payload;
    
-   // retrieve the state
-   light_state = (bool)pkt->payload[2];
-   
-#ifdef LIGHT_CALCULATE_DELAY
-   // retrieve the asn from the packet
-   for (i=0; i<5; i++) {
-     asn[i] = pkt->payload[3+i];
-   }
-#endif
-   
-#ifdef LIGHT_DEBUG
-   openserial_printInfo(
-      COMPONENT_LIGHT,ERR_FLOOD_RCV,
-      (errorparameter_t)seqnum,
-      (errorparameter_t)light_state
-   );
-#endif     
+   // handle the packet
+   do {
+      // abort if not sync'ed
+      if (ieee154e_isSynch()==FALSE) {
+         break;
+      }
+      
+      // abort if I'm the SENSOR node
+      if (idmanager_getMyShortID()==SENSOR_ID) {
+         break;
+      }
+      
+      // abort if this an old packet already received this packet
+      if (rxPkt->seqnum < light_vars.seqnum) {
+         break;
+      }
+      
+      // update the seqnum and light_state
+      light_vars.seqnum      = rxPkt->seqnum;
+      light_vars.light_state = rxPkt->light_state;
+      
+      // process packet
+      if (idmanager_getMyShortID()==SINK_ID) {
+         // I'm the sink: consume
+         light_consume_packet();
+      } else {
+         // I'm NOT the sink: forward
+         light_fwd_packet();
+      }
+   } while(0);
    
    // free the packet
    openqueue_freePacketBuffer(pkt);
-   
-   // drop if we already received this packet
-   if (seqnum<=light_vars.seqnum) {
-#ifdef LIGHT_DEBUG
-      openserial_printInfo(
-         COMPONENT_LIGHT,ERR_FLOOD_DROP,
-         (errorparameter_t)seqnum,
-         (errorparameter_t)light_state
-     );
-#endif     
-     return;
-   }
-   
-   // update the seqnum 
-   light_vars.seqnum = seqnum;
-   
-   // update the state
-   light_vars.light_state = light_state;
-   
-#ifdef LIGHT_CALCULATE_DELAY
-   // ASN retrieve the asn from the packet, store in light_vars.lastEventAsn
-#endif
-   
-   // if I am the sink, process the message (update the state)
-   if (light_checkMyId(SINK_ID)) {
-      light_process_packet_at_sink();
-      return;
-   }
-   
-   if (light_vars.busyForwarding==TRUE) {
-      return;
-   }
-   
-   // if I am not the sink, let's forward
-   fwpkt = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
-   if (fwpkt==NULL) {
-      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,1,0);
-      return;
-   }
-   light_format_packet(fwpkt);
-   
-   light_vars.pktToForward   = fwpkt;
-   light_vars.busyForwarding = TRUE;
-   light_vars.fwTimerId      = opentimers_start(
-      (openrandom_get16b()&0x3f),
-      TIMER_ONESHOT,
-      TIME_MS,
-      light_timer_fwd_cb
-   );
-   
-#ifdef LIGHT_DEBUG
-   openserial_printInfo(
-      COMPONENT_LIGHT,
-      ERR_FLOOD_FW,
-      (errorparameter_t)seqnum,
-      (errorparameter_t)light_state
-   );
-#endif
 }
 
-void light_timer_fwd_cb(opentimer_id_t id) {
-   if ((sixtop_send(light_vars.pktToForward))==E_FAIL) {
-      openqueue_freePacketBuffer(light_vars.pktToForward);
-   }
-   light_vars.busyForwarding = FALSE;
-   light_vars.pktToForward   = NULL;
-}
-
-//=== misc
-
-port_INLINE bool light_get_light_state(void) {
-  return light_vars.light_state;
-}
-
-port_INLINE uint16_t light_get_seqnum(void) {
-  return light_vars.seqnum;
-}
-
-// check if my id is equal to addr
-port_INLINE bool light_checkMyId(uint16_t addr) {
-  return ((idmanager_getMyID(ADDR_64B)->addr_64b[7] == (addr & 0xff)) &&
-          (idmanager_getMyID(ADDR_64B)->addr_64b[6] == (addr >> 8)));
-}
-
-//=========================== private ==========================================
-
-void light_process_packet_at_sink() {
-#ifdef LIGHT_CALCULATE_DELAY
-   asn_t      event_asn;
-   uint16_t   asnDiff;
-#endif
+void light_consume_packet(void) {
    
    // switch rxlight pin high/low
    if (light_vars.light_state==TRUE) {
@@ -419,27 +263,19 @@ void light_process_packet_at_sink() {
    } else {
       debugpins_rxlight_clr();
    }
-   
-#ifdef LIGHT_CALCULATE_DELAY
-   // calculate the time difference between the asn in the packet and now
-   // TODO
-   
-   // print
-   /*
-   openserial_printInfo(
-      COMPONENT_LIGHT,
-      ERR_FLOOD_STATE,
-      (errorparameter_t)light_vars.light_state,
-      (errorparameter_t)asnDiff
-   );
-   */
-#else 
-   openserial_printInfo(
-      COMPONENT_LIGHT,
-      ERR_FLOOD_STATE,
-      (errorparameter_t)light_vars.light_state,
-      (errorparameter_t)0
-   );
-#endif
 }
 
+void light_fwd_packet(void) {
+   opentimers_start(
+      (openrandom_get16b()&0x3f),
+      TIMER_ONESHOT,
+      TIME_MS,
+      light_fwd_timer_cb
+   );
+}
+
+void light_fwd_timer_cb(opentimer_id_t timerId) {
+   scheduler_push_task(light_send_task, TASKPRIO_MAX);
+}
+
+//=========================== private ==========================================
