@@ -672,7 +672,9 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
          } else {
             // CELLTYPE_TXRX
-           ieee154e_vars.dataToSend = openqueue_macGetDataPacket();
+            if (openrandom_get16b()%MAXNUMNEIGHBORS==0) {
+               ieee154e_vars.dataToSend = openqueue_macGetDataPacket();
+            }
          }
          
          if (ieee154e_vars.dataToSend==NULL) {
