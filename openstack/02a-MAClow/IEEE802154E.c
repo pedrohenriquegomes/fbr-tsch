@@ -936,6 +936,7 @@ port_INLINE void activity_rie3() {
 }
 
 port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
+   eb_ht* eb;
    
    // change state
    changeState(S_TXACKOFFSET);
@@ -1004,8 +1005,11 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
       
+      // parse as if it's an EB (light_ht and eb_ht) start with the same bytes
+      eb = (eb_ht*)ieee154e_vars.dataReceived->payload;
+      
       // break if wrong type
-      if ( *((uint16_t*)(ieee154e_vars.dataReceived->payload))!=0xbbbb && *((uint16_t*)(ieee154e_vars.dataReceived->payload))!=0xdddd) {
+      if ( eb->type!=0xbbbb && eb->type!=0xdddd) {
          break;
       }
       
@@ -1013,12 +1017,12 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       ieee154e_vars.lastCapturedTime = capturedTime;
       
       // synchronize to the received packet iif I'm not a DAGroot and this is my preferred parent
-      /*
-      if (idmanager_getIsDAGroot()==FALSE && neighbors_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
+      if (
+         idmanager_getIsDAGroot()==FALSE &&
+         neighbors_isPreferredParent(eb->src)
+      ) {
          synchronizePacket(ieee154e_vars.syncCapturedTime);
       }
-      */
-      synchronizePacket(ieee154e_vars.syncCapturedTime); // poipoi: Fix #5
       
       // indicate reception to upper layer
       notif_receive(ieee154e_vars.dataReceived);

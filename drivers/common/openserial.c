@@ -479,9 +479,6 @@ void openserial_goldenImageCommands(void){
        case COMMAND_PING_MOTE:
            // this should not happen
            break;
-       case COMMAND_SET_DAGRANK: // two bytes
-           neighbors_setMyDAGrank(comandParam_16);
-           break;
        case COMMAND_SET_FRAMELENGTH: // two bytes
            schedule_setFrameLength(comandParam_16);
            break;

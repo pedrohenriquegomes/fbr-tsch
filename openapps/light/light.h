@@ -8,6 +8,7 @@
 // application-level switches
 #define LIGHT_PRINTOUT_READING
 #define LIGHT_CALCULATE_DELAY
+#define LIGHT_FAKESEND
 
 // defines
 #define LIGHT_FAKESEND_PERIOD     1000 // period, in slots, of sending data

@@ -77,23 +77,6 @@ void task_sixtopNotifSendDone() {
    // take ownership
    msg->owner = COMPONENT_SIXTOP;
    
-   // update neighbor statistics
-   if (msg->l2_sendDoneError==E_SUCCESS) {
-      neighbors_indicateTx(
-         &(msg->l2_nextORpreviousHop),
-         msg->l2_numTxAttempts,
-         TRUE,
-         &msg->l2_asn
-      );
-   } else {
-      neighbors_indicateTx(
-         &(msg->l2_nextORpreviousHop),
-         msg->l2_numTxAttempts,
-         FALSE,
-         &msg->l2_asn
-      );
-   }
-   
    // send the packet to where it belongs
    switch (msg->creator) {
       
@@ -121,7 +104,8 @@ void task_sixtopNotifSendDone() {
 }
 
 void task_sixtopNotifReceive() {
-   OpenQueueEntry_t* msg;
+   OpenQueueEntry_t*    msg;
+   eb_ht*               eb;
    
    // get received packet from openqueue
    msg = openqueue_sixtopGetReceivedPacket();
@@ -138,24 +122,20 @@ void task_sixtopNotifReceive() {
    // take ownership
    msg->owner = COMPONENT_SIXTOP;
    
+   // parse as if it's an EB (light_ht and eb_ht) start with the same bytes
+   eb = (eb_ht*)msg->payload;
+   
    // update neighbor statistics
-   /* TODO reenable
    neighbors_indicateRx(
-      &(msg->l2_nextORpreviousHop),
+      eb->src,
       msg->l1_rssi,
-      &msg->l2_asn,
-      msg->l2_joinPriorityPresent,
-      msg->l2_joinPriority
+      &msg->l2_asn
    );
-   */
    
    // send the packet up the stack, if it qualifies
    switch (*((uint16_t*)(msg->payload))) {
       case 0xbbbb:
-         /*
-         // update the rank
          neighbors_indicateRxEB(msg);
-         */
          light_receive_beacon(msg);
          break;
       case 0xdddd:
