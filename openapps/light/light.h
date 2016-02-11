@@ -47,7 +47,8 @@ END_PACK
 
 typedef struct {
    // app state
-   uint16_t             seqnum;             // event sequence number
+   uint16_t             burstId;            // burst ID of the event
+   uint16_t             pktId  ;            // packet ID
    uint16_t             light_reading;      // current light sensor reading
    bool                 light_state;        // current state of the light (TRUE==on, FALSE==off)
    asn_t                lastEventAsn;       // holds the ASN of last event

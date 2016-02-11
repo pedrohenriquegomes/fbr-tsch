@@ -63,7 +63,6 @@ void light_init(void) {
 */
 void light_trigger(void) {
    bool                 iShouldSend;
-   uint8_t              i;
 #ifdef LIGHT_FAKESEND
    uint16_t             numAsnSinceLastEvent;
 #else
@@ -124,11 +123,11 @@ void light_trigger(void) {
    // remember the current ASN
    ieee154e_getAsnStruct(&light_vars.lastEventAsn);
    
-   // increment the seqnum
-   light_vars.seqnum++;
+   // increment the burstId
+   light_vars.burstId = (light_vars.burstId+1)%16;
    
    // send burst of LIGHT_BURSTSIZE packets
-   for (i=0;i<LIGHT_BURSTSIZE;i++) {
+   for (light_vars.pktId=0;light_vars.pktId<LIGHT_BURSTSIZE;light_vars.pktId++) {
       light_send_one_packet();
    }
 }
@@ -155,7 +154,7 @@ port_INLINE void light_send_one_packet(void) {
    packetfunctions_reserveHeaderSize(pkt,sizeof(light_ht));
    ((light_ht*)(pkt->payload))->type        = 0xdddd;
    ((light_ht*)(pkt->payload))->src         = idmanager_getMyShortID();
-   ((light_ht*)(pkt->payload))->seqnum      = light_vars.seqnum;
+   ((light_ht*)(pkt->payload))->seqnum      = (light_vars.burstId<<4) | light_vars.pktId;
    ((light_ht*)(pkt->payload))->light_state = light_vars.light_state;
    
    // send
@@ -204,8 +203,9 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       // abort if this an old burstID
       // TODO Fix #13
       
-      // update the seqnum and light_state
-      light_vars.seqnum      = rxPkt->seqnum;
+      // update the burstId, pktId and light_state
+      light_vars.burstId     = (rxPkt->seqnum & 0xf0)>>4;
+      light_vars.pktId       = rxPkt->seqnum & 0x0f;
       light_vars.light_state = rxPkt->light_state;
       
       // map received light_state to light debug pin
