@@ -29,8 +29,7 @@ static const uint8_t chTemplate_default[] = {
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
 #define EBPERIOD                  1000 // in ms, EB sending period
 #define MAXKAPERIOD                200 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
-//#define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
-#define DESYNCTIMEOUT             4666 // in slots: @8ms per slot -> ~37 seconds
+#define DESYNCTIMEOUT             4666 // in slots: 4666@7ms per slot -> ~32 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
@@ -270,6 +269,7 @@ void               ieee154e_init(void);
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
+void               ieee154e_getAsnStruct(asn_t* toAsn);
 void               ieee154e_setIsAckEnabled(bool isEnabled);
 void               ieee154e_setSingleChannel(uint8_t channel);
 

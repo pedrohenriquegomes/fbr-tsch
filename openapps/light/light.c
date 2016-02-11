@@ -13,10 +13,6 @@
 #include "debugpins.h"
 #include "openrandom.h"
 
-#define LIGHT_DEBUG
-#define LIGHT_PRINTOUT_READING
-#define CALCULATE_DELAY
-
 //=========================== variables =======================================
 
 light_vars_t        light_vars;
@@ -26,10 +22,10 @@ light_vars_t        light_vars;
 // transmitting
 void     light_timer_send_cb(opentimer_id_t id);
 void     light_send_task_cb(void);
-void     light_prepare_packet(OpenQueueEntry_t* pkt);
+void     light_format_packet(OpenQueueEntry_t* pkt);
 // receiving
 void     light_timer_fwd_cb(opentimer_id_t id);
-void     light_process_packet(void);
+void     light_process_packet_at_sink(void);
 
 //=========================== public ===========================================
 
@@ -75,6 +71,9 @@ void light_init(void) {
 void light_trigger(void) {
    callbackRead_cbt     light_read_cb;
    bool                 iShouldSend;
+#ifdef LIGHT_FAKESEND
+   uint16_t             numAsnSinceLastEvent;
+#endif
    
    // stop if I'm not the SENSOR mote with a light sensor attached
    if ( light_checkMyId(SENSOR_ID)==FALSE || sensors_is_present(SENSOR_LIGHT)==FALSE ) {
@@ -83,9 +82,23 @@ void light_trigger(void) {
    
    //=== if I get here, I'm the SENSOR mote
    
+#ifdef LIGHT_FAKESEND
+   // how many cells since the last time I transmitted?
+   numAsnSinceLastEvent = ieee154e_asnDiff(&light_vars.lastEventAsn);
+   
+   // set light_reading to fake high/low value to trigger packets
+   if (numAsnSinceLastEvent>LIGHT_FAKESEND_PERIOD) {
+      if (light_vars.light_reading<LUX_THRESHOLD) {
+         light_vars.light_reading=2*LUX_THRESHOLD;
+      } else {
+         light_vars.light_reading=0;
+      }
+   }
+#else
    // current light reading
    light_read_cb             = sensors_getCallbackRead(SENSOR_LIGHT);
    light_vars.light_reading  = light_read_cb();
+#endif
    
    // detect light state switches
    if (       light_vars.light_state==FALSE && (light_vars.light_reading >= (LUX_THRESHOLD + LUX_HYSTERESIS))) {
@@ -113,12 +126,16 @@ void light_trigger(void) {
    
    //=== if I get here, I will send a packet
    
-#ifdef CALCULATE_DELAY
-   // get the current ASN
-   ieee154e_getAsn(light_vars.received_asn);
-#endif
+   // remember the current ASN
+   ieee154e_getAsnStruct(&light_vars.lastEventAsn);
    
-   // start timer for additional packets
+   // increment the seqnum
+   light_vars.seqnum++;
+   
+   // initiate the burst of packets
+   light_vars.numBurstPktsSent = 0;
+   
+   // start timer for sending packets
    light_vars.sendTimerId = opentimers_start(
       LIGHT_SEND_PERIOD_MS,
       TIMER_PERIODIC,
@@ -128,20 +145,16 @@ void light_trigger(void) {
 }
 
 void light_timer_send_cb(opentimer_id_t timerId) {
-   if (light_vars.n_tx < LIGHT_SEND_RETRIES) {
+   if (light_vars.numBurstPktsSent<LIGHT_BURSTSIZE) {
+      light_vars.numBurstPktsSent++;
       scheduler_push_task(light_send_task_cb, TASKPRIO_MAX);
-      light_vars.n_tx++;
    } else {
       opentimers_stop(timerId);
-      light_vars.n_tx = 0;
    }
 }
 
 void light_send_task_cb() {
    OpenQueueEntry_t*    pktToSend;
-   
-   // increment the counter
-   light_vars.seqnum++;
    
    // get a free packet buffer
    pktToSend = openqueue_getFreePacketBuffer(COMPONENT_LIGHT);
@@ -149,7 +162,7 @@ void light_send_task_cb() {
       openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,0,0);
       return;
    }
-   light_prepare_packet(pktToSend);
+   light_format_packet(pktToSend);
    
 #ifdef LIGHT_DEBUG
    openserial_printInfo(
@@ -165,30 +178,21 @@ void light_send_task_cb() {
    }
 }
 
-port_INLINE void light_prepare_packet(OpenQueueEntry_t* pkt) {
-   uint8_t i;
-   
+port_INLINE void light_format_packet(OpenQueueEntry_t* pkt) {
    // take ownership over the packet
    pkt->owner                               = COMPONENT_LIGHT;
    pkt->creator                             = COMPONENT_LIGHT;
 
-#ifdef CALCULATE_DELAY
-   packetfunctions_reserveHeaderSize(pkt,5);
-   for (i = 0; i < 5; i++) {
-     *((uint8_t*)&pkt->payload[i]) = light_vars.received_asn[i];
-   }
+#ifdef LIGHT_CALCULATE_DELAY
+   // TODO add light_vars.lastEventAsn into packet
 #endif
    
    // fill payload
-   packetfunctions_reserveHeaderSize(pkt,3);
-   *((uint8_t*)&pkt->payload[0])            = light_vars.seqnum & 0xff;
-   *((uint8_t*)&pkt->payload[1])            = light_vars.seqnum >> 8;
-   *((uint8_t*)&pkt->payload[2])            = light_vars.light_state;
-   
-   // fill metadata
-   pkt->l2_nextORpreviousHop.type           = ADDR_16B;
-   pkt->l2_nextORpreviousHop.addr_16b[0]    = 0xff;
-   pkt->l2_nextORpreviousHop.addr_16b[1]    = 0xff;
+   packetfunctions_reserveHeaderSize(pkt,sizeof(light_ht));
+   ((light_ht*)(pkt->payload))->type        = 0xdddd;
+   ((light_ht*)(pkt->payload))->src         = idmanager_getMyShortID();
+   ((light_ht*)(pkt->payload))->seqnum      = light_vars.seqnum;
+   ((light_ht*)(pkt->payload))->light_state = light_vars.light_state;
 }
 
 void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -230,7 +234,7 @@ void light_receive_beacon(OpenQueueEntry_t* pkt) {
         
         // if I am the sink, process the beacon (update the state)
         if (light_checkMyId(SINK_ID)) {
-           light_process_packet();
+           light_process_packet_at_sink();
         }
       }
       return;
@@ -254,7 +258,7 @@ void light_receive_beacon(OpenQueueEntry_t* pkt) {
      openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,2,0);
      return;
    }
-   light_prepare_packet(fwPkt);
+   light_format_packet(fwPkt);
 
    light_vars.pktToForward   = fwPkt;
    light_vars.busyForwarding = TRUE;
@@ -280,7 +284,7 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
    OpenQueueEntry_t* fwpkt;
    uint16_t          seqnum;
    bool              light_state;
-#ifdef CALCULATE_DELAY
+#ifdef LIGHT_CALCULATE_DELAY
    uint8_t           i;
    uint8_t           asn[5];
 #endif
@@ -300,7 +304,7 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
    // retrieve the state
    light_state = (bool)pkt->payload[2];
    
-#ifdef CALCULATE_DELAY
+#ifdef LIGHT_CALCULATE_DELAY
    // retrieve the asn from the packet
    for (i=0; i<5; i++) {
      asn[i] = pkt->payload[3+i];
@@ -336,16 +340,13 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
    // update the state
    light_vars.light_state = light_state;
    
-#ifdef CALCULATE_DELAY
-   // retrieve the asn from the packet
-   for (i=0; i<5; i++) {
-     light_vars.received_asn[i] = asn[i];
-   }
+#ifdef LIGHT_CALCULATE_DELAY
+   // ASN retrieve the asn from the packet, store in light_vars.lastEventAsn
 #endif
    
    // if I am the sink, process the message (update the state)
    if (light_checkMyId(SINK_ID)) {
-      light_process_packet();
+      light_process_packet_at_sink();
       return;
    }
    
@@ -359,7 +360,7 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       openserial_printError(COMPONENT_LIGHT,ERR_NO_FREE_PACKET_BUFFER,1,0);
       return;
    }
-   light_prepare_packet(fwpkt);
+   light_format_packet(fwpkt);
    
    light_vars.pktToForward   = fwpkt;
    light_vars.busyForwarding = TRUE;
@@ -406,8 +407,8 @@ port_INLINE bool light_checkMyId(uint16_t addr) {
 
 //=========================== private ==========================================
 
-void light_process_packet() {
-#ifdef CALCULATE_DELAY
+void light_process_packet_at_sink() {
+#ifdef LIGHT_CALCULATE_DELAY
    asn_t      event_asn;
    uint16_t   asnDiff;
 #endif
@@ -419,19 +420,19 @@ void light_process_packet() {
       debugpins_rxlight_clr();
    }
    
-#ifdef CALCULATE_DELAY
-   // calculate the time difference
-   event_asn.byte4      =  light_vars.received_asn[4];
-   event_asn.bytes2and3 = (light_vars.received_asn[3] << 8) | light_vars.received_asn[2];
-   event_asn.bytes0and1 = (light_vars.received_asn[1] << 8) | light_vars.received_asn[0];
+#ifdef LIGHT_CALCULATE_DELAY
+   // calculate the time difference between the asn in the packet and now
+   // TODO
    
-   asnDiff = ieee154e_asnDiff(&event_asn);
+   // print
+   /*
    openserial_printInfo(
       COMPONENT_LIGHT,
       ERR_FLOOD_STATE,
       (errorparameter_t)light_vars.light_state,
       (errorparameter_t)asnDiff
    );
+   */
 #else 
    openserial_printInfo(
       COMPONENT_LIGHT,

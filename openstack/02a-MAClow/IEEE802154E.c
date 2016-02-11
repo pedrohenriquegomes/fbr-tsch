@@ -1105,6 +1105,10 @@ port_INLINE void ieee154e_getAsn(uint8_t* array) {
    array[4]         =  ieee154e_vars.asn.byte4;
 }
 
+port_INLINE void ieee154e_getAsnStruct(asn_t* toAsn) {
+   memcpy(toAsn,&ieee154e_vars.asn,sizeof(asn_t));
+}
+
 port_INLINE uint16_t ieee154e_getTimeCorrection() {
     int16_t returnVal;
     

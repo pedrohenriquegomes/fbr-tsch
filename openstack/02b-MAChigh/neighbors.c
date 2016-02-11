@@ -393,6 +393,9 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
                           uint8_t      numTxAttempts,
                           bool         was_finally_acked,
                           asn_t*       asnTs) {
+   
+   return; // Fixme in #5
+                            
    uint8_t i;
    // don't run through this function if packet was sent to broadcast address
    if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
