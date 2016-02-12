@@ -80,7 +80,7 @@ port_INLINE void sixtop_sendEB(void) {
    packetfunctions_reserveHeaderSize(eb,sizeof(eb_ht));
    ((eb_ht*)(eb->payload))->type            = LONGTYPE_BEACON;
    ((eb_ht*)(eb->payload))->src             = idmanager_getMyShortID();
-   ((eb_ht*)(eb->payload))->rank            = neighbors_getMyDAGrank();
+   ((eb_ht*)(eb->payload))->ebrank          = (uint8_t)neighbors_getMyDAGrank();
    ((eb_ht*)(eb->payload))->light_info      = light_get_light_info(0);
    
    // remember where to write the ASN to

@@ -220,15 +220,7 @@ void neighbors_indicateRxEB(OpenQueueEntry_t* msg) {
    if (isNeighbor(eb->src)==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(eb->src,i)) {
-            if (
-                  eb->rank > neighbors_vars.neighbors[i].DAGrank &&
-                  eb->rank - neighbors_vars.neighbors[i].DAGrank >(DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
-               ) {
-                // the new DAGrank looks suspiciously high, only increment a bit
-                neighbors_vars.neighbors[i].DAGrank += (DEFAULTLINKCOST*2*MINHOPRANKINCREASE);
-            } else {
-               neighbors_vars.neighbors[i].DAGrank = eb->rank;
-            }
+            neighbors_vars.neighbors[i].DAGrank = eb->ebrank;
             break;
          }
       }
@@ -257,7 +249,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    bool      prefParentFound;
    
    // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
-   if ((idmanager_getIsDAGroot())==TRUE) {
+   if (idmanager_getIsDAGroot()==TRUE) {
        neighbors_vars.myDAGrank=MINHOPRANKINCREASE;
        return;
    }
@@ -277,7 +269,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
          neighbors_vars.neighbors[i].parentPreference=0;
          
          // calculate link cost to this neighbor
-         rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
+         rankIncrease = MINHOPRANKINCREASE;
          
          tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
          if ( tentativeDAGrank<neighbors_vars.myDAGrank &&

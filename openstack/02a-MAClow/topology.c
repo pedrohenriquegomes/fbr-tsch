@@ -63,6 +63,7 @@ bool topology_isAcceptablePacket(uint16_t shortID) {
    bool returnVal;
    
    returnVal=FALSE;
+   /*
    switch (idmanager_getMyShortID()) {
       case MOTE_A:
          if (
@@ -117,7 +118,6 @@ bool topology_isAcceptablePacket(uint16_t shortID) {
          }
          break;
    }
-   /*
    switch (idmanager_getMyShortID()) {
       case MOTE_A:
          if (
@@ -167,6 +167,30 @@ bool topology_isAcceptablePacket(uint16_t shortID) {
          break;
    }
    */
+   switch (idmanager_getMyShortID()) {
+      case MOTE_A:
+         if (
+               shortID==MOTE_B
+            ) {
+            returnVal=TRUE;
+         }
+         break;
+      case MOTE_B:
+         if (
+               shortID==MOTE_A ||
+               shortID==MOTE_D
+            ) {
+            returnVal=TRUE;
+         }
+         break;
+      case MOTE_D:
+         if (
+               shortID==MOTE_B
+            ) {
+            returnVal=TRUE;
+         }
+         break;
+   }
    return returnVal;
 #else
    return TRUE;

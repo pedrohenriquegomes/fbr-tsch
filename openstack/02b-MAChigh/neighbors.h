@@ -18,9 +18,9 @@
 #define SWITCHSTABILITYTHRESHOLD  3
 #define DEFAULTLINKCOST           15
 
-#define MAXDAGRANK                0xffff
+#define MAXDAGRANK                0xff
 #define DEFAULTDAGRANK            MAXDAGRANK
-#define MINHOPRANKINCREASE        256  // default value in RPL and Minimal 6TiSCH draft
+#define MINHOPRANKINCREASE        1
 
 //=========================== typedef =========================================
 
