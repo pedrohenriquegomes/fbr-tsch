@@ -78,13 +78,13 @@ port_INLINE void sixtop_sendEB(void) {
    
    // fill in EB
    packetfunctions_reserveHeaderSize(eb,sizeof(eb_ht));
-   ((eb_ht*)(eb->payload))->type            = 0xbbbb;
+   ((eb_ht*)(eb->payload))->type            = LONGTYPE_BEACON;
    ((eb_ht*)(eb->payload))->src             = idmanager_getMyShortID();
    ((eb_ht*)(eb->payload))->rank            = neighbors_getMyDAGrank();
    ((eb_ht*)(eb->payload))->light_info      = light_get_light_info(0);
    
    // remember where to write the ASN to
-   eb->l2_ASNpayload                        = (uint8_t*)(&((eb_ht*)(eb->payload))->asn);
+   eb->l2_ASNpayload                        = (uint8_t*)(&((eb_ht*)(eb->payload))->asn0);
    
    // some l2 information about this packet
    eb->l2_frameType                         = IEEE154_TYPE_BEACON;
@@ -168,11 +168,11 @@ void task_sixtopNotifReceive(void) {
    
    // send the packet up the stack, if it qualifies
    switch (*((uint16_t*)(msg->payload))) {
-      case 0xbbbb:
+      case LONGTYPE_BEACON:
          neighbors_indicateRxEB(msg);
          light_receive_beacon(msg);
          break;
-      case 0xdddd:
+      case LONGTYPE_DATA:
         light_receive_data(msg);
         break;
       default:

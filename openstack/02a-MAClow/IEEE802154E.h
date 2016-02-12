@@ -22,6 +22,9 @@ static const uint8_t chTemplate_default[] = {
 
 //=========================== define ==========================================
 
+#define LONGTYPE_BEACON         0xb0b0
+#define LONGTYPE_DATA           0xd0d0
+
 #define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
 #define TXRETRIES                    0 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)

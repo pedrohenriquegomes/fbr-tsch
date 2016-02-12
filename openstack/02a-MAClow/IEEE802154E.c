@@ -439,7 +439,8 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
 }
 
 port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
-   uint8_t              i;
+   uint8_t    i;
+   eb_ht*     eb;
    
    // check state
    if (ieee154e_vars.state!=S_SYNCRX) {
@@ -502,7 +503,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       }
       
       // break if not beacon
-      if (((eb_ht*)(ieee154e_vars.dataReceived->payload))->type != 0xbbbb) {
+      if (((eb_ht*)(ieee154e_vars.dataReceived->payload))->type != LONGTYPE_BEACON) {
          break;
       }
       
@@ -527,7 +528,13 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       //=== synchronize to the ASN
       // store ASN
-      asnStoreFromEB((uint8_t*)&(((eb_ht*)(ieee154e_vars.dataReceived->payload))->asn));
+      // store the ASN
+      eb = (eb_ht*)(ieee154e_vars.dataReceived->payload);
+      ieee154e_vars.asn.bytes0and1   =     eb->asn0+
+                                       256*eb->asn1;
+      ieee154e_vars.asn.bytes2and3   =     eb->asn2+
+                                       256*eb->asn3;
+      ieee154e_vars.asn.byte4        =     0;
       // calculate the current slotoffset
       ieee154e_syncSlotOffset();
       schedule_syncSlotOffset(ieee154e_vars.slotOffset);
@@ -589,6 +596,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 
 port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
+   eb_ht*      eb;
    
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -695,7 +703,11 @@ port_INLINE void activity_ti1ORri1() {
                // I will be sending an EB
                
                // fill in the ASN field of the EB
-               ieee154e_getAsn((uint8_t*)ieee154e_vars.dataToSend->l2_ASNpayload);
+              eb = (eb_ht*)(ieee154e_vars.dataToSend->payload);
+              eb->asn0 = (ieee154e_vars.asn.bytes0and1     & 0xff);
+              eb->asn1 = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
+              eb->asn2 = (ieee154e_vars.asn.bytes2and3     & 0xff);
+              eb->asn3 = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
             }
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
@@ -986,7 +998,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       eb = (eb_ht*)ieee154e_vars.dataReceived->payload;
       
       // break if wrong type
-      if ( eb->type!=0xbbbb && eb->type!=0xdddd) {
+      if ( eb->type!=LONGTYPE_BEACON && eb->type!=LONGTYPE_DATA) {
          break;
       }
       

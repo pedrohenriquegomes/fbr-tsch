@@ -161,7 +161,7 @@ port_INLINE void light_send_one_packet(uint8_t pktId) {
    
    // fill payload
    packetfunctions_reserveHeaderSize(pkt,sizeof(light_ht));
-   ((light_ht*)(pkt->payload))->type        = 0xdddd;
+   ((light_ht*)(pkt->payload))->type        = LONGTYPE_DATA;
    ((light_ht*)(pkt->payload))->src         = idmanager_getMyShortID();
    ((light_ht*)(pkt->payload))->light_info  = light_get_light_info(pktId);
    
