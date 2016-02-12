@@ -398,7 +398,7 @@ port_INLINE void activity_synchronize_newSlot() {
       radio_rfOff();
       
       i=0;
-      while (ieee154e_vars.freq != ieee154e_vars.chTemplateEB[i] && i<EB_NUMCHANS){
+      while (ieee154e_vars.freq-11 != ieee154e_vars.chTemplateEB[i] && i<EB_NUMCHANS){
           i++;
       }
       
