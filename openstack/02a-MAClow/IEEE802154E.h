@@ -146,12 +146,11 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-   TsTxOffset                =  131,                  //  4000us
-   TsLongGT                  =   43,                  //  1300us
-//   TsTxAckDelay              =  151,                  //  4606us
-   TsTxAckDelay              =  0,
-   TsShortGT                 =   16,                  //   500us
-   TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
+   TsTxOffset                =  95,                   // 95=2899us
+   TsLongGT                  =  43,                   // 43=1312us
+   TsTxAckDelay              =   0,
+   TsShortGT                 =  16,                   //   500us
+   TsSlotDuration            =  PORT_TsSlotDuration,
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
@@ -161,10 +160,9 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-//   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdDataDuration            =   98,   
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+   wdRadioTx                 =  33,                   //  1000us (needs to be >delayTx)
+   wdDataDuration            =  98,   
+   wdAckDuration             =  98,                   //  3000us (measured 1000us)
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

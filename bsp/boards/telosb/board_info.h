@@ -56,19 +56,17 @@ to this board.
 //===== IEEE802154E timing
 
 // time-slot related
-//#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
-//#define PORT_TsSlotDuration                   197 // TsTxOffset (131) + WdDataDuration (66)
-#define PORT_TsSlotDuration                   229
+#define PORT_TsSlotDuration                 150  // 150=4578us (measured 4450us)
 
 // execution speed related
-#define PORT_maxTxDataPrepare               45     //  45=1374us (measured 1040us)
-#define PORT_maxRxAckPrepare                20     //   610us (measured  474us)
-#define PORT_maxRxDataPrepare               33     //  1000us (measured  477us)
-#define PORT_maxTxAckPrepare                40     //   792us (measured  746us)- cannot be bigger than 28.. is the limit for telosb as actvitiy_rt5 is executed almost there.
+#define PORT_maxTxDataPrepare               30   //  30= 915us (measured 753us)
+#define PORT_maxRxAckPrepare                20   //      610us (measured  474us)
+#define PORT_maxRxDataPrepare               20   //  20= 610us (measured  446us)
+#define PORT_maxTxAckPrepare                40   //      792us (measured  746us)- cannot be bigger than 28.. is the limit for telosb as actvitiy_rt5 is executed almost there.
 
 // radio speed related
-#define PORT_delayTx                        12    //   366us (measured  352us)
-#define PORT_delayRx                        0     //     0us (can not measure)
+#define PORT_delayTx                        12    //     366us (measured  352us)
+#define PORT_delayRx                        0     //       0us (can not measure)
 
 //===== adaptive_sync accuracy
 
