@@ -63,6 +63,7 @@ typedef struct {
 // initialization
 void     light_init(void);
 void     light_trigger(void);
+uint8_t  light_get_light_info(void);
 void     light_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void     light_receive_data(OpenQueueEntry_t* msg);
 void     light_receive_beacon(OpenQueueEntry_t* msg);

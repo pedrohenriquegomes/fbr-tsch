@@ -136,6 +136,10 @@ void light_trigger(void) {
    }
 }
 
+uint8_t  light_get_light_info(void) {
+   return (light_vars.burstId<<4) | (light_vars.pktId<<1) | light_vars.light_state;
+}
+
 port_INLINE void light_send_one_packet(void) {
    OpenQueueEntry_t*    pkt;
    
@@ -158,7 +162,7 @@ port_INLINE void light_send_one_packet(void) {
    packetfunctions_reserveHeaderSize(pkt,sizeof(light_ht));
    ((light_ht*)(pkt->payload))->type        = 0xdddd;
    ((light_ht*)(pkt->payload))->src         = idmanager_getMyShortID();
-   ((light_ht*)(pkt->payload))->light_info  = (light_vars.burstId<<4) | (light_vars.pktId<<1) | light_vars.light_state;
+   ((light_ht*)(pkt->payload))->light_info  = light_get_light_info();
    
    // send
    if ((sixtop_send(pkt))==E_FAIL) {
