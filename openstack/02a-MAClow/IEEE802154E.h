@@ -222,7 +222,8 @@ typedef struct {
    PORT_RADIOTIMER_WIDTH     syncCapturedTime;        // captured time used to sync
    // channel hopping
    uint8_t                   freq;                    // frequency of the current slot
-   uint8_t                   asnOffset;               // offset inside the frame
+   uint8_t                   asnOffset;               // offset inside the frame for eb
+   uint8_t                   dataAsnOffset;           // offset inside the frame for data
    uint8_t                   singleChannel;           // the single channel used for transmission
    bool                      singleChannelChanged;    // detect id singleChannelChanged
    uint8_t                   chTemplate[16];          // storing the template of hopping sequence
