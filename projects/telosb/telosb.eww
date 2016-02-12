@@ -2,6 +2,9 @@
 
 <workspace>
   <project>
+    <path>$WS_DIR$\01bsp_radio_tx\01bsp_radio_tx.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\03oos_openwsn\03oos_openwsn.ewp</path>
   </project>
   <batchBuild/>
