@@ -403,7 +403,7 @@ port_INLINE void activity_synchronize_newSlot() {
       }
       
       if (i<EB_NUMCHANS){
-          ieee154e_vars.freq = ieee154e_vars.chTemplateEB[(i+1)%EB_NUMCHANS];
+          ieee154e_vars.freq = 11 + ieee154e_vars.chTemplateEB[(i+1)%EB_NUMCHANS];
       }
       
       // configure the radio to listen to the default synchronizing channel
@@ -579,7 +579,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
             break;
          }
       }
-      ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
+      ieee154e_vars.ebAsnOffset = i - schedule_getChannelOffset();      
+      ieee154e_vars.dataAsnOffset = ieee154e_vars.asn.bytes0and1%16 - schedule_getChannelOffset();
       
       // compute radio duty cycle
       ieee154e_vars.radioOnTics += (radio_getTimerValue()-ieee154e_vars.radioOnInit);
@@ -1118,7 +1119,8 @@ port_INLINE void incrementAsnOffset() {
    
    // increment the offsets
    ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%SLOTFRAME_LENGTH;
-   ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%16;
+   ieee154e_vars.ebAsnOffset   = (ieee154e_vars.ebAsnOffset+1)%EB_NUMCHANS;
+   ieee154e_vars.dataAsnOffset = (ieee154e_vars.dataAsnOffset+1)%16;
 }
 
 //from upper layer that want to send the ASN to compute timing or latency
@@ -1327,10 +1329,10 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
             return ieee154e_vars.singleChannel; // single channel
         } else {
             // channel hopping enabled, use the channel depending on hopping template
-            return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
+            return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.dataAsnOffset+channelOffset)%16];
         }
     } else {
-        return 11+ieee154e_vars.chTemplateEB[(ieee154e_vars.asnOffset+channelOffset)%EB_NUMCHANS];
+        return 11+ieee154e_vars.chTemplateEB[(ieee154e_vars.ebAsnOffset+channelOffset)%EB_NUMCHANS];
     }
 }
 
