@@ -136,6 +136,7 @@ command_line_options = {
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
     'goldenImage':      ['none','root','sniffer'],
+    'version':          ['debug','release']
 }
 
 def validate_option(key, value, env):
@@ -293,6 +294,13 @@ command_line_vars.AddVariables(
         'comma-separated list of user applications',       # help
         '',                                                # default
         validate_apps,                                     # validator
+        None,                                              # converter
+    ),
+    (
+        'version',                                         # key
+        '',                                                # help
+        command_line_options['version'][0],                # default
+        validate_option,                                   # validator
         None,                                              # converter
     ),
 )

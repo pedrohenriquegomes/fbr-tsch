@@ -22,18 +22,25 @@ void    leds_init() {
 
 // red = LED1 = P5.4
 void    leds_error_on() {
+#ifdef DEBUG
    P5OUT     &= ~0x10;
+#endif
 }
 void    leds_error_off() {
-   P5OUT     |=  0x10;
+#ifdef DEBUG
+  P5OUT     |=  0x10;
+#endif
 }
 void    leds_error_toggle() {
-   P5OUT     ^=  0x10;
+#ifdef DEBUG
+  P5OUT     ^=  0x10;
+#endif
 }
 uint8_t leds_error_isOn() {
-   return (uint8_t)(~P5OUT & 0x10)>>4;
+  return (uint8_t)(~P5OUT & 0x10)>>4;
 }
 void leds_error_blink() {
+#ifdef DEBUG
    uint8_t i;
    volatile uint16_t delay;
    // turn all LEDs off
@@ -44,34 +51,47 @@ void leds_error_blink() {
       P5OUT     ^=  0x10;
       for (delay=0xff;delay>0;delay--);
    }
+#endif
 }
 
 // green = LED2 = P5.5
 void    leds_light_on() {
+#ifdef DEBUG
    P5OUT     &= ~0x20;
+#endif
 }
 void    leds_light_off() {
-   P5OUT     |=  0x20;
+#ifdef DEBUG
+  P5OUT     |=  0x20;
+#endif
 }
 void    leds_light_toggle() {
-   P5OUT     ^=  0x20;
+#ifdef DEBUG
+  P5OUT     ^=  0x20;
+#endif
 }
 uint8_t leds_light_isOn() {
-   return (uint8_t)(~P5OUT & 0x20)>>5;
+  return (uint8_t)(~P5OUT & 0x20)>>5;
 }
 
 // blue = LED3 = P5.6
 void    leds_sync_on() {
-   P5OUT     &= ~0x40;
+#ifdef DEBUG
+  P5OUT     &= ~0x40;
+#endif
 }
 void    leds_sync_off() {
-   P5OUT     |=  0x40;
+#ifdef DEBUG
+  P5OUT     |=  0x40;
+#endif
 }
 void    leds_sync_toggle() {
-   P5OUT     ^=  0x40;
+#ifdef DEBUG
+  P5OUT     ^=  0x40;
+#endif
 }
 uint8_t leds_sync_isOn() {
-   return (uint8_t)(~P5OUT & 0x40)>>6;
+  return (uint8_t)(~P5OUT & 0x40)>>6;
 }
 
 void    leds_debug_on() {
@@ -89,16 +109,23 @@ uint8_t leds_debug_isOn() {
 }
 
 void    leds_all_on() {
-   P5OUT     &= ~0x70;
+#ifdef DEBUG
+  P5OUT     &= ~0x70;
+#endif
 }
 void    leds_all_off() {
-   P5OUT     |=  0x70;
+#ifdef DEBUG
+  P5OUT     |=  0x70;
+#endif
 }
 void    leds_all_toggle() {
-   P5OUT     ^=  0x70;
+#ifdef DEBUG
+  P5OUT     ^=  0x70;
+#endif
 }
 
 void    leds_circular_shift() {
+#ifdef DEBUG
    uint8_t leds_on;
    // get LED state
    leds_on  = (~P5OUT & 0x70) >> 4;
@@ -116,9 +143,11 @@ void    leds_circular_shift() {
    leds_on <<= 4;                                // send back to position 4
    P5OUT |=  (~leds_on & 0x70);                  // switch on the leds marked '1' in leds_on
    P5OUT &= ~( leds_on & 0x70);                  // switch off the leds marked '0' in leds_on
+#endif
 }
 
 void    leds_increment() {
+#ifdef DEBUG
    uint8_t leds_on;
    // get LED state
    leds_on  = (~P5OUT & 0x70) >> 4;
@@ -132,6 +161,7 @@ void    leds_increment() {
    leds_on <<= 4;                                // send back to position 4
    P5OUT |=  (~leds_on & 0x70);                  // switch on the leds marked '1' in leds_on
    P5OUT &= ~( leds_on & 0x70);                  // switch off the leds marked '0' in leds_on
+#endif
 }
 
 //=========================== private =========================================
