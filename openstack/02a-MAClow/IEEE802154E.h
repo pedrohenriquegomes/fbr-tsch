@@ -21,7 +21,7 @@ static const uint8_t chTemplate_default[] = {
 };
 
 static const uint8_t chTemplate_eb[] = {
-   0,4,9,15                            // channels to send EBs on (-11, i.e. 0=channel 11)
+   0,4,9,15                            // channels to send EBs on (-11, i.e. 0=channel 11) (0,4,9,15)==(11,15,20,26)
 };
 #define EB_NUMCHANS                 4  // number of channels EBs are sent on
 #define EB_SLOWHOPPING_PERIOD    1000  // how often a node changes the channel it listens on for EBs, in slots (1000=4610ms)
