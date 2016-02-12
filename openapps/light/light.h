@@ -38,7 +38,7 @@ BEGIN_PACK
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint16_t  type;
    uint16_t  src;
-   uint16_t  seqnum;
+   uint8_t   seqnum;
    uint8_t   light_state;
 } light_ht;
 END_PACK

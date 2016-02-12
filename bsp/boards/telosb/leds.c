@@ -47,16 +47,16 @@ void leds_error_blink() {
 }
 
 // green = LED2 = P5.5
-void    leds_radio_on() {
+void    leds_light_on() {
    P5OUT     &= ~0x20;
 }
-void    leds_radio_off() {
+void    leds_light_off() {
    P5OUT     |=  0x20;
 }
-void    leds_radio_toggle() {
+void    leds_light_toggle() {
    P5OUT     ^=  0x20;
 }
-uint8_t leds_radio_isOn() {
+uint8_t leds_light_isOn() {
    return (uint8_t)(~P5OUT & 0x20)>>5;
 }
 

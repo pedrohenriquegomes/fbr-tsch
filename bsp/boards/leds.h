@@ -38,10 +38,10 @@ void    leds_error_toggle(void);
 uint8_t leds_error_isOn(void);
 void    leds_error_blink(void);
 
-void    leds_radio_on(void);
-void    leds_radio_off(void);
-void    leds_radio_toggle(void);
-uint8_t leds_radio_isOn(void);
+void    leds_light_on(void);
+void    leds_light_off(void);
+void    leds_light_toggle(void);
+uint8_t leds_light_isOn(void);
 
 void    leds_sync_on(void);
 void    leds_sync_off(void);

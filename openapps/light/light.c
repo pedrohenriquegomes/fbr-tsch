@@ -54,6 +54,7 @@ void light_init(void) {
 #endif
    
    debugpins_light_clr();
+   leds_light_off();
 }
 
 //=== transmitting
@@ -100,12 +101,14 @@ void light_trigger(void) {
       
       light_vars.light_state = TRUE;
       debugpins_light_set();
+      leds_light_on();
       iShouldSend = TRUE;
    } else if (light_vars.light_state==TRUE  && (light_vars.light_reading <  (LUX_THRESHOLD - LUX_HYSTERESIS))) {
       // light was just turned off
       
       light_vars.light_state = FALSE;
       debugpins_light_clr();
+      leds_light_off();
       iShouldSend = TRUE;
    } else {
       // light stays in same state
@@ -240,8 +243,10 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       // map received light_state to light debug pin
       if (light_vars.light_state==TRUE) {
          debugpins_light_set();
+         leds_light_on();
       } else {
          debugpins_light_clr();
+         leds_light_off();
       }
       
       // retransmit packet
