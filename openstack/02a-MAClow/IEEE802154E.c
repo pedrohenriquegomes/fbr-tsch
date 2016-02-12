@@ -665,8 +665,8 @@ port_INLINE void activity_ti1ORri1() {
    cellType = schedule_getType();
    switch (cellType) {
       case CELLTYPE_EB:
-         // have 6top create an EB packet every MAXNUMNEIGHBORS EB slots, on average
-         if (openrandom_get16b()%MAXNUMNEIGHBORS==0) {
+         // have 6top create an EB packet every AVERAGEDEGREE EB slots, on average
+         if (openrandom_get16b()%AVERAGEDEGREE==0) {
             sixtop_sendEB();
          }
       case CELLTYPE_TXRX:
@@ -680,7 +680,7 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
          } else {
             // CELLTYPE_TXRX
-            if (openrandom_get16b()%MAXNUMNEIGHBORS==0) {
+            if (openrandom_get16b()%AVERAGEDEGREE==0) {
                ieee154e_vars.dataToSend = openqueue_macGetDataPacket();
             }
          }
