@@ -54,32 +54,68 @@ topology.
 */
 bool topology_isAcceptablePacket(uint16_t shortID) {
 #ifdef FORCETOPOLOGY
+#define MOTE_A 0x6f16
+#define MOTE_B 0x3bdd
+#define MOTE_C 0x7905
+#define MOTE_D 0xb957
+#define MOTE_E 0xbb5e
+#define MOTE_F 0x930f
    bool returnVal;
    
    returnVal=FALSE;
    switch (idmanager_getMyShortID()) {
-      case 0x6f16:
+      case MOTE_A:
          if (
-               shortID==0x3bdd
+               shortID==MOTE_B ||
+               shortID==MOTE_C
             ) {
             returnVal=TRUE;
          }
-         break;     
-      case 0x3bdd:
+         break;
+      case MOTE_B:
          if (
-               shortID==0x6f16 ||
-               shortID==0xb957
+               shortID==MOTE_A ||
+               shortID==MOTE_D ||
+               shortID==MOTE_E
             ) {
             returnVal=TRUE;
          }
-         break;    
-      case 0xb957:
+         break;
+      case MOTE_C:
          if (
-               shortID==0x3bdd
+               shortID==MOTE_A ||
+               shortID==MOTE_D ||
+               shortID==MOTE_E
             ) {
             returnVal=TRUE;
          }
-         break;      
+         break;
+      case MOTE_D:
+         if (
+               shortID==MOTE_B ||
+               shortID==MOTE_C ||
+               shortID==MOTE_F
+            ) {
+            returnVal=TRUE;
+         }
+         break;
+      case MOTE_E:
+         if (
+               shortID==MOTE_B ||
+               shortID==MOTE_C ||
+               shortID==MOTE_F
+            ) {
+            returnVal=TRUE;
+         }
+         break;
+      case MOTE_F:
+         if (
+               shortID==MOTE_D ||
+               shortID==MOTE_E
+            ) {
+            returnVal=TRUE;
+         }
+         break;
    }
    return returnVal;
 #else
