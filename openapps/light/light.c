@@ -12,6 +12,7 @@
 #include "sixtop.h"
 #include "debugpins.h"
 #include "openrandom.h"
+#include "leds.h"
 
 //=========================== variables =======================================
 
@@ -157,8 +158,7 @@ port_INLINE void light_send_one_packet(void) {
    packetfunctions_reserveHeaderSize(pkt,sizeof(light_ht));
    ((light_ht*)(pkt->payload))->type        = 0xdddd;
    ((light_ht*)(pkt->payload))->src         = idmanager_getMyShortID();
-   ((light_ht*)(pkt->payload))->seqnum      = (light_vars.burstId<<4) | light_vars.pktId;
-   ((light_ht*)(pkt->payload))->light_state = light_vars.light_state;
+   ((light_ht*)(pkt->payload))->light_info  = (light_vars.burstId<<4) | (light_vars.pktId<<1) | light_vars.light_state;
    
    // send
    if ((sixtop_send(pkt))==E_FAIL) {
@@ -186,6 +186,7 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
    light_ht*         rxPkt;
    uint8_t           pkt_burstId;
    uint8_t           pkt_pktId;
+   uint8_t           pkt_light_state;
    
    // handle the packet
    do {
@@ -203,9 +204,10 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       pkt->owner = COMPONENT_LIGHT;
       
       // parse packet
-      rxPkt       = (light_ht*)pkt->payload;
-      pkt_burstId = (rxPkt->seqnum & 0xf0)>>4;
-      pkt_pktId   = rxPkt->seqnum & 0x0f;
+      rxPkt             = (light_ht*)pkt->payload;
+      pkt_burstId       = (rxPkt->light_info & 0xf0)>>4;
+      pkt_pktId         = (rxPkt->light_info & 0x07)>>1;
+      pkt_light_state   = (rxPkt->light_info & 0x01)>>0;
       
       // filter burstID
       if (pkt_burstId!=light_vars.burstId) {
@@ -238,7 +240,7 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       // update the burstId, pktId and light_state
       light_vars.burstId     = pkt_burstId;
       light_vars.pktId       = pkt_pktId;
-      light_vars.light_state = rxPkt->light_state;
+      light_vars.light_state = pkt_light_state;
       
       // map received light_state to light debug pin
       if (light_vars.light_state==TRUE) {
