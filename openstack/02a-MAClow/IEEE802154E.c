@@ -579,7 +579,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
             break;
          }
       }
-      ieee154e_vars.asnOffset = i - schedule_getChannelOffset();      
+      ieee154e_vars.ebAsnOffset = i - schedule_getChannelOffset();      
       ieee154e_vars.dataAsnOffset = ieee154e_vars.asn.bytes0and1%16 - schedule_getChannelOffset();
       
       // compute radio duty cycle
@@ -1119,7 +1119,7 @@ port_INLINE void incrementAsnOffset() {
    
    // increment the offsets
    ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%SLOTFRAME_LENGTH;
-   ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%EB_NUMCHANS;
+   ieee154e_vars.ebAsnOffset   = (ieee154e_vars.ebAsnOffset+1)%EB_NUMCHANS;
    ieee154e_vars.dataAsnOffset = (ieee154e_vars.dataAsnOffset+1)%16;
 }
 
@@ -1332,7 +1332,7 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
             return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.dataAsnOffset+channelOffset)%16];
         }
     } else {
-        return 11+ieee154e_vars.chTemplateEB[(ieee154e_vars.asnOffset+channelOffset)%EB_NUMCHANS];
+        return 11+ieee154e_vars.chTemplateEB[(ieee154e_vars.ebAsnOffset+channelOffset)%EB_NUMCHANS];
     }
 }
 
