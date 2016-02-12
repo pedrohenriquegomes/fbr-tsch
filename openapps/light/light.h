@@ -11,8 +11,8 @@
 #define LIGHT_FAKESEND
 
 // defines
-#define LIGHT_FAKESEND_PERIOD     1000 // period, in slots, of sending data
-#define LIGHT_BURSTSIZE           3    // number of packets sent on each light event
+#define LIGHT_FAKESEND_PERIOD     400 // period, in slots, of sending data
+#define LIGHT_BURSTSIZE             3 // number of packets sent on each light event
 #define LUX_THRESHOLD             500
 #define LUX_HYSTERESIS            100
 
