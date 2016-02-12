@@ -160,9 +160,9 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =  33,                   //  1000us (needs to be >delayTx)
-   wdDataDuration            =  98,   
-   wdAckDuration             =  98,                   //  3000us (measured 1000us)
+   wdRadioTx                 =  16,                   //  16=488us (needs to be >delayTx)
+   wdDataDuration            =  98,                   //     500us
+   wdAckDuration             =  98,                   //    3000us (measured 1000us)
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
