@@ -20,7 +20,7 @@ light_vars_t        light_vars;
 
 //=========================== prototypes =======================================
 
-void light_send_one_packet(void);
+void light_send_one_packet(uint8_t pktId);
 
 //=========================== public ===========================================
 
@@ -65,6 +65,7 @@ void light_init(void) {
 */
 void light_trigger(void) {
    bool                 iShouldSend;
+   uint8_t              pktId;
 #ifdef LIGHT_FAKESEND
    uint16_t             numAsnSinceLastEvent;
 #else
@@ -131,16 +132,16 @@ void light_trigger(void) {
    light_vars.burstId = (light_vars.burstId+1)%16;
    
    // send burst of LIGHT_BURSTSIZE packets
-   for (light_vars.pktId=0;light_vars.pktId<LIGHT_BURSTSIZE;light_vars.pktId++) {
-      light_send_one_packet();
+   for (pktId=0;pktId<LIGHT_BURSTSIZE;pktId++) {
+      light_send_one_packet(pktId);
    }
 }
 
-uint8_t  light_get_light_info(void) {
-   return (light_vars.burstId<<4) | (light_vars.pktId<<1) | light_vars.light_state;
+uint8_t  light_get_light_info(uint8_t pktId) {
+   return (light_vars.burstId<<4) | (pktId<<1) | light_vars.light_state;
 }
 
-port_INLINE void light_send_one_packet(void) {
+port_INLINE void light_send_one_packet(uint8_t pktId) {
    OpenQueueEntry_t*    pkt;
    
    // get a free packet buffer
@@ -162,7 +163,7 @@ port_INLINE void light_send_one_packet(void) {
    packetfunctions_reserveHeaderSize(pkt,sizeof(light_ht));
    ((light_ht*)(pkt->payload))->type        = 0xdddd;
    ((light_ht*)(pkt->payload))->src         = idmanager_getMyShortID();
-   ((light_ht*)(pkt->payload))->light_info  = light_get_light_info();
+   ((light_ht*)(pkt->payload))->light_info  = light_get_light_info(pktId);
    
    // send
    if ((sixtop_send(pkt))==E_FAIL) {
@@ -180,7 +181,54 @@ void light_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 //== receiving
 
 void light_receive_beacon(OpenQueueEntry_t* pkt) {
-   // TODO: Fix #14
+   eb_ht*          rxPkt;
+   uint8_t         pkt_burstId;
+   uint8_t         pkt_light_state;
+   
+   // handle the packet
+   do {
+      
+      // take ownserhip over the packet
+      pkt->owner        = COMPONENT_LIGHT;
+      
+      // parse packet
+      rxPkt             = (eb_ht*)pkt->payload;
+      pkt_burstId       = (rxPkt->light_info & 0xf0)>>4;
+      pkt_light_state   = (rxPkt->light_info & 0x01)>>0;
+      
+      // filter burstID
+      if (pkt_burstId!=light_vars.burstId) {
+         if ( ((pkt_burstId-light_vars.burstId)&0x0f) <=7) {
+            // new burstID
+            
+            // reset pktIDMap
+            light_vars.pktIDMap = 0x00;
+            
+            // remove old packets from queue
+            // TODO Fix #17
+            
+         } else {
+            // old burstID
+            
+            // abort
+            break;
+         }
+      }
+      
+      // update the burstId, pktId and light_state
+      light_vars.burstId     = pkt_burstId;
+      light_vars.light_state = pkt_light_state;
+      
+      // map received light_state to light debug pin
+      if (light_vars.light_state==TRUE) {
+         debugpins_light_set();
+         leds_light_on();
+      } else {
+         debugpins_light_clr();
+         leds_light_off();
+      }
+      
+   } while(0);
    
    // free packet
    openqueue_freePacketBuffer(pkt);
@@ -243,7 +291,6 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       
       // update the burstId, pktId and light_state
       light_vars.burstId     = pkt_burstId;
-      light_vars.pktId       = pkt_pktId;
       light_vars.light_state = pkt_light_state;
       
       // map received light_state to light debug pin
@@ -257,7 +304,7 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       
       // retransmit packet
       if (idmanager_getMyShortID()!=SINK_ID) {
-         light_send_one_packet();
+         light_send_one_packet(pkt_pktId);
       }
    } while(0);
    

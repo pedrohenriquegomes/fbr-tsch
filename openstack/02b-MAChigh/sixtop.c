@@ -81,7 +81,7 @@ port_INLINE void sixtop_sendEB(void) {
    ((eb_ht*)(eb->payload))->type            = 0xbbbb;
    ((eb_ht*)(eb->payload))->src             = idmanager_getMyShortID();
    ((eb_ht*)(eb->payload))->rank            = neighbors_getMyDAGrank();
-   ((eb_ht*)(eb->payload))->light_info      = light_get_light_info();
+   ((eb_ht*)(eb->payload))->light_info      = light_get_light_info(0);
    
    // remember where to write the ASN to
    eb->l2_ASNpayload                        = (uint8_t*)(&((eb_ht*)(eb->payload))->asn);

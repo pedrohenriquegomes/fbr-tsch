@@ -47,7 +47,6 @@ END_PACK
 typedef struct {
    // app state
    uint16_t             burstId;            // current burst ID (identifying the event)
-   uint16_t             pktId;              // current packet ID (identifying the packet in a burst)
    uint8_t              pktIDMap;           // each flag is set when the corresponding pktId was sent
    uint16_t             light_reading;      // current light sensor reading
    bool                 light_state;        // current state of the light (TRUE==on, FALSE==off)
@@ -63,7 +62,7 @@ typedef struct {
 // initialization
 void     light_init(void);
 void     light_trigger(void);
-uint8_t  light_get_light_info(void);
+uint8_t  light_get_light_info(uint8_t pktId);
 void     light_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void     light_receive_data(OpenQueueEntry_t* msg);
 void     light_receive_beacon(OpenQueueEntry_t* msg);
