@@ -108,6 +108,13 @@ void ieee154e_init() {
        sizeof(ieee154e_vars.chTemplate)
    );
    
+   
+  memcpy(
+       &(ieee154e_vars.chTemplateEB[0]),
+       chTemplate_eb,
+       sizeof(ieee154e_vars.chTemplateEB)
+   );
+   
    if (idmanager_getIsDAGroot()==TRUE) {
       changeIsSync(TRUE);
    } else {
@@ -356,6 +363,9 @@ bool debugPrint_macStats() {
 //======= SYNCHRONIZING
 
 port_INLINE void activity_synchronize_newSlot() {
+   uint8_t i;
+   ieee154e_vars.joinChannelChangingCounter = (ieee154e_vars.joinChannelChangingCounter + 1)%CHANNELCHANGING_COUNTER;
+  
    // I'm in the middle of receiving a packet
    if (ieee154e_vars.state==S_SYNCRX) {
       return;
@@ -375,6 +385,29 @@ port_INLINE void activity_synchronize_newSlot() {
       
       // update record of current channel
       ieee154e_vars.freq = SYNCHRONIZING_CHANNEL;
+      
+      // switch on the radio in Rx mode.
+      radio_rxEnable();
+      ieee154e_vars.radioOnInit=radio_getTimerValue();
+      ieee154e_vars.radioOnThisSlot=TRUE;
+      radio_rxNow();
+   }
+   
+   if (ieee154e_vars.state==S_SYNCLISTEN && ieee154e_vars.joinChannelChangingCounter == 0){
+      // turn off the radio (in case it wasn't yet)
+      radio_rfOff();
+      
+      i=0;
+      while (ieee154e_vars.freq != ieee154e_vars.chTemplateEB[i] && i<EBCHANNEL){
+          i++;
+      }
+      
+      if (i<EBCHANNEL){
+          ieee154e_vars.freq = ieee154e_vars.chTemplateEB[(i+1)%EBCHANNEL];
+      }
+      
+      // configure the radio to listen to the default synchronizing channel
+      radio_setFrequency(ieee154e_vars.freq);
       
       // switch on the radio in Rx mode.
       radio_rxEnable();
@@ -534,8 +567,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       // infer the asnOffset based on the fact that
       // ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
-      for (i=0;i<16;i++){
-         if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
+      for (i=0;i<EBCHANNEL;i++){
+         if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplateEB[i]){
             break;
          }
       }
@@ -1275,11 +1308,17 @@ different channel offsets in the same slot.
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
-    if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
-        return ieee154e_vars.singleChannel; // single channel
+    uint8_t cellType;
+    cellType = schedule_getType();
+    if (cellType!=CELLTYPE_EB){
+        if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
+            return ieee154e_vars.singleChannel; // single channel
+        } else {
+            // channel hopping enabled, use the channel depending on hopping template
+            return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
+        }
     } else {
-        // channel hopping enabled, use the channel depending on hopping template
-        return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
+        return 11+ieee154e_vars.chTemplateEB[(ieee154e_vars.asnOffset+channelOffset)%EBCHANNEL];
     }
 }
 
