@@ -20,6 +20,11 @@ static const uint8_t chTemplate_default[] = {
    5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
 };
 
+static const uint8_t chTemplate_eb[] = {
+   12,13,14,15
+};
+#define EBCHANNEL 4
+#define CHANNELCHANGING_COUNTER 1000  //in slots
 //=========================== define ==========================================
 
 #define LONGTYPE_BEACON         0xb0b0
@@ -221,6 +226,7 @@ typedef struct {
    uint8_t                   singleChannel;           // the single channel used for transmission
    bool                      singleChannelChanged;    // detect id singleChannelChanged
    uint8_t                   chTemplate[16];          // storing the template of hopping sequence
+   uint8_t                   chTemplateEB[EBCHANNEL];          // hopping sequence for EB
    // template ID
    uint8_t                   tsTemplateId;            // timeslot template id
    uint8_t                   chTemplateId;            // channel hopping tempalte id
@@ -242,6 +248,8 @@ typedef struct {
    // next channel to send beacon
    uint8_t                   nextChannelEB;
    uint8_t                   jumpCounter;
+   
+   uint16_t                  joinChannelChangingCounter;
 } ieee154e_vars_t;
 
 BEGIN_PACK
