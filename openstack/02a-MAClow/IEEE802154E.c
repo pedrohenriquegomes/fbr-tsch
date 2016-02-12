@@ -364,7 +364,7 @@ bool debugPrint_macStats() {
 
 port_INLINE void activity_synchronize_newSlot() {
    uint8_t i;
-   ieee154e_vars.joinChannelChangingCounter = (ieee154e_vars.joinChannelChangingCounter + 1)%CHANNELCHANGING_COUNTER;
+   ieee154e_vars.joinChannelChangingCounter = (ieee154e_vars.joinChannelChangingCounter + 1)%EB_SLOWHOPPING_PERIOD;
   
    // I'm in the middle of receiving a packet
    if (ieee154e_vars.state==S_SYNCRX) {
@@ -398,12 +398,12 @@ port_INLINE void activity_synchronize_newSlot() {
       radio_rfOff();
       
       i=0;
-      while (ieee154e_vars.freq != ieee154e_vars.chTemplateEB[i] && i<EBCHANNEL){
+      while (ieee154e_vars.freq != ieee154e_vars.chTemplateEB[i] && i<EB_NUMCHANS){
           i++;
       }
       
-      if (i<EBCHANNEL){
-          ieee154e_vars.freq = ieee154e_vars.chTemplateEB[(i+1)%EBCHANNEL];
+      if (i<EB_NUMCHANS){
+          ieee154e_vars.freq = ieee154e_vars.chTemplateEB[(i+1)%EB_NUMCHANS];
       }
       
       // configure the radio to listen to the default synchronizing channel
@@ -574,7 +574,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       // infer the asnOffset based on the fact that
       // ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
-      for (i=0;i<EBCHANNEL;i++){
+      for (i=0;i<EB_NUMCHANS;i++){
          if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplateEB[i]){
             break;
          }
@@ -1330,7 +1330,7 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
             return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
         }
     } else {
-        return 11+ieee154e_vars.chTemplateEB[(ieee154e_vars.asnOffset+channelOffset)%EBCHANNEL];
+        return 11+ieee154e_vars.chTemplateEB[(ieee154e_vars.asnOffset+channelOffset)%EB_NUMCHANS];
     }
 }
 
