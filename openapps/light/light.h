@@ -29,13 +29,13 @@
 #define SINK_ID                   0xbb5e
 #define SENSOR_ID                 0x930f
 */
-#ifdef USBHUB
-// hub@EWSN
+
+#ifdef SETUP_USBHUB // hub@EWSN
 #define SINK_ID                   0x6f16
 #define SENSOR_ID                 0xb957
 #endif
 
-#ifdef TESTBED
+#ifdef SETUP_TESTBED
 #define SINK_ID                   0x76fb
 #define SENSOR_ID                 0x86a0
 #endif

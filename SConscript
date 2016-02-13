@@ -66,13 +66,12 @@ else:
         env.Append(CPPDEFINES    = 'DISABLE_DEBUGPINS')
         env.Append(CPPDEFINES    = 'DISABLE_OPENSERIAL')
         env.Append(CPPDEFINES    = 'LIGHT_FAKESEND')
-        
-if env['usecase']=='testbed':
-    env.Append(CPPDEFINES    = 'USECASE_TESTBED')
-else:
-        if env['usecase']=='usbhub':
-            env.Append(CPPDEFINES    = 'USECASE_USBHUB')
-        
+
+if   env['setup']=='testbed':
+    env.Append(CPPDEFINES    = 'SETUP_TESTBED')
+elif env['setup']=='usbhub':
+    env.Append(CPPDEFINES    = 'SETUP_USBHUB')
+
 if   env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
