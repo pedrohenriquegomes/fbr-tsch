@@ -39,6 +39,11 @@ if env['dagroot']==1:
     env.Append(CPPDEFINES    = 'DAGROOT')
 if env['forcetopology']==1:
     env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
+if env['topology']=='linear':
+    env.Append(CPPDEFINES    = 'TOPOLOGY_LINEAR')
+else:
+    if env['topology']=='mesh':
+        env.Append(CPPDEFINES    = 'TOPOLOGY_MESH')
 if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 if env['cryptoengine']:

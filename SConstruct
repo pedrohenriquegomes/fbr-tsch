@@ -131,6 +131,7 @@ command_line_options = {
     'simhostpy':        [''],                               # No reasonable default
     'dagroot':          ['0','1'],
     'forcetopology':    ['0','1'],
+    'topology':         ['linear','mesh']
     'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
@@ -252,6 +253,13 @@ command_line_vars.AddVariables(
         command_line_options['forcetopology'][0],          # default
         validate_option,                                   # validator
         int,                                               # converter
+    ),
+    (
+        'topology',                                        # key
+        '',                                                # help
+        command_line_options['forcetopology'][0],          # default
+        validate_option,                                   # validator
+        None,                                              # converter
     ),
     (
         'cryptoengine',                                    # key

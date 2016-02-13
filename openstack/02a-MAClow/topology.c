@@ -58,10 +58,16 @@ bool topology_isAcceptablePacket(uint16_t shortID) {
 #define MOTE_D 0xb957
 #define MOTE_E 0xbb5e
 #define MOTE_F 0x930f
+#define MOTE_G
+#define MOTE_H
+#define MOTE_I
+#define MOTE_J
+  
+  
    bool returnVal;
    
    returnVal=FALSE;
-   /*
+#ifdef TOPOLOGY_LINEAR
    switch (idmanager_getMyShortID()) {
       case MOTE_A:
          if (
@@ -116,80 +122,6 @@ bool topology_isAcceptablePacket(uint16_t shortID) {
          }
          break;
    }
-   switch (idmanager_getMyShortID()) {
-      case MOTE_A:
-         if (
-               shortID==MOTE_B
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_B:
-         if (
-               shortID==MOTE_A ||
-               shortID==MOTE_C
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_C:
-         if (
-               shortID==MOTE_B ||
-               shortID==MOTE_D
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_F:
-         if (
-               shortID==MOTE_C ||
-               shortID==MOTE_E
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_E:
-         if (
-               shortID==MOTE_D ||
-               shortID==MOTE_F
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_D:
-         if (
-               shortID==MOTE_E
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-   }
-   */
-   switch (idmanager_getMyShortID()) {
-      case MOTE_A:
-         if (
-               shortID==MOTE_B
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_B:
-         if (
-               shortID==MOTE_A ||
-               shortID==MOTE_D
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_D:
-         if (
-               shortID==MOTE_B
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-   }
-   return returnVal;
 #else
    return TRUE;
 #endif
