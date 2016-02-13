@@ -44,7 +44,7 @@ static const uint8_t chTemplate_eb[] = {
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
 #define EBPERIOD                  1000 // in ms, EB sending period
 #define MAXKAPERIOD                200 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
-#define DESYNCTIMEOUT             4666 // in slots: 4666@7ms per slot -> ~32 seconds
+#define DESYNCTIMEOUT             2169 // in slots: 2169@4.61ms per slot -> ~10 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
@@ -215,6 +215,7 @@ typedef struct {
    // misc
    asn_t                     asn;                     // current absolute slot number
    slotOffset_t              slotOffset;              // current slot offset
+   uint8_t                   syncnum;                 // current synchronization number
    slotOffset_t              nextActiveSlotOffset;    // next active slot offset
    PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network

@@ -172,7 +172,11 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
+          <state>LIGHT_FAKESEND</state>
           <state>SETUP_USBHUB</state>
+          <state>ENABLE_LEDS</state>
+          <state>ENABLE_DEBUGPINS</state>
+          <state>ENABLE_OPENSERIAL</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
