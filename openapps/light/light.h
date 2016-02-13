@@ -30,7 +30,7 @@
 #define SENSOR_ID                 0x930f
 */
 
-#ifdef SETUP_USBHUB // hub@EWSN
+#ifdef SETUP_USBHUB
 #define SINK_ID                   0x6f16
 #define SENSOR_ID                 0xb957
 #endif

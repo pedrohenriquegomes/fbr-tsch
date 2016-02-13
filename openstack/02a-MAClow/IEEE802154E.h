@@ -27,8 +27,15 @@ static const uint8_t chTemplate_eb[] = {
 #define EB_SLOWHOPPING_PERIOD    1000  // how often a node changes the channel it listens on for EBs, in slots (1000=4610ms)
 //=========================== define ==========================================
 
-#define LONGTYPE_BEACON         0xb0b0
-#define LONGTYPE_DATA           0xd0d0
+#ifdef SETUP_USBHUB
+#define LONGTYPE_BEACON           0xb0b0
+#define LONGTYPE_DATA             0xd0d0
+#endif
+
+#ifdef SETUP_TESTBED
+#define LONGTYPE_BEACON           0xbbbb
+#define LONGTYPE_DATA             0xdddd
+#endif
 
 #define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
 #define TXRETRIES                    0 // number of MAC retries before declaring failed
