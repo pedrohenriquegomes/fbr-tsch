@@ -251,7 +251,7 @@ command_line_vars.AddVariables(
         '',                                                # help
         command_line_options['forcetopology'][0],          # default
         validate_option,                                   # validator
-        int,                                               # converter
+        None,                                              # converter
     ),
     (
         'cryptoengine',                                    # key
