@@ -130,19 +130,13 @@ void debugpins_radio_set() {
 
 // P2.3
 void debugpins_light_toggle() {
-#ifdef ENABLE_DEBUGPINS
   P2OUT ^=  0x08;
-#endif
 }
 void debugpins_light_clr() {
-#ifdef ENABLE_DEBUGPINS
   P2OUT &= ~0x08;
-#endif
 }
 void debugpins_light_set() {
-#ifdef ENABLE_DEBUGPINS
   P2OUT |=  0x08;
-#endif
 }
 
 // P6.3
@@ -159,25 +153,6 @@ void debugpins_user_clr() {
 void debugpins_user_set() {
 #ifdef ENABLE_DEBUGPINS
   P6OUT |=  0x08;
-#endif
-}
-
-void    leds_toggle_2x(void){
-#ifdef ENABLE_DEBUGPINS
-  uint16_t i;
-  debugpins_task_toggle();
-  for (i=0;i<0xFFFF;i++);
-  for (i=0;i<0xFFFF;i++);
-  debugpins_task_toggle();
-#endif
-}  
-void    leds_toggle_4x(void){
-#ifdef ENABLE_DEBUGPINS
-  uint16_t i;
-  leds_toggle_2x();
-  for (i=0;i<0xFFFF;i++);
-  for (i=0;i<0xFFFF;i++);
-  leds_toggle_2x();
 #endif
 }
 
