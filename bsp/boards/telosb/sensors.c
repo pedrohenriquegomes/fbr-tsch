@@ -61,7 +61,7 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
       case SENSOR_ADC_TOTAL_SOLAR:
          return &adc_sens_read_total_solar;
       case SENSOR_LIGHT:
-         return &adc_sens_read_photosynthetic;   
+         return &adc_sens_read_total_solar;   
       default:
          return NULL;
    }
@@ -85,7 +85,7 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
       case SENSOR_ADC_TOTAL_SOLAR:
          return &adc_sens_convert_total_solar;
       case SENSOR_LIGHT:
-         return &adc_sens_convert_photosynthetic;
+         return &adc_sens_convert_total_solar;
       default:
          return NULL;
    }
