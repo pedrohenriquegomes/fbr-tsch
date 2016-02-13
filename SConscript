@@ -53,7 +53,15 @@ else:
     else:
         env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
         
-
+if env['configuration']=='release':
+    env.Append(CPPDEFINES    = 'RELEASE')
+else:
+    if env['configuration']=='debug':
+        env.Append(CPPDEFINES    = 'DISABLE_LEDS')
+        env.Append(CPPDEFINES    = 'DISABLE_DEBUGPING')
+        env.Append(CPPDEFINES    = 'DISABLE_OPENSERIAL')
+        env.Append(CPPDEFINES    = 'LIGHT_FAKESEND')
+        
 if   env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:

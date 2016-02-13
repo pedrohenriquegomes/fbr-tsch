@@ -92,7 +92,8 @@ void openserial_init() {
 }
 
 owerror_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t length) {
-   uint8_t i;
+#ifdef DISABLE_OPENSERIAL
+  uint8_t i;
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
@@ -107,7 +108,7 @@ owerror_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t 
    }
    outputHdlcClose();
    ENABLE_INTERRUPTS();
-   
+#endif
    return E_SUCCESS;
 }
 
@@ -118,6 +119,7 @@ owerror_t openserial_printInfoErrorCritical(
       errorparameter_t arg1,
       errorparameter_t arg2
    ) {
+#ifdef DISABLE_OPENSERIAL
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
@@ -134,11 +136,12 @@ owerror_t openserial_printInfoErrorCritical(
    outputHdlcWrite((uint8_t) (arg2 & 0x00ff));
    outputHdlcClose();
    ENABLE_INTERRUPTS();
-   
+#endif
    return E_SUCCESS;
 }
 
 owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
+#ifdef DISABLE_OPENSERIAL
    uint8_t  i;
    uint8_t  asn[5];
    INTERRUPT_DECLARATION();
@@ -162,11 +165,12 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
    }
    outputHdlcClose();
    ENABLE_INTERRUPTS();
-   
+#endif
    return E_SUCCESS;
 }
 
 owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channel) {
+#ifdef DISABLE_OPENSERIAL
    uint8_t  i;
    INTERRUPT_DECLARATION();
    
@@ -183,7 +187,7 @@ owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channe
    outputHdlcClose();
    
    ENABLE_INTERRUPTS();
-   
+#endif
    return E_SUCCESS;
 }
 
