@@ -169,7 +169,7 @@ void neighbors_indicateRx(
          newNeighbor = FALSE;
          
          // update numRx, rssi, asn
-         neighbors_vars.neighbors[i].numRx++;
+//         neighbors_vars.neighbors[i].numRx++;
          neighbors_vars.neighbors[i].rssi=rssi;
          memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
          
@@ -220,6 +220,9 @@ void neighbors_indicateRxEB(OpenQueueEntry_t* msg) {
    if (isNeighbor(eb->src)==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(eb->src,i)) {
+           // update numRx
+           if (neighbors_vars.neighbors[i].numRx < 255) neighbors_vars.neighbors[i].numRx++;
+
             neighbors_vars.neighbors[i].DAGrank = eb->ebrank;
             break;
          }
@@ -247,6 +250,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint32_t  tentativeDAGrank; // 32-bit since is used to sum
    uint8_t   prefParentIdx;
    bool      prefParentFound;
+   uint8_t   prefParentNumRX;
    
    // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
    if (idmanager_getIsDAGroot()==TRUE) {
@@ -261,6 +265,13 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    prefParentFound           = FALSE;
    prefParentIdx             = 0;
    
+   // get how many beacons i received from my current prefered parent
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (neighbors_vars.neighbors[i].used==TRUE && neighbors_vars.neighbors[i].parentPreference==TRUE) {
+          prefParentNumRX = neighbors_vars.neighbors[i].numRx;
+      }
+   }
+
    // loop through neighbor table, update myDAGrank
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==TRUE) {
@@ -273,7 +284,9 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
          
          tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
          if ( tentativeDAGrank<neighbors_vars.myDAGrank &&
-              tentativeDAGrank<MAXDAGRANK) {
+              tentativeDAGrank<MAXDAGRANK &&
+              neighbors_vars.neighbors[i].numRx >= prefParentNumRX ) {
+                
             // found better parent, lower my DAGrank
             neighbors_vars.myDAGrank   = tentativeDAGrank;
             prefParentFound            = TRUE;
