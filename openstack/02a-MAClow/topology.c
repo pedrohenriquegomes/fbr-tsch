@@ -22,9 +22,9 @@
 //=========================== public ==========================================
 
 bool topology_isAcceptablePacket(uint16_t srcShortID) {
-#ifdef TOPOLOGY_LINEAR
    bool returnVal;
-   
+
+#ifdef TOPOLOGY_LINEAR
    returnVal=FALSE;
    switch (idmanager_getMyShortID()) {
       case MOTE_8:
@@ -59,8 +59,9 @@ bool topology_isAcceptablePacket(uint16_t srcShortID) {
          break;
    }
 #else
-   return TRUE;
+   returnVal=TRUE;
 #endif
+   return returnVal;
 }
 
 //=========================== private =========================================
