@@ -4,192 +4,60 @@
 
 //=========================== defines =========================================
 
+#define MOTE_8  0x3bdd
+#define MOTE_4  0xb957
+#define MOTE_17 0xbb5e
+#define MOTE_19 0x7905
+#define MOTE_21 0x930f
+#define MOTE_23 0x13cf
+#define MOTE_25 0x6e29
+#define MOTE_27 0x89a5
+#define MOTE_28 0x5a53
+#define MOTE_12 0x6f16
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
-/**
-\brief Force a topology.
-
-This function is used to force a certain topology, by hard-coding the list of
-acceptable neighbors for a given mote. This function is invoked each time a
-packet is received. If it returns FALSE, the packet is silently dropped, as if
-it were never received. If it returns TRUE, the packet is accepted.
-
-Typically, filtering packets is done by analyzing the IEEE802.15.4 header. An
-example body for this function which forces a topology is:
-
-   switch (idmanager_getMyID(ADDR_64B)->addr_64b[7]) {
-      case TOPOLOGY_MOTE1:
-         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE2) {
-            returnVal=TRUE;
-         } else {
-            returnVal=FALSE;
-         }
-         break;
-      case TOPOLOGY_MOTE2:
-         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE1 ||
-             ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE3) {
-            returnVal=TRUE;
-         } else {
-            returnVal=FALSE;
-         }
-         break;
-      default:
-         returnVal=TRUE;
-   }
-   return returnVal;
-
-By default, however, the function should return TRUE to *not* force any
-topology.
-
-\param[in] ieee802514_header The parsed IEEE802.15.4 MAC header.
-
-\return TRUE if the packet can be received.
-\return FALSE if the packet should be silently dropped.
-*/
 bool topology_isAcceptablePacket(uint16_t shortID) {
-#ifdef FORCETOPOLOGY
-#define MOTE_A 0x6f16
-#define MOTE_B 0x3bdd
-#define MOTE_C 0x7905
-#define MOTE_D 0xb957
-#define MOTE_E 0xbb5e
-#define MOTE_F 0x930f
    bool returnVal;
    
    returnVal=FALSE;
-   /*
+#ifdef TOPOLOGY_LINEAR
    switch (idmanager_getMyShortID()) {
-      case MOTE_A:
-         if (
-               shortID==MOTE_B ||
-               shortID==MOTE_C
-            ) {
-            returnVal=TRUE;
-         }
+      case MOTE_8:
+         if (shortID==MOTE_4) {                       returnVal=TRUE;}
          break;
-      case MOTE_B:
-         if (
-               shortID==MOTE_A ||
-               shortID==MOTE_D ||
-               shortID==MOTE_E
-            ) {
-            returnVal=TRUE;
-         }
+      case MOTE_4:
+         if (shortID==MOTE_8  || shortID==MOTE_17) {  returnVal=TRUE;}
          break;
-      case MOTE_C:
-         if (
-               shortID==MOTE_A ||
-               shortID==MOTE_D ||
-               shortID==MOTE_E
-            ) {
-            returnVal=TRUE;
-         }
+      case MOTE_17:
+         if (shortID==MOTE_4  || shortID==MOTE_19) {  returnVal=TRUE;}
          break;
-      case MOTE_D:
-         if (
-               shortID==MOTE_B ||
-               shortID==MOTE_C ||
-               shortID==MOTE_F
-            ) {
-            returnVal=TRUE;
-         }
+      case MOTE_19:
+         if (shortID==MOTE_17 || shortID==MOTE_21) {  returnVal=TRUE;}
          break;
-      case MOTE_E:
-         if (
-               shortID==MOTE_B ||
-               shortID==MOTE_C ||
-               shortID==MOTE_F
-            ) {
-            returnVal=TRUE;
-         }
+      case MOTE_21:
+         if (shortID==MOTE_19 || shortID==MOTE_23) {  returnVal=TRUE;}
          break;
-      case MOTE_F:
-         if (
-               shortID==MOTE_D ||
-               shortID==MOTE_E
-            ) {
-            returnVal=TRUE;
-         }
+      case MOTE_23:
+         if (shortID==MOTE_21 || shortID==MOTE_25) {  returnVal=TRUE;}
+         break;
+      case MOTE_25:
+         if (shortID==MOTE_23 || shortID==MOTE_27) {  returnVal=TRUE;}
+         break;
+      case MOTE_27:
+         if (shortID==MOTE_25 || shortID==MOTE_28) {  returnVal=TRUE;}
+         break;
+      case MOTE_28:
+         if (shortID==MOTE_27 || shortID==MOTE_12) {  returnVal=TRUE;}
+         break;
+      case MOTE_12:
+         if (shortID==MOTE_28                    ) {  returnVal=TRUE;}
          break;
    }
-   switch (idmanager_getMyShortID()) {
-      case MOTE_A:
-         if (
-               shortID==MOTE_B
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_B:
-         if (
-               shortID==MOTE_A ||
-               shortID==MOTE_C
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_C:
-         if (
-               shortID==MOTE_B ||
-               shortID==MOTE_D
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_F:
-         if (
-               shortID==MOTE_C ||
-               shortID==MOTE_E
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_E:
-         if (
-               shortID==MOTE_D ||
-               shortID==MOTE_F
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_D:
-         if (
-               shortID==MOTE_E
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-   }
-   */
-   switch (idmanager_getMyShortID()) {
-      case MOTE_A:
-         if (
-               shortID==MOTE_B
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_B:
-         if (
-               shortID==MOTE_A ||
-               shortID==MOTE_D
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case MOTE_D:
-         if (
-               shortID==MOTE_B
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-   }
-   return returnVal;
 #else
    return TRUE;
 #endif
