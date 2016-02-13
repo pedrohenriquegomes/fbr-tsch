@@ -137,7 +137,8 @@ command_line_options = {
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
     'goldenImage':      ['none','root','sniffer'],
-    'configuration':    ['debug','release']
+    'configuration':    ['debug','release'],
+    'usecase':          ['usbhub','testbed']
 }
 
 def validate_option(key, value, env):
@@ -308,6 +309,13 @@ command_line_vars.AddVariables(
         'configuration',                                   # key
         '',                                                # help
         command_line_options['configuration'][0],          # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'usecase',                                         # key
+        '',                                                # help
+        command_line_options['usecase'][0],                # default
         validate_option,                                   # validator
         None,                                              # converter
     ),
