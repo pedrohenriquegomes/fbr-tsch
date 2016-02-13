@@ -8,7 +8,7 @@
 
 //=========================== defines =========================================
 
-#define CHANNEL              11                           // 11 = 2.405GHz
+#define CHANNEL              26                           // 11 = 2.405GHz
 #define MAX_LEN_PAYLOAD      125                          // max length of the PHY payload, NOT including the CRC
 #define MAX_LEN_FRAME        MAX_LEN_PAYLOAD+LENGTH_CRC   // maximum length of the PHY payload, WITH he CRC
 #define MIN_INTERFRAME_DELAY 10                           // 32kHz ticks (MUST be >10 per bug in bsp_timer module)
@@ -87,7 +87,7 @@ int mote_main(void) {
       
       // wait for txpk_txNow to be set to 1 (by timer expiring)
       while (app_vars.txpk_txNow==0) {
-         board_sleep();
+         __bis_SR_register(GIE+LPM0_bits);
       }
       
       // led
