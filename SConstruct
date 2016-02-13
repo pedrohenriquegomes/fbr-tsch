@@ -139,6 +139,7 @@ command_line_options = {
     'goldenImage':      ['none','root','sniffer'],
     'configuration':    ['debug','release'],
     'setup':            ['usbhub','testbed'],
+    'fakesend':         ['0','1'],
 }
 
 def validate_option(key, value, env):
@@ -316,6 +317,13 @@ command_line_vars.AddVariables(
         'setup',                                           # key
         '',                                                # help
         command_line_options['setup'][0],                  # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'fakesend',                                        # key
+        '',                                                # help
+        command_line_options['fakesend'][0],               # default
         validate_option,                                   # validator
         None,                                              # converter
     ),

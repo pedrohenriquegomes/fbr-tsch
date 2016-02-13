@@ -92,7 +92,7 @@ void openserial_init() {
 }
 
 owerror_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t length) {
-#ifdef DISABLE_OPENSERIAL
+#ifdef ENABLE_OPENSERIAL
   uint8_t i;
    INTERRUPT_DECLARATION();
    
@@ -119,7 +119,7 @@ owerror_t openserial_printInfoErrorCritical(
       errorparameter_t arg1,
       errorparameter_t arg2
    ) {
-#ifdef DISABLE_OPENSERIAL
+#ifdef ENABLE_OPENSERIAL
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
@@ -141,7 +141,7 @@ owerror_t openserial_printInfoErrorCritical(
 }
 
 owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
-#ifdef DISABLE_OPENSERIAL
+#ifdef ENABLE_OPENSERIAL
    uint8_t  i;
    uint8_t  asn[5];
    INTERRUPT_DECLARATION();
@@ -170,7 +170,7 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
 }
 
 owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channel) {
-#ifdef DISABLE_OPENSERIAL
+#ifdef ENABLE_OPENSERIAL
    uint8_t  i;
    INTERRUPT_DECLARATION();
    

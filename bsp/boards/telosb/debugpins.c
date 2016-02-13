@@ -28,142 +28,142 @@ void debugpins_init() {
 
 // P6.6
 void debugpins_frame_toggle() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P6OUT ^=  0x40;
 #endif
 }
 void debugpins_frame_clr() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P6OUT &= ~0x40;
 #endif
 }
 void debugpins_frame_set() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P6OUT |=  0x40;
 #endif
 }
 
 // P6.7
 void debugpins_slot_toggle() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P6OUT ^=  0x80;
 #endif
 }
 void debugpins_slot_clr() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P6OUT &= ~0x80;
 #endif
 }
 void debugpins_slot_set() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P6OUT |=  0x80;
 #endif
 }
 
 // P6.2
 void debugpins_fsm_toggle() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT ^=  0x04;
 #endif
 }
 void debugpins_fsm_clr() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT &= ~0x04;
 #endif
 }
 void debugpins_fsm_set() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT |=  0x04;
 #endif
 }
 
 // P2.6
 void debugpins_task_toggle() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P2OUT ^=  0x40;
 #endif
 }
 void debugpins_task_clr() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P2OUT &= ~0x40;
 #endif
 }
 void debugpins_task_set() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P2OUT |=  0x40;
 #endif
 }
 
 // P6.0
 void debugpins_isr_toggle() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT ^=  0x01;
 #endif
 }
 void debugpins_isr_clr() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT &= ~0x01;
 #endif
 }
 void debugpins_isr_set() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P6OUT |=  0x01;
 #endif
 }
 
 // P6.1
 void debugpins_radio_toggle() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
    P6OUT ^=  0x02;
 #endif
 }
 void debugpins_radio_clr() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT &= ~0x02;
 #endif
 }
 void debugpins_radio_set() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT |=  0x02;
 #endif
 }
 
 // P2.3
 void debugpins_light_toggle() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P2OUT ^=  0x08;
 #endif
 }
 void debugpins_light_clr() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P2OUT &= ~0x08;
 #endif
 }
 void debugpins_light_set() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P2OUT |=  0x08;
 #endif
 }
 
 // P6.3
 void debugpins_user_toggle() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT ^=  0x08;
 #endif
 }
 void debugpins_user_clr() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT &= ~0x08;
 #endif
 }
 void debugpins_user_set() {
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   P6OUT |=  0x08;
 #endif
 }
 
 void    leds_toggle_2x(void){
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   uint16_t i;
   debugpins_task_toggle();
   for (i=0;i<0xFFFF;i++);
@@ -172,7 +172,7 @@ void    leds_toggle_2x(void){
 #endif
 }  
 void    leds_toggle_4x(void){
-#ifdef DISABLE_DEBUGPINS
+#ifdef ENABLE_DEBUGPINS
   uint16_t i;
   leds_toggle_2x();
   for (i=0;i<0xFFFF;i++);
