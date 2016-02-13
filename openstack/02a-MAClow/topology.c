@@ -21,41 +21,41 @@
 
 //=========================== public ==========================================
 
-bool topology_isAcceptablePacket(uint16_t shortID) {
+bool topology_isAcceptablePacket(uint16_t srcShortID) {
+#ifdef TOPOLOGY_LINEAR
    bool returnVal;
    
    returnVal=FALSE;
-#ifdef TOPOLOGY_LINEAR
    switch (idmanager_getMyShortID()) {
       case MOTE_8:
-         if (shortID==MOTE_4) {                       returnVal=TRUE;}
+         if (srcShortID==MOTE_4) {                          returnVal=TRUE;}
          break;
       case MOTE_4:
-         if (shortID==MOTE_8  || shortID==MOTE_17) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_8  || srcShortID==MOTE_17) {  returnVal=TRUE;}
          break;
       case MOTE_17:
-         if (shortID==MOTE_4  || shortID==MOTE_19) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_4  || srcShortID==MOTE_19) {  returnVal=TRUE;}
          break;
       case MOTE_19:
-         if (shortID==MOTE_17 || shortID==MOTE_21) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_17 || srcShortID==MOTE_21) {  returnVal=TRUE;}
          break;
       case MOTE_21:
-         if (shortID==MOTE_19 || shortID==MOTE_23) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_19 || srcShortID==MOTE_23) {  returnVal=TRUE;}
          break;
       case MOTE_23:
-         if (shortID==MOTE_21 || shortID==MOTE_25) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_21 || srcShortID==MOTE_25) {  returnVal=TRUE;}
          break;
       case MOTE_25:
-         if (shortID==MOTE_23 || shortID==MOTE_27) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_23 || srcShortID==MOTE_27) {  returnVal=TRUE;}
          break;
       case MOTE_27:
-         if (shortID==MOTE_25 || shortID==MOTE_28) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_25 || srcShortID==MOTE_28) {  returnVal=TRUE;}
          break;
       case MOTE_28:
-         if (shortID==MOTE_27 || shortID==MOTE_12) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_27 || srcShortID==MOTE_12) {  returnVal=TRUE;}
          break;
       case MOTE_12:
-         if (shortID==MOTE_28                    ) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_28                       ) {  returnVal=TRUE;}
          break;
    }
 #else
