@@ -449,6 +449,8 @@ def telosb_bootload(target, source, env):
     bootloadThreads = []
     countingSem     = threading.Semaphore(0)
     # create threads
+    if env['bootload']=='all':
+       env['bootload'] = 'COM3,COM4,COM5,COM6,COM7,COM8,COM10,COM11,COM12,COM13,COM14'
     for comPort in env['bootload'].split(','):
         bootloadThreads += [
             telosb_bootloadThread(
