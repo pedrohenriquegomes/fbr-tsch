@@ -131,7 +131,7 @@ command_line_options = {
     'simhostpy':        [''],                               # No reasonable default
     'dagroot':          ['0','1'],
     'forcetopology':    ['0','1'],
-    'topology':         ['linear','mesh']
+    'topology':         ['','linear'],
     'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
