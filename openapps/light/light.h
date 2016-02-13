@@ -63,6 +63,8 @@ typedef struct {
    opentimer_id_t       fwdTimerId;         // timer ID for forwarding one packet
    // sending
    uint8_t              numBurstPktsSent;   // controls the number of packets transmitted in each event
+   // delayed toggles
+   uint8_t              missedToggles;
 } light_vars_t;
 
 //=========================== prototypes =======================================

@@ -673,6 +673,9 @@ port_INLINE void activity_ti1ORri1() {
       return;
    }
    
+    // lets check for missed toogles
+   light_check_missed_toogles();
+   
    // trigger application, which can send packet
    light_trigger();
    

@@ -21,6 +21,7 @@ light_vars_t        light_vars;
 //=========================== prototypes =======================================
 
 void light_send_one_packet(uint8_t pktId);
+void light_update_state(uint8_t pkt_light_state);
 
 //=========================== public ===========================================
 
@@ -137,10 +138,6 @@ void light_trigger(void) {
    }
 }
 
-uint8_t  light_get_light_info(uint8_t pktId) {
-   return (light_vars.burstId<<4) | (pktId<<1) | light_vars.light_state;
-}
-
 port_INLINE void light_send_one_packet(uint8_t pktId) {
    OpenQueueEntry_t*    pkt;
    
@@ -206,6 +203,12 @@ void light_receive_beacon(OpenQueueEntry_t* pkt) {
             
             // remove old packets from queue
             // TODO Fix #17
+
+            // lets calculate how many burst we missed
+            while ((++light_vars.burstId & 0x0f) != pkt_burstId)
+            {
+              light_vars.missedToggles++;
+            }
             
          } else {
             // old burstID
@@ -217,16 +220,9 @@ void light_receive_beacon(OpenQueueEntry_t* pkt) {
       
       // update the burstId, pktId and light_state
       light_vars.burstId     = pkt_burstId;
-      light_vars.light_state = pkt_light_state;
-      
-      // map received light_state to light debug pin
-      if (light_vars.light_state==TRUE) {
-         debugpins_light_set();
-         leds_light_on();
-      } else {
-         debugpins_light_clr();
-         leds_light_off();
-      }
+
+      // update the state
+      light_update_state(pkt_light_state);
       
    } while(0);
    
@@ -272,6 +268,12 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
             // remove old packets from queue
             // TODO Fix #17
             
+            // lets calculate how many burst we missed
+            while ((++light_vars.burstId & 0x0f) != pkt_burstId)
+            {
+              light_vars.missedToggles++;
+            }
+            
          } else {
             // old burstID
             
@@ -291,16 +293,9 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
       
       // update the burstId, pktId and light_state
       light_vars.burstId     = pkt_burstId;
-      light_vars.light_state = pkt_light_state;
       
-      // map received light_state to light debug pin
-      if (light_vars.light_state==TRUE) {
-         debugpins_light_set();
-         leds_light_on();
-      } else {
-         debugpins_light_clr();
-         leds_light_off();
-      }
+      // update the state
+      light_update_state(pkt_light_state);
       
       // retransmit packet
       if (idmanager_getMyShortID()!=SINK_ID) {
@@ -310,6 +305,60 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
    
    // free the packet
    openqueue_freePacketBuffer(pkt);
+}
+
+//=== misc
+
+uint8_t  light_get_light_info(uint8_t pktId) {
+   return (light_vars.burstId<<4) | (pktId<<1) | light_vars.light_state;
+}
+
+port_INLINE void light_check_missed_toogles(void) {
+   if (light_vars.missedToggles)
+   {
+      light_vars.light_state = !light_vars.light_state;
+        
+      if (light_vars.light_state==TRUE) {
+         debugpins_light_set();
+         leds_light_on();
+      } else {
+         debugpins_light_clr();
+         leds_light_off();
+      }
+      light_vars.missedToggles--;
+   }
+}
+
+void light_update_state(uint8_t pkt_light_state) {
+  
+  // if we do not have missed toggles, we use the packet information
+  if (!light_vars.missedToggles)
+  {
+    light_vars.light_state = pkt_light_state;
+    
+    // map received light_state to light debug pin
+    if (light_vars.light_state==TRUE) {
+       debugpins_light_set();
+       leds_light_on();
+    } else {
+       debugpins_light_clr();
+       leds_light_off();
+    }
+  }
+  // if we missed some toogles, we just invert the state
+  else {
+    light_vars.light_state = !light_vars.light_state;
+    
+    if (light_vars.light_state==TRUE) {
+       debugpins_light_set();
+       leds_light_on();
+    } else {
+       debugpins_light_clr();
+       leds_light_off();
+    }
+    
+    //light_vars.missedToggles--;
+  }
 }
 
 //=========================== private ==========================================
