@@ -22,15 +22,16 @@
 // Pedro@USC
 #define SINK_ID                   0xed4e
 #define SENSOR_ID                 0x89a5
-*/
 // Thomas@Inria
 #define SINK_ID                   0x6f16
 #define SENSOR_ID                 0xb957
-/*
 // Thomas@home
 #define SINK_ID                   0xbb5e
 #define SENSOR_ID                 0x930f
 */
+// hub@EWSN
+#define SINK_ID                   0x6f16
+#define SENSOR_ID                 0xb957
 
 //=========================== typedef ==========================================
 
