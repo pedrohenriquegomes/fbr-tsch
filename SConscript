@@ -53,10 +53,10 @@ else:
     else:
         env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
         
-if env['version']=='release':
+if env['configuration']=='release':
     env.Append(CPPDEFINES    = 'RELEASE')
 else:
-    if env['version']=='debug':
+    if env['configuration']=='debug':
         env.Append(CPPDEFINES    = 'DEBUG')
         
 if   env['toolchain']=='mspgcc':
