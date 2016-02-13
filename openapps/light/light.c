@@ -66,7 +66,7 @@ void light_init(void) {
 void light_trigger(void) {
    bool                 iShouldSend;
    uint8_t              pktId;
-#ifdef DEBUG
+#ifdef LIGHT_FAKESEND
    uint16_t             numAsnSinceLastEvent;
 #else
    callbackRead_cbt     light_read_cb;
@@ -79,7 +79,7 @@ void light_trigger(void) {
    
    //=== if I get here, I'm the SENSOR mote
    
-#ifdef DEBUG
+#ifdef LIGHT_FAKESEND
    // how many cells since the last time I transmitted?
    numAsnSinceLastEvent = ieee154e_asnDiff(&light_vars.lastEventAsn);
    
