@@ -58,7 +58,7 @@ if env['configuration']=='release':
 else:
     if env['configuration']=='debug':
         env.Append(CPPDEFINES    = 'DISABLE_LEDS')
-        env.Append(CPPDEFINES    = 'DISABLE_DEBUGPING')
+        env.Append(CPPDEFINES    = 'DISABLE_DEBUGPINS')
         env.Append(CPPDEFINES    = 'DISABLE_OPENSERIAL')
         env.Append(CPPDEFINES    = 'LIGHT_FAKESEND')
         
