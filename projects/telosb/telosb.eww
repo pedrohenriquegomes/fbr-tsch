@@ -2,7 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\01bsp_radio_tx\01bsp_radio_tx.ewp</path>
+    <path>$WS_DIR$\01bsp_jammer\01bsp_jammer.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\03oos_openwsn\03oos_openwsn.ewp</path>
