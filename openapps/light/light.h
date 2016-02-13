@@ -13,7 +13,7 @@
 // defines
 #define LIGHT_FAKESEND_PERIOD     400 // period, in slots, of sending data
 #define LIGHT_BURSTSIZE             3 // number of packets sent on each light event
-#define LUX_THRESHOLD             500
+#define LUX_THRESHOLD             400
 #define LUX_HYSTERESIS            100
 
 //=== hardcoded addresses (last 2 bytes of the EUI64)
