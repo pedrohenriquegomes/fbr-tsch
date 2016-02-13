@@ -3,6 +3,7 @@
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
+#include "light.h"
 
 //=========================== variables =======================================
 
@@ -148,6 +149,26 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].owner==owner) {
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
+      }
+   }
+   ENABLE_INTERRUPTS();
+}
+
+void openqueue_removeAllOldBurst(uint8_t burstId) {
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++){
+     // only reset Data packets
+      if (openqueue_vars.queue[i].creator==COMPONENT_LIGHT) {
+        // get the payload
+        light_ht* data_pkt = (light_ht*)(openqueue_vars.queue[i].payload);
+        // shift and mask to get the burstId
+        uint8_t pkt_burstId = (data_pkt->light_info >> 4) & 0x0f;
+        
+        if (pkt_burstId < burstId) {
+          openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         }
       }
    }
    ENABLE_INTERRUPTS();

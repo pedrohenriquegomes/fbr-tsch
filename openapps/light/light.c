@@ -205,7 +205,7 @@ void light_receive_beacon(OpenQueueEntry_t* pkt) {
             light_vars.pktIDMap = 0x00;
             
             // remove old packets from queue
-            // TODO Fix #17
+            openqueue_removeAllOldBurst(pkt_burstId);
             
          } else {
             // old burstID
@@ -270,7 +270,7 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
             light_vars.pktIDMap = 0x00;
             
             // remove old packets from queue
-            // TODO Fix #17
+            openqueue_removeAllOldBurst(pkt_burstId);
             
          } else {
             // old burstID
