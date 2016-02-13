@@ -49,13 +49,15 @@ bool topology_isAcceptablePacket(uint16_t srcShortID) {
          if (srcShortID==MOTE_23 || srcShortID==MOTE_27) {  returnVal=TRUE;}
          break;
       case MOTE_27:
-         if (srcShortID==MOTE_25 || srcShortID==MOTE_28) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_25 || srcShortID==MOTE_12) {  returnVal=TRUE;}
          break;
+      /*
       case MOTE_28:
          if (srcShortID==MOTE_27 || srcShortID==MOTE_12) {  returnVal=TRUE;}
          break;
+      */
       case MOTE_12:
-         if (srcShortID==MOTE_28                       ) {  returnVal=TRUE;}
+         if (srcShortID==MOTE_27                       ) {  returnVal=TRUE;}
          break;
    }
 #else
