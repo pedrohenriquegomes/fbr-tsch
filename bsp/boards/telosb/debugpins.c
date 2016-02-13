@@ -18,12 +18,12 @@
 void debugpins_init() {
    P6DIR |=  0x40;      // frame [P6.6]
    P6DIR |=  0x80;      // slot  [P6.7]
-   P2DIR |=  0x08;      // fsm   [P2.3]
+   P6DIR |=  0x04;      // fsm   [P6.2]
    P2DIR |=  0x40;      // task  [P2.6]
    P6DIR |=  0x01;      // isr   [P6.0]
    P6DIR |=  0x02;      // radio [P6.1] 
-   P6DIR |=  0x04;      // user1 [P6.2] 
-   P6DIR |=  0x08;      // user2 [P6.3] 
+   P2DIR |=  0x08;      // light [P2.3] 
+   P6DIR |=  0x08;      // user  [P6.3] 
 }
 
 // P6.6
@@ -60,20 +60,20 @@ void debugpins_slot_set() {
 #endif
 }
 
-// P2.3
+// P6.2
 void debugpins_fsm_toggle() {
 #ifdef DISABLE_DEBUGPINS
-  P2OUT ^=  0x08;
+  P6OUT ^=  0x04;
 #endif
 }
 void debugpins_fsm_clr() {
 #ifdef DISABLE_DEBUGPINS
-  P2OUT &= ~0x08;
+  P6OUT &= ~0x04;
 #endif
 }
 void debugpins_fsm_set() {
 #ifdef DISABLE_DEBUGPINS
-  P2OUT |=  0x08;
+  P6OUT |=  0x04;
 #endif
 }
 
@@ -128,20 +128,20 @@ void debugpins_radio_set() {
 #endif
 }
 
-// P6.2
+// P2.3
 void debugpins_light_toggle() {
 #ifdef DISABLE_DEBUGPINS
-  P6OUT ^=  0x04;
+  P2OUT ^=  0x08;
 #endif
 }
 void debugpins_light_clr() {
 #ifdef DISABLE_DEBUGPINS
-  P6OUT &= ~0x04;
+  P2OUT &= ~0x08;
 #endif
 }
 void debugpins_light_set() {
 #ifdef DISABLE_DEBUGPINS
-  P6OUT |=  0x04;
+  P2OUT |=  0x08;
 #endif
 }
 
