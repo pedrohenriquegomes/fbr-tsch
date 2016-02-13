@@ -57,7 +57,10 @@ if env['configuration']=='release':
     env.Append(CPPDEFINES    = 'RELEASE')
 else:
     if env['configuration']=='debug':
-        env.Append(CPPDEFINES    = 'DEBUG')
+        env.Append(CPPDEFINES    = 'DISABLE_LEDS')
+        env.Append(CPPDEFINES    = 'DISABLE_DEBUGPING')
+        env.Append(CPPDEFINES    = 'DISABLE_OPENSERIAL')
+        env.Append(CPPDEFINES    = 'LIGHT_FAKESEND')
         
 if   env['toolchain']=='mspgcc':
     
