@@ -48,6 +48,7 @@ class topology():
         
         self.myCanvas = Tkinter.Canvas(self.master, width=600, height=400)
         self.myCanvas.pack()
+        self.lines = []
         
         self.slotLabel    = Tkinter.Label(self.master,text="slotoffset") 
         self.channelLabel = Tkinter.Label(self.master,text="choffset")
@@ -85,7 +86,7 @@ class topology():
                 for j in range(self.numOfMotes):
                     if ( (not (i is j)) and LEVELOFNUMOFLINKS >= rm.randrange(1,10) ): 
                         if ( calculateDistance(self.xaxis[i],self.yaxis[i],self.xaxis[j],self.yaxis[j]) < LINKDISTANCE ):
-                            self.myCanvas.create_line(self.xaxis[i],self.yaxis[i],self.xaxis[j],self.yaxis[j])
+                            self.lines.append(self.myCanvas.create_line(self.xaxis[i],self.yaxis[i],self.xaxis[j],self.yaxis[j]))
         else:
             id = moteTopology[0]
             idx,idy = self.findIndex(id)
@@ -117,15 +118,10 @@ class topology():
         self.neighbourTable[mote1][mote2] = state
         self.neighbourTable[mote2][mote1] = state
         
-    def _markBlacklist(self,index,used,tsNum,choffset,type):
-        if type == 0:   #Tx blacklist
-            blacklist = self.blacklistTxTable
-        else: #Rx blacklist
-            blacklist = self.blacklistRxTable
-        
-        blacklist[index].used = used
-        blacklist[index].tsNum = tsNum
-        blacklist[index].choffset = choffset
+    def deleteLines(self):
+        for line in self.lines:
+            topologyFrame.myCanvas.delete(line)
+        self.lines = []
 
 # ============================== main ============================
 if __name__ == "__main__":

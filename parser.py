@@ -325,6 +325,7 @@ if __name__ == "__main__":
     topologyFrame._drawMotes(moteList)
     moteIndex = 0
     while moteIndex<len(motes):
+        topologyFrame.deleteLines()
         topologyFrame._drawLines(motes[moteIndex])
         topologyFrame.myCanvas.update()
         moteIndex += 1
