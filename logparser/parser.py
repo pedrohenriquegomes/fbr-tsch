@@ -6,6 +6,7 @@ from collections import namedtuple
 import OpenHdlc
 import traceback
 import StackDefines
+import pprint
 
 class fieldParsingKey(object):
     def __init__(self,length,val,name,structure,fields):
@@ -45,13 +46,39 @@ class LogfileParser(object):
         errorcount = {}
         for d in allflatdata:
             if 'errcode' in d:
-                print d['errcode']
                 errstring = StackDefines.errorDescriptions[d['errcode']]
                 if errstring not in errorcount:
                     errorcount[errstring] = 0
                 errorcount[errstring] += 1
         with open('question_2.txt','w') as f:
             f.write(str(errorcount))
+            
+        # question 3: last neighbor table of each mote
+        neighbortable = {}
+        for (moteid,data) in alldata.items():
+            neighbortable[moteid] = {}
+            for d in data:
+                if 'parentPreference' in d:
+                    if d['used']==1:
+                        neighbortable[moteid][d['row']] = d
+        with open('question_3.txt','w') as f:
+            pp = pprint.PrettyPrinter(indent=4)
+            f.write(pp.pformat(neighbortable))
+        
+        # question 4: rssi histogram
+        rssivals = {}
+        for (moteid,data) in neighbortable.items():
+            rssivals[moteid] = []
+            for (_,v) in data.items():
+                
+                rssivals[moteid] += [(hex(v['shortID']),v['rssi'])]
+        with open('question_4.txt','w') as f:
+            output = []
+            for (k,v) in rssivals.items():
+                output += ['{0}: {1}'.format(k,sorted(v))]
+            f.write('\n'.join(output))
+        
+        # question 5: network churn
         
     def parseAllFiles(self):
         alldata = {}
@@ -99,7 +126,7 @@ class LogfileParser(object):
         header     = self.parseHeader(frame[:3],'<HB',('src','type'))
         payload    = {}
         if   header['type']==0: # IsSync
-            payload = self.parseHeader(frame[3:],'<B',('isSync'))
+            payload = self.parseHeader(frame[3:],'<B',('isSync',))
         elif header['type']==1: # IdManager
             payload = self.parseHeader(
                 frame[3:3+5],
@@ -111,7 +138,7 @@ class LogfileParser(object):
                 ),
             )
         elif header['type']==2: # MyDagRank
-            payload = self.parseHeader(frame[3:],'<H',('myDAGrank'))
+            payload = self.parseHeader(frame[3:],'<H',('myDAGrank',))
         elif header['type']==6: # ScheduleRow
             payload = self.parseHeader(
                 frame[3:3+7],

@@ -24,7 +24,6 @@ bool isThisRowMatching(
    uint16_t        shortID,
    uint8_t         rowNumber
 );
-void findPreferredParent(uint8_t checkStableNeighbor, bool* prefParentFound, uint8_t* prefParentIdx);
 
 //=========================== public ==========================================
 
@@ -190,7 +189,7 @@ void neighbors_indicateRx(
                neighbors_vars.neighbors[i].switchStabilityCounter++;
                if (neighbors_vars.neighbors[i].switchStabilityCounter>=SWITCHSTABILITYTHRESHOLD) {
                   neighbors_vars.neighbors[i].switchStabilityCounter=0;
-                   neighbors_vars.neighbors[i].stableNeighbor=FALSE;
+                  neighbors_vars.neighbors[i].stableNeighbor=FALSE;
                }
             } else {
                neighbors_vars.neighbors[i].switchStabilityCounter=0;
@@ -244,6 +243,9 @@ routing decisions to change. Examples are:
 void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint8_t   prefParentIdx;
    bool      prefParentFound;
+   uint8_t   i;
+   uint16_t  tentativeDAGrank;
+   uint16_t  runningNumRx;
    
    // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
    if (idmanager_getIsDAGroot()==TRUE) {
@@ -251,62 +253,48 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
        return;
    }
    
-   // reset my DAG rank to max value. May be lowered below.
-   neighbors_vars.myDAGrank  = MAXDAGRANK;
-   
    // by default, I haven't found a preferred parent
    prefParentFound           = FALSE;
    prefParentIdx             = 0;
    
-   // first, look for a parent which is stable
-   findPreferredParent(TRUE,&prefParentFound,&prefParentIdx);
-   
-   // if not found, drop the condition
-   if (prefParentFound==FALSE) {
-      findPreferredParent(FALSE,&prefParentFound,&prefParentIdx);
+   if (neighbors_vars.myDAGrank==MAXDAGRANK) {
+      // first time I acquire a DAGrank
+      
+      for (i=0;i<MAXNUMNEIGHBORS;i++) {
+         if (neighbors_vars.neighbors[i].used==TRUE) {
+            // reset parent preference
+            neighbors_vars.neighbors[i].parentPreference=0;
+            
+            tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+MINHOPRANKINCREASE;
+            if (tentativeDAGrank<neighbors_vars.myDAGrank && tentativeDAGrank<MAXDAGRANK) {
+               // found better parent
+               neighbors_vars.myDAGrank   = tentativeDAGrank;
+               prefParentFound            = TRUE;
+               prefParentIdx              = i;
+            }
+         }
+      }
+   } else {
+      // change preferred parent for one with my rank-1, with hightest numRx
+      runningNumRx = 0;
+      for (i=0;i<MAXNUMNEIGHBORS;i++) {
+         if (neighbors_vars.neighbors[i].used==TRUE) {
+            // reset parent preference
+            neighbors_vars.neighbors[i].parentPreference=0;
+            
+            if (neighbors_vars.neighbors[i].DAGrank==neighbors_vars.myDAGrank-MINHOPRANKINCREASE && neighbors_vars.neighbors[i].numRx>runningNumRx) {
+               runningNumRx = neighbors_vars.neighbors[i].numRx;
+               // found better parent
+               prefParentFound            = TRUE;
+               prefParentIdx              = i;
+            }
+         }
+      }
    }
    
    // update preferred parent
    if (prefParentFound) {
-      neighbors_vars.neighbors[prefParentIdx].parentPreference       = MAXPREFERENCE;
-      neighbors_vars.neighbors[prefParentIdx].stableNeighbor         = TRUE;
-      neighbors_vars.neighbors[prefParentIdx].switchStabilityCounter = 0;
-   }
-}
-
-void findPreferredParent(uint8_t checkStableNeighbor, bool* prefParentFound, uint8_t* prefParentIdx) {
-   uint8_t   i;
-   bool      condition;
-   uint16_t  rankIncrease;
-   uint32_t  tentativeDAGrank; // 32-bit since is used to sum
-   
-   // loop through neighbor table, update myDAGrank
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (neighbors_vars.neighbors[i].used==TRUE) {
-         
-         // reset parent preference
-         neighbors_vars.neighbors[i].parentPreference=0;
-         
-         // calculate link cost to this neighbor
-         rankIncrease = MINHOPRANKINCREASE;
-         
-         tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
-         if (checkStableNeighbor==TRUE) {
-            condition = (tentativeDAGrank<neighbors_vars.myDAGrank &&
-                         tentativeDAGrank<MAXDAGRANK &&
-                         neighbors_vars.neighbors[i].stableNeighbor==TRUE);
-         } else {
-            condition = (tentativeDAGrank<neighbors_vars.myDAGrank &&
-                         tentativeDAGrank<MAXDAGRANK);
-         }
-         
-         if (condition) {
-            // found better parent, lower my DAGrank
-            neighbors_vars.myDAGrank   = tentativeDAGrank;
-            *prefParentFound           = TRUE;
-            *prefParentIdx             = i;
-         }
-      }
+      neighbors_vars.neighbors[prefParentIdx].parentPreference = MAXPREFERENCE;
    }
 }
 
