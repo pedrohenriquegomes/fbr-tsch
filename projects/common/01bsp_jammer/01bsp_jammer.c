@@ -8,7 +8,7 @@
 
 //=========================== defines =========================================
 
-#define CHANNEL              26                           // 11 = 2.405GHz
+#define CHANNEL              20                           // 11 = 2.405GHz
 #define MAX_LEN_PAYLOAD      125                          // max length of the PHY payload, NOT including the CRC
 #define MAX_LEN_FRAME        MAX_LEN_PAYLOAD+LENGTH_CRC   // maximum length of the PHY payload, WITH he CRC
 #define MIN_INTERFRAME_DELAY 10                           // 32kHz ticks (MUST be >10 per bug in bsp_timer module)
@@ -95,7 +95,8 @@ int mote_main(void) {
       
       // prepare packet
       app_vars.txpk_num++;
-      app_vars.txpk_len           = 1+(getrandom()%(MAX_LEN_PAYLOAD-1));
+      //app_vars.txpk_len           = 1+(getrandom()%(MAX_LEN_PAYLOAD-1));
+      app_vars.txpk_len           = MAX_LEN_PAYLOAD;
       app_vars.txpk_buf[0]        = app_vars.txpk_num;
       for (i=1;i<app_vars.txpk_len;i++) {
          app_vars.txpk_buf[i]     = getrandom()%0xff;

@@ -672,20 +672,6 @@ port_INLINE void activity_ti1ORri1() {
       }
    }
    
-   // if the previous slot took too long, we will not be in the right state
-   if (ieee154e_vars.state!=S_SLEEP) {
-      // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
-                            (errorparameter_t)ieee154e_vars.state,
-                            (errorparameter_t)ieee154e_vars.slotOffset);
-      // abort
-      endSlot();
-      return;
-   }
-   
-   // trigger application, which can send packet
-   light_trigger();
-   
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
       // this is the next active slot
       
@@ -704,6 +690,22 @@ port_INLINE void activity_ti1ORri1() {
       openserial_startOutput();
       return;
    }
+   
+   // if the previous slot took too long, we will not be in the right state
+   if (ieee154e_vars.state!=S_SLEEP) {
+      
+      // log the error
+      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
+                            (errorparameter_t)ieee154e_vars.state,
+                            (errorparameter_t)ieee154e_vars.slotOffset);
+      
+      // abort
+      endSlot();
+      return;
+   }
+   
+   // trigger application, which can send packet
+   light_trigger();
    
    // check the schedule to see what type of slot this is
    cellType = schedule_getType();
@@ -971,7 +973,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_rie3() {
-     
+  
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
