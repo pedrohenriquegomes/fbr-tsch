@@ -63,12 +63,10 @@ if   env['configuration']=='release':
     assert env['bootload']==''
     assert env['fakesend']=='0'
     env['setup']='testbed'
-    env.Append(CPPDEFINES    = 'ENABLE_LEDS')       # TODO remove
-    env.Append(CPPDEFINES    = 'ENABLE_OPENSERIAL') # TODO remove
 elif env['configuration']=='debug':
     env.Append(CPPDEFINES    = 'ENABLE_LEDS')
     env.Append(CPPDEFINES    = 'ENABLE_DEBUGPINS')
-    env.Append(CPPDEFINES    = 'ENABLE_OPENSERIAL')
+    #env.Append(CPPDEFINES    = 'ENABLE_OPENSERIAL')
 
 if   env['setup']=='testbed':
     env.Append(CPPDEFINES    = 'SETUP_TESTBED')
