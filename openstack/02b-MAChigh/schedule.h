@@ -19,7 +19,11 @@ The superframe repears over time and can be arbitrarly long.
 */
 #define NUM_EB_SLOTS        1
 #define NUM_TXRX_SLOTS      10
+#ifdef ENABLE_OPENSERIAL
+#define SLOTFRAME_LENGTH    13
+#else
 #define SLOTFRAME_LENGTH    11
+#endif
 
 #define MAXACTIVESLOTS       (NUM_EB_SLOTS+NUM_TXRX_SLOTS)
 

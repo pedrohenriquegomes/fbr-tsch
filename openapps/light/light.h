@@ -2,16 +2,12 @@
 #define __LIGHT_H
 
 #include "opentimers.h"
+#include "schedule.h"
 
 //=========================== define ===========================================
 
-// application-level switches
-#define LIGHT_PRINTOUT_READING
-#define LIGHT_CALCULATE_DELAY
-//#define LIGHT_FAKESEND
-
 // defines
-#define LIGHT_FAKESEND_PERIOD     400 // period, in slots, of sending data
+#define LIGHT_FAKESEND_PERIOD     216 // period, in slots, of sending data
 #define LIGHT_BURSTSIZE             3 // number of packets sent on each light event
 #define LUX_THRESHOLD             400
 #define LUX_HYSTERESIS            100
@@ -60,6 +56,7 @@ typedef struct {
    uint16_t             light_reading;      // current light sensor reading
    bool                 light_state;        // current state of the light (TRUE==on, FALSE==off)
    asn_t                lastEventAsn;       // holds the ASN of last event
+   uint16_t             numMissedBursts;    // number of burst I have missed and for which I need to catch-up
    // timers
    opentimer_id_t       fwdTimerId;         // timer ID for forwarding one packet
    // sending
@@ -70,7 +67,7 @@ typedef struct {
 
 // initialization
 void     light_init(void);
-void     light_trigger(void);
+void     light_trigger(slotOffset_t slotOffset);
 uint8_t  light_get_light_info(uint8_t pktId);
 void     light_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void     light_receive_data(OpenQueueEntry_t* msg);

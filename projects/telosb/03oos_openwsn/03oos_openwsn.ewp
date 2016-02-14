@@ -173,6 +173,7 @@
         <option>
           <name>CCDefines</name>
           <state>LIGHT_FAKESEND</state>
+          <state>TOPOLOGY_LINEAR</state>
           <state>SETUP_USBHUB</state>
           <state>ENABLE_LEDS</state>
           <state>ENABLE_DEBUGPINS</state>

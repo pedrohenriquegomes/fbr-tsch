@@ -20,7 +20,10 @@ light_vars_t        light_vars;
 
 //=========================== prototypes =======================================
 
+void light_trigger_SENSOR(void);
+void light_trigger_NOT_SENSOR(void);
 void light_send_one_packet(uint8_t pktId);
+void light_update_light_state(uint8_t pkt_light_state);
 
 //=========================== public ===========================================
 
@@ -30,29 +33,9 @@ void light_send_one_packet(uint8_t pktId);
 \brief Initialize this module.
 */
 void light_init(void) {
-#ifdef LIGHT_PRINTOUT_READING
-   callbackRead_cbt     light_read_cb;
-   uint16_t             lux; 
-#endif
    
    // clear local variables
    memset(&light_vars,0,sizeof(light_vars_t));
-   
-#ifdef LIGHT_PRINTOUT_READING
-   // printout the current light reading, used to calibrate LUX_THRESHOLD
-   if ( idmanager_getMyShortID()==SENSOR_ID && sensors_is_present(SENSOR_LIGHT) ) {
-      
-      light_read_cb     = sensors_getCallbackRead(SENSOR_LIGHT);
-      lux               = light_read_cb();
-      
-      openserial_printInfo(
-         COMPONENT_LIGHT,
-         ERR_LIGHT_THRESHOLD,
-         (errorparameter_t)lux,
-         0
-      );
-   }
-#endif
    
    debugpins_light_clr();
    leds_light_off();
@@ -63,7 +46,17 @@ void light_init(void) {
 /**
 \brief Trigger the light app, which can decide to send a packet.
 */
-void light_trigger(void) {
+void light_trigger(slotOffset_t slotOffset) {
+   if ( idmanager_getMyShortID()==SENSOR_ID ) {
+      light_trigger_SENSOR();
+   } else {
+      if (slotOffset==0) {
+         light_trigger_NOT_SENSOR();
+      }
+   }
+}
+
+void light_trigger_SENSOR(void) {
    bool                 iShouldSend;
    uint8_t              pktId;
 #ifdef LIGHT_FAKESEND
@@ -71,13 +64,6 @@ void light_trigger(void) {
 #else
    callbackRead_cbt     light_read_cb;
 #endif
-   
-   // stop if I'm not the SENSOR mote with a light sensor attached
-   if ( idmanager_getMyShortID()!=SENSOR_ID || sensors_is_present(SENSOR_LIGHT)==FALSE ) {
-      return;
-   }
-   
-   //=== if I get here, I'm the SENSOR mote
    
 #ifdef LIGHT_FAKESEND
    // how many cells since the last time I transmitted?
@@ -137,6 +123,29 @@ void light_trigger(void) {
    }
 }
 
+void light_trigger_NOT_SENSOR(void) {
+   if (light_vars.numMissedBursts>0) {
+      // toggle the light state
+      if (light_vars.light_state==1) {
+         light_vars.light_state = 0;
+      } else {
+         light_vars.light_state = 1;
+      }
+      
+      // commit to the light led and pin
+      if (light_vars.light_state==TRUE) {
+         debugpins_light_set();
+         leds_light_on();
+      } else {
+         debugpins_light_clr();
+         leds_light_off();
+      }
+      
+      // decrement numMissedBursts
+      light_vars.numMissedBursts--;
+   }
+}
+
 uint8_t  light_get_light_info(uint8_t pktId) {
    return (light_vars.burstId<<4) | (pktId<<1) | light_vars.light_state;
 }
@@ -154,10 +163,6 @@ port_INLINE void light_send_one_packet(uint8_t pktId) {
    // take ownership over the packet
    pkt->owner                               = COMPONENT_LIGHT;
    pkt->creator                             = COMPONENT_LIGHT;
-   
-#ifdef LIGHT_CALCULATE_DELAY
-   // TODO add light_vars.lastEventAsn into packet
-#endif
    
    // fill payload
    packetfunctions_reserveHeaderSize(pkt,sizeof(light_ht));
@@ -188,6 +193,11 @@ void light_receive_beacon(OpenQueueEntry_t* pkt) {
    // handle the packet
    do {
       
+      // abort if I'm the sensor
+      if ( idmanager_getMyShortID()==SENSOR_ID ) {
+         break;
+      }
+     
       // take ownserhip over the packet
       pkt->owner        = COMPONENT_LIGHT;
       
@@ -215,18 +225,19 @@ void light_receive_beacon(OpenQueueEntry_t* pkt) {
          }
       }
       
-      // update the burstId, pktId and light_state
-      light_vars.burstId     = pkt_burstId;
-      light_vars.light_state = pkt_light_state;
-      
-      // map received light_state to light debug pin
-      if (light_vars.light_state==TRUE) {
-         debugpins_light_set();
-         leds_light_on();
-      } else {
-         debugpins_light_clr();
-         leds_light_off();
+      // record the number of missed bursts, if any
+      if (light_vars.burstId!=pkt_burstId) {
+         while (light_vars.burstId!=pkt_burstId) {
+            light_vars.burstId = (light_vars.burstId+1)%16;
+            light_vars.numMissedBursts++;
+         }
+         light_vars.numMissedBursts--;
+         
+         // update the light state
+         light_update_light_state(pkt_light_state);
       }
+      
+      //=== if I get here, light_vars.burstId==pkt_burstId
       
    } while(0);
    
@@ -289,18 +300,22 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
           light_vars.pktIDMap |= (1<<pkt_pktId);
       }
       
-      // update the burstId, pktId and light_state
-      light_vars.burstId     = pkt_burstId;
-      light_vars.light_state = pkt_light_state;
+      //== if I get here, I accept the data packet
       
-      // map received light_state to light debug pin
-      if (light_vars.light_state==TRUE) {
-         debugpins_light_set();
-         leds_light_on();
-      } else {
-         debugpins_light_clr();
-         leds_light_off();
+      if (light_vars.burstId!=pkt_burstId) {
+         
+        // record number of missed bursts
+        while (light_vars.burstId!=pkt_burstId) {
+            light_vars.burstId = (light_vars.burstId+1)%16;
+            light_vars.numMissedBursts++;
+         }
+         light_vars.numMissedBursts--;
+         
+         // update the light state
+         light_update_light_state(pkt_light_state);
       }
+      
+      //=== if I get here, light_vars.burstId==pkt_burstId
       
       // retransmit packet
       if (idmanager_getMyShortID()!=SINK_ID) {
@@ -313,3 +328,33 @@ void light_receive_data(OpenQueueEntry_t* pkt) {
 }
 
 //=========================== private ==========================================
+
+void light_update_light_state(uint8_t pkt_light_state) {
+   
+   // change the state
+   if (light_vars.numMissedBursts==0) {
+      // we have NOT missed any bursts
+     
+      // apply the state from the packet
+      light_vars.light_state = pkt_light_state;
+      
+   } else {
+      // we have missed at least one burst
+     
+      // toggle the state, regardless of the state in the packet
+      if (light_vars.light_state==1) {
+         light_vars.light_state = 0;
+      } else {
+         light_vars.light_state = 1;
+      }
+   }
+   
+   // commit to the light led and pin
+   if (light_vars.light_state==TRUE) {
+      debugpins_light_set();
+      leds_light_on();
+   } else {
+      debugpins_light_clr();
+      leds_light_off();
+   }
+}

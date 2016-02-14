@@ -705,7 +705,7 @@ port_INLINE void activity_ti1ORri1() {
    }
    
    // trigger application, which can send packet
-   light_trigger();
+   light_trigger(ieee154e_vars.slotOffset);
    
    // check the schedule to see what type of slot this is
    cellType = schedule_getType();

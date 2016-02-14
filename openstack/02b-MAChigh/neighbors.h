@@ -14,8 +14,8 @@
 #define MAXNUMNEIGHBORS           15
 #define AVERAGEDEGREE             6
 #define MAXPREFERENCE             2
-#define BADNEIGHBORMAXRSSI        -80 // dBm
-#define GOODNEIGHBORMINRSSI       -90 // dBm
+#define BADNEIGHBORMAXRSSI        -75 // dBm
+#define GOODNEIGHBORMINRSSI       -85 // dBm
 #define SWITCHSTABILITYTHRESHOLD  3
 #define DEFAULTLINKCOST           15
 
