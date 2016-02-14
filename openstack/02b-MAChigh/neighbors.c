@@ -24,6 +24,7 @@ bool isThisRowMatching(
    uint16_t        shortID,
    uint8_t         rowNumber
 );
+void findPreferredParent(uint8_t checkStableNeighbor, bool* prefParentFound, uint8_t* prefParentIdx);
 
 //=========================== public ==========================================
 
@@ -241,9 +242,6 @@ routing decisions to change. Examples are:
 - I became a DAGroot, so my DAGrank should be 0.
 */
 void neighbors_updateMyDAGrankAndNeighborPreference() {
-   uint8_t   i;
-   uint16_t  rankIncrease;
-   uint32_t  tentativeDAGrank; // 32-bit since is used to sum
    uint8_t   prefParentIdx;
    bool      prefParentFound;
    
@@ -260,6 +258,28 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    prefParentFound           = FALSE;
    prefParentIdx             = 0;
    
+   // first, look for a parent which is stable
+   findPreferredParent(TRUE,&prefParentFound,&prefParentIdx);
+   
+   // if not found, drop the condition
+   if (prefParentFound==FALSE) {
+      findPreferredParent(FALSE,&prefParentFound,&prefParentIdx);
+   }
+   
+   // update preferred parent
+   if (prefParentFound) {
+      neighbors_vars.neighbors[prefParentIdx].parentPreference       = MAXPREFERENCE;
+      neighbors_vars.neighbors[prefParentIdx].stableNeighbor         = TRUE;
+      neighbors_vars.neighbors[prefParentIdx].switchStabilityCounter = 0;
+   }
+}
+
+void findPreferredParent(uint8_t checkStableNeighbor, bool* prefParentFound, uint8_t* prefParentIdx) {
+   uint8_t   i;
+   bool      condition;
+   uint16_t  rankIncrease;
+   uint32_t  tentativeDAGrank; // 32-bit since is used to sum
+   
    // loop through neighbor table, update myDAGrank
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==TRUE) {
@@ -271,21 +291,22 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
          rankIncrease = MINHOPRANKINCREASE;
          
          tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
-         if ( tentativeDAGrank<neighbors_vars.myDAGrank &&
-              tentativeDAGrank<MAXDAGRANK) {
+         if (checkStableNeighbor==TRUE) {
+            condition = (tentativeDAGrank<neighbors_vars.myDAGrank &&
+                         tentativeDAGrank<MAXDAGRANK &&
+                         neighbors_vars.neighbors[i].stableNeighbor==TRUE);
+         } else {
+            condition = (tentativeDAGrank<neighbors_vars.myDAGrank &&
+                         tentativeDAGrank<MAXDAGRANK);
+         }
+         
+         if (condition) {
             // found better parent, lower my DAGrank
             neighbors_vars.myDAGrank   = tentativeDAGrank;
-            prefParentFound            = TRUE;
-            prefParentIdx              = i;
+            *prefParentFound           = TRUE;
+            *prefParentIdx             = i;
          }
       }
-   } 
-   
-   // update preferred parent
-   if (prefParentFound) {
-      neighbors_vars.neighbors[prefParentIdx].parentPreference       = MAXPREFERENCE;
-      neighbors_vars.neighbors[prefParentIdx].stableNeighbor         = TRUE;
-      neighbors_vars.neighbors[prefParentIdx].switchStabilityCounter = 0;
    }
 }
 
