@@ -45,3 +45,4 @@
 /projects/telosb/01bsp_jammer/settings
 /projects/telosb/01bsp_jammer/path.txt
 /projects/telosb/01bsp_jammer/01bsp_jammer.ewd
+/logparser/*.txt
