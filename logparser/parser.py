@@ -5,6 +5,7 @@ import time
 from collections import namedtuple
 import OpenHdlc
 import traceback
+import StackDefines
 
 class fieldParsingKey(object):
     def __init__(self,length,val,name,structure,fields):
@@ -27,11 +28,11 @@ class LogfileParser(object):
         alldata = self.parseAllFiles()
         
         # analyze
-        
-        # are all preferred parents stable neighbors?
         allflatdata = []
         for (k,v) in alldata.items():
             allflatdata += v
+        
+        # question 1: are all preferred parents stable neighbors?
         output = []
         for d in allflatdata:
             if 'parentPreference' in d:
@@ -39,6 +40,18 @@ class LogfileParser(object):
                     output += [ 'rssi={0} stableNeighbor={1}'.format(d['rssi'],d['stableNeighbor'])]
         with open('question_1.txt','w') as f:
             f.write('\n'.join(output))
+        
+        # question 2: how many errors?
+        errorcount = {}
+        for d in allflatdata:
+            if 'errcode' in d:
+                print d['errcode']
+                errstring = StackDefines.errorDescriptions[d['errcode']]
+                if errstring not in errorcount:
+                    errorcount[errstring] = 0
+                errorcount[errstring] += 1
+        with open('question_2.txt','w') as f:
+            f.write(str(errorcount))
         
     def parseAllFiles(self):
         alldata = {}
@@ -139,7 +152,8 @@ class LogfileParser(object):
     def parse_INFO(self,frame):
         pass
     def parse_ERROR(self,frame):
-        pass
+        payload    = self.parseHeader(frame[:8],'<HBBHH',('moteID','component','errcode','arg1','arg2'))
+        return payload
     def parse_CRITICAL(self,frame):
         pass
     def parse_REQUEST(self,frame):
