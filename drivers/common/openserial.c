@@ -276,6 +276,7 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
 }
 
 void openserial_startInput() {
+#ifdef ENABLE_OPENSERIAL
    INTERRUPT_DECLARATION();
    
    if (openserial_vars.inputBufFill>0) {
@@ -295,19 +296,15 @@ void openserial_startInput() {
    openserial_vars.busyReceiving  = FALSE;
    openserial_vars.mode           = MODE_INPUT;
    openserial_vars.reqFrameIdx    = 0;
-#ifdef FASTSIM
-   uart_writeBufferByLen_FASTSIM(
-      openserial_vars.reqFrame,
-      sizeof(openserial_vars.reqFrame)
-   );
-   openserial_vars.reqFrameIdx = sizeof(openserial_vars.reqFrame);
-#else
+
    uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
-#endif
+
    ENABLE_INTERRUPTS();
+#endif
 }
 
 void openserial_startOutput() {
+#ifdef ENABLE_OPENSERIAL
    //schedule a task to get new status in the output buffer
    uint8_t debugPrintCounter;
    
@@ -368,22 +365,16 @@ void openserial_startOutput() {
    DISABLE_INTERRUPTS();
    openserial_vars.mode=MODE_OUTPUT;
    if (openserial_vars.outputBufFilled) {
-#ifdef FASTSIM
-      uart_writeCircularBuffer_FASTSIM(
-         openserial_vars.outputBuf,
-         &openserial_vars.outputBufIdxR,
-         &openserial_vars.outputBufIdxW
-      );
-#else
       uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
-#endif
    } else {
       openserial_stop();
    }
    ENABLE_INTERRUPTS();
+#endif
 }
 
 void openserial_stop() {
+#ifdef ENABLE_OPENSERIAL
    uint8_t inputBufFill;
    uint8_t cmdByte;
    bool busyReceiving;
@@ -437,6 +428,7 @@ void openserial_stop() {
    openserial_vars.inputBufFill  = 0;
    openserial_vars.busyReceiving = FALSE;
    ENABLE_INTERRUPTS();
+#endif
 }
 
 void openserial_goldenImageCommands(void){
