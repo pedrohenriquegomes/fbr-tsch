@@ -5,6 +5,7 @@ import _winreg as winreg
 import struct
 import os
 import time
+import topology
 
 class fieldParsingKey(object):
 
@@ -273,7 +274,7 @@ if __name__ == "__main__":
     
     # define moteId variable
     motes = []
-    
+    moteList = []
     for fileName in os.listdir('./'):
         if len(fileName)>10 and fileName[-10:-4] == 'parsed':
             moteId = ''
@@ -292,6 +293,7 @@ if __name__ == "__main__":
                     print 'my16bID_1={0:2x}   |'.format(int(line[line.find('=')+1:-1]))
                     moteId = int(line[line.find('=')+1:-1])*256+moteId
                     print '---------------\n'
+                    addInNeighborTable(moteId,moteList)
                     findMyId = True
                 if line.find('myDAGrank')==0 and findMyDagrank == False:
                     print '---------------'
@@ -307,6 +309,7 @@ if __name__ == "__main__":
                     line = parsedFile.readline()
                     print 'shortID={0:2x} {1:2x} (L H)'.format(int(line[line.find('=')+1:])%256,int(line[line.find('=')+1:])/256)
                     addInNeighborTable(int(line[line.find('=')+1:]),neighborTable)
+                    addInNeighborTable(int(line[line.find('=')+1:]),moteList)
                     line = parsedFile.readline()
                     print 'DAGrank={0} '.format(line[line.find('=')+1:-1])
                     line = parsedFile.readline()
@@ -316,5 +319,15 @@ if __name__ == "__main__":
             motes += [[moteId,neighborTable]]
             
     # plot topology
-    
+    topologyFrame = topology.topology(moteList)
+    topologyFrame.myCanvas.delete("all")
+    topologyFrame._generateAxises()
+    topologyFrame._drawMotes(moteList)
+    moteIndex = 0
+    while moteIndex<len(motes):
+        topologyFrame._drawLines(motes[moteIndex])
+        topologyFrame.myCanvas.update()
+        moteIndex += 1
+        time.sleep(1)
+    Tkinter.mainloop()
         
