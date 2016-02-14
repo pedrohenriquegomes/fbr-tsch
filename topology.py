@@ -10,7 +10,7 @@ NUMOFMOTES           = 10  # number of motes
 LEVELOFNUMOFLINKS    = 10  # level of number of links: 10 ~ 0 (no connection). If LINKDISTANCE < MINIMUMDISTANCE: Full Connections network.
 MINIMUMDISTANCE      = 40  # minimum distance between two motes
 LINKDISTANCE         = 100 # possible distance for a connection (works only when larger than MINIMUMDISTANCE)
-DIAMETEROFMOTE       = 12  # size of mote
+DIAMETEROFMOTE       = 20  # size of mote
 
 NUMOFCHANNEL = 16
 NUMOFSLOT    = 23
@@ -104,7 +104,7 @@ class topology():
             if moteList == None:
                 self.myCanvas.create_text(self.xaxis[i],self.yaxis[i],text=str(i+1))
             else:
-                self.myCanvas.create_text(self.xaxis[i],self.yaxis[i],text='{0:x}|{1:x}'.format(int(moteList[i])/256,int(moteList[i])%256))
+                self.myCanvas.create_text(self.xaxis[i],self.yaxis[i],font=("Purisa", 12),text='{0:x}|{1:x}'.format(int(moteList[i])/256,int(moteList[i])%256))
             
     def findIndex(self,id):
         # print id

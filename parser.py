@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from Tkinter import *
+import Tkinter
 import serial, threading
 import _winreg as winreg
 import struct
@@ -25,8 +25,9 @@ class parser(threading.Thread):
     
     def __init__(self,inputFileName):
         self.bufIndex = 0
-        self.inputData = open(inputFileName,'r')
+        self.inputData = open(inputFileName,'rb')
         self.inputData = self.inputData.read()
+        print len(self.inputData)
         if len(self.inputData) > 0:
             # print "-------------------"
             self.outputFile = open(inputFileName[:-4]+'_parsed.txt','w')
@@ -265,7 +266,7 @@ def addInNeighborTable(newNeighbor, neighborTable):
 if __name__ == "__main__":
     for fileName in os.listdir('./'):
         if len(fileName) == 7:
-            # print fileName
+            print fileName
             temp = parser(fileName)
             temp.start()
             # raw_input()
@@ -275,6 +276,7 @@ if __name__ == "__main__":
     # define moteId variable
     motes = []
     moteList = []
+    outputFile = open('neighborInf.txt','w')
     for fileName in os.listdir('./'):
         if len(fileName)>10 and fileName[-10:-4] == 'parsed':
             moteId = ''
@@ -283,7 +285,7 @@ if __name__ == "__main__":
             line = parsedFile.readline()
             findMyId = False
             findMyDagrank = False
-            print '======== New File (Mote) Begin ========\n'
+            print '======== New File (Mote) {0} Begin ========\n'.format(fileName[:3])
             while line != '':
                 if line.find('my16bID_0')==0 and findMyId == False:
                     print '---------------'
@@ -300,35 +302,48 @@ if __name__ == "__main__":
                     print 'myDAGrank={0:3}  |'.format(line[line.find('=')+1:-1])
                     print '---------------\n'
                     findMyDagrank = True
-                if line.find('parentPreference')==0:
-                    print 'parentPreference={0} '.format(line[line.find('=')+1:-1])
+                if line.find('row')==0:
+                    row = line[line.find('=')+1:-1]
                     line = parsedFile.readline()
-                    print 'stableNeighbor={0} '.format(line[line.find('=')+1:-1])
-                    line = parsedFile.readline()
-                    print 'switchStabilityCounter={0} '.format(line[line.find('=')+1:-1])
-                    line = parsedFile.readline()
-                    print 'shortID={0:2x} {1:2x} (L H)'.format(int(line[line.find('=')+1:])%256,int(line[line.find('=')+1:])/256)
-                    addInNeighborTable(int(line[line.find('=')+1:]),neighborTable)
-                    addInNeighborTable(int(line[line.find('=')+1:]),moteList)
-                    line = parsedFile.readline()
-                    print 'DAGrank={0} '.format(line[line.find('=')+1:-1])
-                    line = parsedFile.readline()
-                    print 'rssi={0} '.format(line[line.find('=')+1:])
+                    if line.find('used')==0:
+                        line = parsedFile.readline()
+                        if line.find('parentPreference')==0:
+                            output = ''
+                            output +='row={0} '.format(row)
+                            output+='parentPreference={0} '.format(line[line.find('=')+1:-1])
+                            line = parsedFile.readline()
+                            output+='stableNeighbor={0} '.format(line[line.find('=')+1:-1])
+                            line = parsedFile.readline()
+                            output+='switchStabilityCounter={0} '.format(line[line.find('=')+1:-1])
+                            line = parsedFile.readline()
+                            if int(line[line.find('=')+1:]) != 0:
+                                output+='shortID={0:2x} {1:2x} (H L)'.format(int(line[line.find('=')+1:])/256,int(line[line.find('=')+1:])%256)
+                                addInNeighborTable(int(line[line.find('=')+1:]),neighborTable)
+                                addInNeighborTable(int(line[line.find('=')+1:]),moteList)
+                                line = parsedFile.readline()
+                                output+='DAGrank={0} '.format(line[line.find('=')+1:-1])
+                                line = parsedFile.readline()
+                                output+='rssi={0} '.format(line[line.find('=')+1:-1])
+                            else:
+                                output = ''
+                            if output != '':
+                                print output
+                                outputFile.write(output+'\n')
                 line = parsedFile.readline()
                 
             motes += [[moteId,neighborTable]]
-            
+    outputFile.close()
     # plot topology
-    topologyFrame = topology.topology(moteList)
-    topologyFrame.myCanvas.delete("all")
-    topologyFrame._generateAxises()
-    topologyFrame._drawMotes(moteList)
-    moteIndex = 0
-    while moteIndex<len(motes):
-        topologyFrame.deleteLines()
-        topologyFrame._drawLines(motes[moteIndex])
-        topologyFrame.myCanvas.update()
-        moteIndex += 1
-        time.sleep(1)
-    Tkinter.mainloop()
+    # topologyFrame = topology.topology(moteList)
+    # topologyFrame.myCanvas.delete("all")
+    # topologyFrame._generateAxises()
+    # topologyFrame._drawMotes(moteList)
+    # moteIndex = 0
+    # while moteIndex<len(motes):
+        # topologyFrame.deleteLines()
+        # topologyFrame._drawLines(motes[moteIndex])
+        # topologyFrame.myCanvas.update()
+        # moteIndex += 1
+        # # time.sleep(1)
+    # Tkinter.mainloop()
         
