@@ -56,7 +56,7 @@ to this board.
 //===== IEEE802154E timing
 
 // time-slot related
-#define PORT_TsSlotDuration                 150  // 150=4578us (measured 4450us)
+#define PORT_TsSlotDuration                 131  // 131=3998us
 
 // execution speed related
 #define PORT_maxTxDataPrepare               30   //  30= 915us (measured 753us)
