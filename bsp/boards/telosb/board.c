@@ -58,7 +58,11 @@ void board_init() {
 }
 
 void board_sleep() {
-   __bis_SR_register(GIE+LPM3_bits);             // sleep, but leave ACLK on
+#ifdef ENABLE_OPENSERIAL
+   __bis_SR_register(GIE+LPM0_bits);             // need to leave clock running for serial
+#else
+   __bis_SR_register(GIE+LPM3_bits);             // leave only ACLK on
+#endif
 }
 
 void board_reset() {
