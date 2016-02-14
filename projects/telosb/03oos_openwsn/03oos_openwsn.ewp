@@ -177,7 +177,6 @@
           <state>SETUP_USBHUB</state>
           <state>ENABLE_LEDS</state>
           <state>ENABLE_DEBUGPINS</state>
-          <state>ENABLE_OPENSERIAL</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -242,7 +241,7 @@
         <option>
           <name>CCAllowList</name>
           <version>1</version>
-          <state>00000</state>
+          <state>11111</state>
         </option>
         <option>
           <name>CCObjUseModuleName</name>
@@ -374,16 +373,16 @@
         </option>
         <option>
           <name>CCOptLevel</name>
-          <state>1</state>
+          <state>3</state>
         </option>
         <option>
           <name>CCOptStrategy</name>
           <version>0</version>
-          <state>0</state>
+          <state>2</state>
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>1</state>
+          <state>3</state>
         </option>
         <option>
           <name>CInput</name>
