@@ -138,7 +138,8 @@ command_line_options = {
     'l2_security':      ['0','1'],
     'goldenImage':      ['none','root','sniffer'],
     'configuration':    ['debug','release'],
-    'usecase':          ['usbhub','testbed']
+    'setup':            ['usbhub','testbed'],
+    'fakesend':         ['0','1'],
 }
 
 def validate_option(key, value, env):
@@ -313,9 +314,16 @@ command_line_vars.AddVariables(
         None,                                              # converter
     ),
     (
-        'usecase',                                         # key
+        'setup',                                           # key
         '',                                                # help
-        command_line_options['usecase'][0],                # default
+        command_line_options['setup'][0],                  # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'fakesend',                                        # key
+        '',                                                # help
+        command_line_options['fakesend'][0],               # default
         validate_option,                                   # validator
         None,                                              # converter
     ),

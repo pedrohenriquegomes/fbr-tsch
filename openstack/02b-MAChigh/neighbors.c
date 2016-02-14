@@ -214,9 +214,8 @@ void neighbors_indicateRxEB(OpenQueueEntry_t* msg) {
    // take ownership over the packet
    msg->owner = COMPONENT_NEIGHBORS;
    
-   // parse eb
+   // update rank
    eb = (eb_ht*)msg->payload;
-   
    if (isNeighbor(eb->src)==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(eb->src,i)) {
@@ -226,7 +225,7 @@ void neighbors_indicateRxEB(OpenQueueEntry_t* msg) {
       }
    } 
    
-   // update my routing information
+   // update routing info
    neighbors_updateMyDAGrankAndNeighborPreference(); 
 }
 

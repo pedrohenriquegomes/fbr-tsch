@@ -22,17 +22,17 @@ void    leds_init() {
 
 // red = LED1 = P5.4
 void    leds_error_on() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
    P5OUT     &= ~0x10;
 #endif
 }
 void    leds_error_off() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     |=  0x10;
 #endif
 }
 void    leds_error_toggle() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     ^=  0x10;
 #endif
 }
@@ -40,7 +40,7 @@ uint8_t leds_error_isOn() {
   return (uint8_t)(~P5OUT & 0x10)>>4;
 }
 void leds_error_blink() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
    uint8_t i;
    volatile uint16_t delay;
    // turn all LEDs off
@@ -56,17 +56,17 @@ void leds_error_blink() {
 
 // green = LED2 = P5.5
 void    leds_light_on() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
    P5OUT     &= ~0x20;
 #endif
 }
 void    leds_light_off() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     |=  0x20;
 #endif
 }
 void    leds_light_toggle() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     ^=  0x20;
 #endif
 }
@@ -76,17 +76,17 @@ uint8_t leds_light_isOn() {
 
 // blue = LED3 = P5.6
 void    leds_sync_on() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     &= ~0x40;
 #endif
 }
 void    leds_sync_off() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     |=  0x40;
 #endif
 }
 void    leds_sync_toggle() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     ^=  0x40;
 #endif
 }
@@ -109,23 +109,23 @@ uint8_t leds_debug_isOn() {
 }
 
 void    leds_all_on() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     &= ~0x70;
 #endif
 }
 void    leds_all_off() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     |=  0x70;
 #endif
 }
 void    leds_all_toggle() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
   P5OUT     ^=  0x70;
 #endif
 }
 
 void    leds_circular_shift() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
    uint8_t leds_on;
    // get LED state
    leds_on  = (~P5OUT & 0x70) >> 4;
@@ -147,7 +147,7 @@ void    leds_circular_shift() {
 }
 
 void    leds_increment() {
-#ifdef DISABLE_LEDS
+#ifdef ENABLE_LEDS
    uint8_t leds_on;
    // get LED state
    leds_on  = (~P5OUT & 0x70) >> 4;

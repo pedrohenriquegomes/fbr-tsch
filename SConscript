@@ -58,21 +58,21 @@ else:
     else:
         env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
         
-if env['configuration']=='release':
+if   env['configuration']=='release':
     env.Append(CPPDEFINES    = 'RELEASE')
-else:
-    if env['configuration']=='debug':
-        env.Append(CPPDEFINES    = 'DISABLE_LEDS')
-        env.Append(CPPDEFINES    = 'DISABLE_DEBUGPINS')
-        env.Append(CPPDEFINES    = 'DISABLE_OPENSERIAL')
-        env.Append(CPPDEFINES    = 'LIGHT_FAKESEND')
-        
-if env['usecase']=='testbed':
-    env.Append(CPPDEFINES    = 'USECASE_TESTBED')
-else:
-        if env['usecase']=='usbhub':
-            env.Append(CPPDEFINES    = 'USECASE_USBHUB')
-        
+elif env['configuration']=='debug':
+    env.Append(CPPDEFINES    = 'ENABLE_LEDS')
+    env.Append(CPPDEFINES    = 'ENABLE_DEBUGPINS')
+    env.Append(CPPDEFINES    = 'ENABLE_OPENSERIAL')
+
+if   env['setup']=='testbed':
+    env.Append(CPPDEFINES    = 'SETUP_TESTBED')
+elif env['setup']=='usbhub':
+    env.Append(CPPDEFINES    = 'SETUP_USBHUB')
+
+if   env['fakesend']=='1':
+    env.Append(CPPDEFINES    = 'LIGHT_FAKESEND')
+    
 if   env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
@@ -449,6 +449,8 @@ def telosb_bootload(target, source, env):
     bootloadThreads = []
     countingSem     = threading.Semaphore(0)
     # create threads
+    if env['bootload']=='all':
+       env['bootload'] = 'COM3,COM4,COM5,COM6,COM7,COM8,COM10,COM11,COM12'
     for comPort in env['bootload'].split(','):
         bootloadThreads += [
             telosb_bootloadThread(

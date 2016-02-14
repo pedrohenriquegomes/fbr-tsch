@@ -13,7 +13,7 @@
 // defines
 #define LIGHT_FAKESEND_PERIOD     400 // period, in slots, of sending data
 #define LIGHT_BURSTSIZE             3 // number of packets sent on each light event
-#define LUX_THRESHOLD             500
+#define LUX_THRESHOLD             400
 #define LUX_HYSTERESIS            100
 
 //=== hardcoded addresses (last 2 bytes of the EUI64)
@@ -29,13 +29,13 @@
 #define SINK_ID                   0xbb5e
 #define SENSOR_ID                 0x930f
 */
-#ifdef USBHUB
-// hub@EWSN
+
+#ifdef SETUP_USBHUB
 #define SINK_ID                   0x6f16
 #define SENSOR_ID                 0xb957
 #endif
 
-#ifdef TESTBED
+#ifdef SETUP_TESTBED
 #define SINK_ID                   0x76fb
 #define SENSOR_ID                 0x86a0
 #endif
@@ -46,6 +46,7 @@ BEGIN_PACK
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint16_t  type;
    uint16_t  src;
+   uint8_t   syncnum;
    uint8_t   light_info;
 } light_ht;
 END_PACK

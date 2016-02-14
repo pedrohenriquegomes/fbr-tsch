@@ -540,6 +540,11 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
          break;
       }
       
+      // break if not new syncnum
+      if (((eb_ht*)(ieee154e_vars.dataReceived->payload))->syncnum==ieee154e_vars.syncnum) {
+         break;
+      }
+      
       // break if from node outside of allowed topology
       if (topology_isAcceptablePacket(((eb_ht*)(ieee154e_vars.dataReceived->payload))->src)==FALSE) {
          break;
@@ -559,19 +564,24 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // turn off the radio
       radio_rfOff();
       
-      //=== synchronize to the ASN
-      // store ASN
-      // store the ASN
+      // parse eb
       eb = (eb_ht*)(ieee154e_vars.dataReceived->payload);
+      
+      // store syncnum
+      ieee154e_vars.syncnum = eb->syncnum;
+      
+      // store ASN
       ieee154e_vars.asn.bytes0and1   =     eb->asn0+
                                        256*eb->asn1;
       ieee154e_vars.asn.bytes2and3   =     eb->asn2+
                                        256*eb->asn3;
       ieee154e_vars.asn.byte4        =     0;
+      
       // calculate the current slotoffset
       ieee154e_syncSlotOffset();
       schedule_syncSlotOffset(ieee154e_vars.slotOffset);
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+      
       // infer the asnOffset based on the fact that
       // ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
       for (i=0;i<EB_NUMCHANS;i++){
@@ -589,7 +599,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       packetfunctions_tossFooter(ieee154e_vars.dataReceived, LENGTH_CRC);
       
       // synchronize to the slot boundary
-      synchronizePacket(ieee154e_vars.syncCapturedTime);
+      synchronizePacket(ieee154e_vars.syncCapturedTime); // first synchronization
       
       // declare synchronized
       changeIsSync(TRUE);
@@ -662,20 +672,6 @@ port_INLINE void activity_ti1ORri1() {
       }
    }
    
-   // if the previous slot took too long, we will not be in the right state
-   if (ieee154e_vars.state!=S_SLEEP) {
-      // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
-                            (errorparameter_t)ieee154e_vars.state,
-                            (errorparameter_t)ieee154e_vars.slotOffset);
-      // abort
-      endSlot();
-      return;
-   }
-   
-   // trigger application, which can send packet
-   light_trigger();
-   
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
       // this is the next active slot
       
@@ -694,6 +690,22 @@ port_INLINE void activity_ti1ORri1() {
       openserial_startOutput();
       return;
    }
+   
+   // if the previous slot took too long, we will not be in the right state
+   if (ieee154e_vars.state!=S_SLEEP) {
+      
+      // log the error
+      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
+                            (errorparameter_t)ieee154e_vars.state,
+                            (errorparameter_t)ieee154e_vars.slotOffset);
+      
+      // abort
+      endSlot();
+      return;
+   }
+   
+   // trigger application, which can send packet
+   light_trigger();
    
    // check the schedule to see what type of slot this is
    cellType = schedule_getType();
@@ -731,13 +743,26 @@ port_INLINE void activity_ti1ORri1() {
             
             // change state
             changeState(S_TXDATAOFFSET);
+            
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+            
+            // both data and eb's start with same fields
+            eb = (eb_ht*)(ieee154e_vars.dataToSend->payload);
+            
+            // fill in syncnum
+            eb->syncnum = ieee154e_vars.syncnum;
+            
+            // fill in ASN (if I'm sending an EB)
             if (cellType==CELLTYPE_EB) {
-               // I will be sending an EB
-               
-               // fill in the ASN field of the EB
-              eb = (eb_ht*)(ieee154e_vars.dataToSend->payload);
+              // I will be sending an EB
+              
+              // increment syncnum
+              if (idmanager_getIsDAGroot()==TRUE) {
+                 ieee154e_vars.syncnum++;
+              }
+              
+              // fill in the ASN field
               eb->asn0 = (ieee154e_vars.asn.bytes0and1     & 0xff);
               eb->asn1 = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
               eb->asn2 = (ieee154e_vars.asn.bytes2and3     & 0xff);
@@ -948,7 +973,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_rie3() {
-     
+  
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -1047,9 +1072,11 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // synchronize to the received packet iif I'm not a DAGroot and this is my preferred parent
       if (
          idmanager_getIsDAGroot()==FALSE &&
-         neighbors_isPreferredParent(eb->src)
+         neighbors_isPreferredParent(eb->src) &&
+         eb->syncnum!=ieee154e_vars.syncnum
       ) {
          synchronizePacket(ieee154e_vars.syncCapturedTime);
+         ieee154e_vars.syncnum = eb->syncnum;
       }
       
       // indicate reception to upper layer
