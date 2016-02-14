@@ -159,7 +159,7 @@ typedef enum {
 enum ieee154e_atomicdurations_enum {
    // time-slot related
    TsTxOffset                =  95,                   // 95=2899us
-   TsLongGT                  =  43,                   // 43=1312us
+   TsLongGT                  =  13,                   // 13=400us
    TsTxAckDelay              =   0,
    TsShortGT                 =  16,                   //   500us
    TsSlotDuration            =  PORT_TsSlotDuration,
