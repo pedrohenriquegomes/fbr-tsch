@@ -2,7 +2,7 @@
 
 Source code with implementation of [FBR-TSCH][1] protocol.
 
-This code was sed on [OpenWSN][2].
+This code was based on [OpenWSN][2].
 
 This protocol is an adaptation of TSCH protocol based on flooding.
 It was submitted to the EWSN Dependability Competition 2016 and got 4th place.
