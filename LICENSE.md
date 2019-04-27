@@ -4,6 +4,9 @@ Developed by:
 Autonomous Networks Research Group (ANRG)
 University of Southern California
 http://anrg.usc.edu/
+INRIA Paris
+Eva Team
+https://team.inria.fr/eva/
 
 Contributors:
 * Pedro Henrique Gomes
